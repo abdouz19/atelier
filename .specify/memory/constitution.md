@@ -1,50 +1,95 @@
-# [PROJECT_NAME] Constitution
-<!-- Example: Spec Constitution, TaskFlow Constitution, etc. -->
+<!--
+Sync Impact Report:
+- Version change: N/A → 1.0.0
+- List of modified principles (old title → new title if renamed):
+  - [PRINCIPLE_1_NAME] → Core Data Flow Architecture
+  - [PRINCIPLE_2_NAME] → Component & Page Discipline
+  - [PRINCIPLE_3_NAME] → Type Safety & Data Integrity
+  - [PRINCIPLE_4_NAME] → RTL & Localization First
+  - [PRINCIPLE_5_NAME] → UI/UX Consistency & State Management
+- Added sections: Development Prohibitions (The "NEVER" list), Technology Stack & Structure
+- Removed sections: N/A
+- Templates requiring updates (✅ updated / ⚠ pending):
+  - .specify/templates/plan-template.md (⚠ pending)
+  - .specify/templates/spec-template.md (✅ updated)
+  - .specify/templates/tasks-template.md (✅ updated)
+- Follow-up TODOs: 
+  - Update plan-template.md to reflect specific Electron/Next.js architecture.
+-->
+
+# Atelier Constitution
 
 ## Core Principles
 
-### [PRINCIPLE_1_NAME]
-<!-- Example: I. Library-First -->
-[PRINCIPLE_1_DESCRIPTION]
-<!-- Example: Every feature starts as a standalone library; Libraries must be self-contained, independently testable, documented; Clear purpose required - no organizational-only libraries -->
+### Core Data Flow Architecture (NON-NEGOTIABLE)
+All data operations MUST follow this exact sequence without skipping steps:
+1. **Page**: Composes layout and calls hooks.
+2. **Hook**: Manages IPC calls and loading/error/data states.
+3. **ipc-client**: Standardized client for Electron communication.
+4. **electron/ipc handler**: Backend entry point in the main process.
+5. **service**: Contains pure business logic.
+6. **queries**: Direct database interactions using Drizzle ORM.
+7. **Drizzle**: ORM layer.
+8. **SQLite**: Persistent database layer.
 
-### [PRINCIPLE_2_NAME]
-<!-- Example: II. CLI Interface -->
-[PRINCIPLE_2_DESCRIPTION]
-<!-- Example: Every library exposes functionality via CLI; Text in/out protocol: stdin/args → stdout, errors → stderr; Support JSON + human-readable formats -->
+### Component & Page Discipline
+- **Pages**: Compose UI and call hooks only. NO logic, NO database access.
+- **Components**: Render UI and emit events only. Max 150 lines. MUST use named exports. NO inline styles.
+- **Hooks**: Handle IPC calls and state management (loading/error/data). NO JSX.
+- **Services**: Pure business logic only. NO JSX, NO hooks.
+- **Queries**: Drizzle ORM only. NO raw SQL, NO logic.
+- **IPC Handlers**: Call services only. One file per domain.
+- **Schemas**: Table definitions only. Every table MUST have `id`, `created_at`, and `updated_at`.
 
-### [PRINCIPLE_3_NAME]
-<!-- Example: III. Test-First (NON-NEGOTIABLE) -->
-[PRINCIPLE_3_DESCRIPTION]
-<!-- Example: TDD mandatory: Tests written → User approved → Tests fail → Then implement; Red-Green-Refactor cycle strictly enforced -->
+### Type Safety & Data Integrity
+- **TypeScript**: Strict mode ALWAYS. NO `any`, NO `@ts-ignore`.
+- **IPC**: All channels defined as `const enum`. Responses typed as `{success:true,data:T}|{success:false,error:string}`.
+- **Validation**: All form data MUST be Zod-validated before reaching the service layer.
 
-### [PRINCIPLE_4_NAME]
-<!-- Example: IV. Integration Testing -->
-[PRINCIPLE_4_DESCRIPTION]
-<!-- Example: Focus areas requiring integration tests: New library contract tests, Contract changes, Inter-service communication, Shared schemas -->
+### RTL & Localization First
+- **UI**: Global Arabic UI with `dir="rtl"` enforced on the root layout.
+- **Strings**: ALL strings MUST be externalized to `public/locales/ar/`. NO hardcoded strings in JSX.
 
-### [PRINCIPLE_5_NAME]
-<!-- Example: V. Observability, VI. Versioning & Breaking Changes, VII. Simplicity -->
-[PRINCIPLE_5_DESCRIPTION]
-<!-- Example: Text I/O ensures debuggability; Structured logging required; Or: MAJOR.MINOR.BUILD format; Or: Start simple, YAGNI principles -->
+### UI/UX Consistency & State Management
+- **Standard Layout**: Every page MUST have `AppLayout` and `PageHeader`.
+- **Empty States**: Every list MUST have an `EmptyState`.
+- **Async Operations**: MUST have skeleton loaders, disabled buttons, and spinners.
+- **Error Handling**: Show errors via `ErrorAlert`, NEVER swallow errors.
+- **User Confirmation**: All destructive actions MUST require a `ConfirmDialog`.
+- **Forms**: Use `react-hook-form` + Zod resolver + visible labels + error slots + toast on success.
+- **State**: DB data via hooks. UI state via Zustand. Form state via `react-hook-form`. Use `useSearchParams` for filters/pagination. NO Zustand for single-component data.
 
-## [SECTION_2_NAME]
-<!-- Example: Additional Constraints, Security Requirements, Performance Standards, etc. -->
+## Development Prohibitions (The "NEVER" List)
+- NEVER place business logic in components.
+- NEVER use Drizzle in the renderer process.
+- NEVER use `localStorage` for persistent data (use SQLite).
+- NEVER use prop drilling beyond 3 levels.
+- NEVER use `useEffect` for data fetching.
+- NEVER include hardcoded strings in JSX.
+- NEVER skip loading/empty/error states.
+- NEVER create forms without Zod validation.
 
-[SECTION_2_CONTENT]
-<!-- Example: Technology stack requirements, compliance standards, deployment policies, etc. -->
+## Technology Stack & Structure
 
-## [SECTION_3_NAME]
-<!-- Example: Development Workflow, Review Process, Quality Gates, etc. -->
+### Core Stack
+- Next.js 14 (App Router)
+- Electron
+- shadcn/ui + Tailwind (RTL)
+- SQLite via Drizzle ORM
+- Zustand + react-hook-form + Zod
+- Recharts
 
-[SECTION_3_CONTENT]
-<!-- Example: Code review requirements, testing gates, deployment approval process, etc. -->
+### Directory Structure
+- `electron/`: Main process, preload, and IPC handlers.
+- `src/app/`: Next.js pages only.
+- `src/components/`: UI components (ui/, shared/, per-module).
+- `src/features/[module]/`: Feature-specific services, queries, and types.
+- `src/hooks/`: Data fetching and IPC integration.
+- `src/db/schema/`: Drizzle table definitions.
+- `src/lib/ipc-client.ts`: Typed IPC client.
+- `src/store/`: Zustand stores for UI state.
 
 ## Governance
-<!-- Example: Constitution supersedes all other practices; Amendments require documentation, approval, migration plan -->
+This Constitution supersedes all other documentation and practices within the project. All architectural decisions must be justified against these principles. Amendments to this document require a formal proposal and consensus.
 
-[GOVERNANCE_RULES]
-<!-- Example: All PRs/reviews must verify compliance; Complexity must be justified; Use [GUIDANCE_FILE] for runtime development guidance -->
-
-**Version**: [CONSTITUTION_VERSION] | **Ratified**: [RATIFICATION_DATE] | **Last Amended**: [LAST_AMENDED_DATE]
-<!-- Example: Version: 2.1.1 | Ratified: 2025-06-13 | Last Amended: 2025-07-16 -->
+**Version**: 1.0.0 | **Ratified**: 2026-03-14 | **Last Amended**: 2026-03-14

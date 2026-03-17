@@ -1,0 +1,19 @@
+{
+  "main": "electron/main.js",
+  "scripts": {
+    "dev": "next dev",
+    "dev:electron": "concurrently \"next dev\" \"wait-on http://localhost:3000 && NODE_ENV=development electron .\"",
+    "build": "next build && next export",
+    "build:electron": "npm run build && electron-builder",
+    "dist:win": "npm run build && electron-builder --win",
+    "dist:mac": "npm run build && electron-builder --mac"
+  },
+  "build": {
+    "appId": "com.yourcompany.yourapp",
+    "productName": "YourAppName",
+    "directories": { "output": "dist" },
+    "files": ["electron/**/*", "out/**/*", "package.json"],
+    "win": { "target": "nsis" },
+    "mac": { "target": "dmg" }
+  }
+}

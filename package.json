@@ -1,0 +1,44 @@
+{
+  "name": "atelier",
+  "version": "0.1.0",
+  "private": true,
+  "main": "electron/main.js",
+  "scripts": {
+    "dev:next": "cd frontend && npm run dev",
+    "dev:electron": "concurrently \"npm run dev:next\" \"wait-on http://localhost:3000 && NODE_ENV=development electron .\"",
+    "build": "cd frontend && npm run build",
+    "build:electron": "npm run build && electron-builder",
+    "dist:mac": "npm run build && electron-builder --mac",
+    "dist:win": "npm run build && electron-builder --win",
+    "postinstall": "CXXFLAGS='-std=c++20' electron-rebuild -f -w argon2,better-sqlite3"
+  },
+  "build": {
+    "appId": "com.atelier.app",
+    "productName": "أتيلييه",
+    "directories": {
+      "output": "dist"
+    },
+    "files": [
+      "electron/**/*",
+      "frontend/out/**/*",
+      "package.json"
+    ],
+    "win": {
+      "target": "nsis"
+    },
+    "mac": {
+      "target": "dmg"
+    }
+  },
+  "dependencies": {
+    "argon2": "^0.31.2",
+    "better-sqlite3": "^12.8.0"
+  },
+  "devDependencies": {
+    "@electron/rebuild": "^4.0.3",
+    "concurrently": "^9.2.1",
+    "electron": "^41.0.2",
+    "electron-builder": "^26.8.1",
+    "wait-on": "^9.0.4"
+  }
+}

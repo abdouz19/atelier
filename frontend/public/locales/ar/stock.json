@@ -1,0 +1,114 @@
+{
+  "page": {
+    "title": "المخزون",
+    "addButton": "إضافة صنف"
+  },
+  "tabs": {
+    "active": "نشط",
+    "archived": "مؤرشف"
+  },
+  "table": {
+    "searchPlaceholder": "ابحث باسم الصنف...",
+    "filterByType": "فلترة حسب النوع",
+    "allTypes": "جميع الأنواع",
+    "emptyState": "لا توجد أصناف مطابقة للبحث",
+    "emptyStateAction": "أضف صنفاً جديداً أو عدّل معايير البحث"
+  },
+  "columns": {
+    "name": "الاسم",
+    "type": "النوع",
+    "quantity": "الكمية",
+    "color": "اللون",
+    "description": "الوصف",
+    "actions": "إجراءات"
+  },
+  "variants": {
+    "count": "لون",
+    "noColor": "بدون لون"
+  },
+  "addItem": {
+    "title": "إضافة صنف جديد",
+    "nameLabel": "اسم الصنف",
+    "namePlaceholder": "مثال: قماش أبيض",
+    "typeLabel": "النوع",
+    "typePlaceholder": "مثال: قماش",
+    "unitLabel": "الوحدة",
+    "unitPlaceholder": "مثال: متر",
+    "quantityLabel": "الكمية الابتدائية",
+    "colorLabel": "اللون (اختياري)",
+    "colorPlaceholder": "مثال: أبيض",
+    "imageLabel": "الصورة (اختيارية)",
+    "descriptionLabel": "الوصف (اختياري)",
+    "notesLabel": "ملاحظات (اختيارية)",
+    "submitButton": "إضافة",
+    "successToast": "تم إضافة الصنف بنجاح",
+    "duplicateWarning": "يوجد صنف آخر بنفس الاسم"
+  },
+  "addInbound": {
+    "title": "إضافة كمية واردة",
+    "quantityLabel": "الكمية",
+    "colorLabel": "اللون (اختياري)",
+    "dateLabel": "تاريخ الاستلام",
+    "notesLabel": "ملاحظات (اختيارية)",
+    "submitButton": "تسجيل",
+    "successToast": "تم تسجيل الكمية بنجاح"
+  },
+  "editTransaction": {
+    "title": "تعديل المعاملة",
+    "quantityLabel": "الكمية",
+    "dateLabel": "التاريخ",
+    "submitButton": "حفظ",
+    "successToast": "تم تعديل المعاملة بنجاح"
+  },
+  "editItem": {
+    "title": "تعديل بيانات الصنف",
+    "submitButton": "حفظ التعديلات",
+    "removeImage": "إزالة الصورة",
+    "successToast": "تم تعديل الصنف بنجاح"
+  },
+  "detail": {
+    "inboundButton": "إضافة وارد",
+    "editButton": "تعديل",
+    "totalQuantity": "الكمية الإجمالية",
+    "variantsSection": "الألوان والكميات",
+    "historySection": "سجل المعاملات",
+    "historyDate": "التاريخ",
+    "historyType": "النوع",
+    "historyQuantity": "الكمية",
+    "historyColor": "اللون",
+    "historySource": "المصدر",
+    "typeInbound": "وارد",
+    "typeConsumed": "مستهلك",
+    "sourceCutting": "قص",
+    "sourceDistribution": "توزيع",
+    "sourceQc": "مراقبة الجودة",
+    "sourceFinition": "تشطيب",
+    "noHistory": "لا توجد معاملات بعد",
+    "editTransactionButton": "تعديل"
+  },
+  "archive": {
+    "button": "أرشفة",
+    "confirmTitle": "تأكيد الأرشفة",
+    "confirmMessage": "هل أنت متأكد من أرشفة هذا الصنف؟ يمكنك استعادته لاحقاً.",
+    "successToast": "تم أرشفة الصنف",
+    "archivedSection": "الأصناف المؤرشفة",
+    "emptyArchive": "لا توجد أصناف مؤرشفة",
+    "restoreButton": "استعادة",
+    "restoreConfirmTitle": "تأكيد الاستعادة",
+    "restoreConfirmMessage": "هل تريد استعادة هذا الصنف إلى قائمة المخزون النشط؟",
+    "restoreSuccessToast": "تم استعادة الصنف"
+  },
+  "errors": {
+    "loadFailed": "فشل تحميل المخزون",
+    "saveFailed": "فشل حفظ البيانات",
+    "notFound": "الصنف غير موجود"
+  },
+  "validation": {
+    "nameRequired": "اسم الصنف مطلوب",
+    "typeRequired": "النوع مطلوب",
+    "unitRequired": "الوحدة مطلوبة",
+    "quantityRequired": "الكمية مطلوبة",
+    "quantityPositive": "يجب أن تكون الكمية أكبر من صفر",
+    "dateFuture": "لا يمكن اختيار تاريخ في المستقبل"
+  }
+}
