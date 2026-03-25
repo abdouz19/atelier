@@ -18,6 +18,7 @@ function DetailView({ detail }: { detail: DetailType }) {
           <div><span className="text-gray-500">التاريخ: </span><span>{new Date(detail.sessionDate).toLocaleDateString('en-GB')}</span></div>
           <div><span className="text-gray-500">القماش: </span><span>{detail.fabricName} — {detail.fabricColor}</span></div>
           <div><span className="text-gray-500">الموديل: </span><span>{detail.modelName}</span></div>
+          {detail.sizeLabel && <div><span className="text-gray-500">المقاس: </span><span>{detail.sizeLabel}</span></div>}
           <div><span className="text-gray-500">الأمتار: </span><span>{detail.metersUsed} م</span></div>
           <div><span className="text-gray-500">الطبقات: </span><span>{detail.layers}</span></div>
           <div><span className="text-gray-500">سعر الطبقة: </span><span>{detail.pricePerLayer.toLocaleString('en-US')} دج</span></div>
@@ -33,12 +34,16 @@ function DetailView({ detail }: { detail: DetailType }) {
         </tbody></table>
       </div>
       <div className="rounded-xl border border-gray-200 bg-white p-4">
-        <h3 className="mb-3 font-semibold text-gray-700">القطع حسب المقاس</h3>
-        <table className="w-full text-sm"><tbody className="divide-y divide-gray-100">
-          {detail.piecesBySize.map((p) => (
-            <tr key={p.sizeLabel}><td className="py-2 text-gray-700">{p.sizeLabel}</td><td className="py-2 text-right font-medium text-gray-900">{p.count} قطعة</td></tr>
-          ))}
-        </tbody></table>
+        <h3 className="mb-3 font-semibold text-gray-700">الأجزاء المنتجة</h3>
+        {detail.parts.length === 0 ? (
+          <p className="text-sm text-gray-400">لا توجد أجزاء مسجلة (جلسة قديمة)</p>
+        ) : (
+          <table className="w-full text-sm"><thead className="text-xs text-gray-500"><tr><th className="py-2 text-right">اسم الجزء</th><th className="py-2 text-right">العدد</th></tr></thead><tbody className="divide-y divide-gray-100">
+            {detail.parts.map((p) => (
+              <tr key={p.partName}><td className="py-2 text-gray-700">{p.partName}</td><td className="py-2 font-medium text-gray-900">{p.count}</td></tr>
+            ))}
+          </tbody></table>
+        )}
       </div>
       {detail.consumptionEntries.length > 0 && (
         <div className="rounded-xl border border-gray-200 bg-white p-4">

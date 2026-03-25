@@ -1,13 +1,16 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { X } from 'lucide-react';
-import { useDistributeForm } from '@/hooks/useDistributeForm';
+import { X, Plus } from 'lucide-react';
 import { ipcClient } from '@/lib/ipc-client';
-import { ManagedDropdown } from '@/components/shared/ManagedDropdown';
-import { AvailabilityTableSelector } from './AvailabilityTableSelector';
-import type { DistributionTailorSummary } from '@/features/distribution/distribution.types';
+import type { DistributionTailorSummary, AvailablePartForModel } from '@/features/distribution/distribution.types';
 import type { LookupEntry } from '@/features/lookups/lookups.types';
+import { ManagedDropdown } from '@/components/shared/ManagedDropdown';
+
+interface PartQtyRow {
+  partName: string;
+  quantity: number;
+}
 
 interface DistributeModalProps {
   onClose: () => void;
@@ -15,26 +18,62 @@ interface DistributeModalProps {
 }
 
 export function DistributeModal({ onClose, onSuccess }: DistributeModalProps) {
-  const {
-    tailorId, setTailorId,
-    modelName, setModelName,
-    availabilityCombinations, selectedCombination, selectCombination,
-    isLoadingCombinations, modelSuggestions, activeTailors,
-  } = useDistributeForm();
-
-  const [quantity, setQuantity] = useState('');
+  const [tailorId, setTailorId] = useState('');
+  const [modelName, setModelName] = useState('');
+  const [sizeLabel, setSizeLabel] = useState('');
+  const [color, setColor] = useState('');
+  const [expectedPiecesCount, setExpectedPiecesCount] = useState('');
   const [pricePerPiece, setPricePerPiece] = useState('');
   const [distributionDate, setDistributionDate] = useState(new Date().toISOString().split('T')[0]);
+  const [partRows, setPartRows] = useState<PartQtyRow[]>([]);
+  const [availableParts, setAvailableParts] = useState<AvailablePartForModel[]>([]);
+  const [availableSizes, setAvailableSizes] = useState<string[]>([]);
+  const [availableColors, setAvailableColors] = useState<string[]>([]);
+  const [isLoadingParts, setIsLoadingParts] = useState(false);
+  const [activeTailors, setActiveTailors] = useState<Array<{ id: string; name: string }>>([]);
+  const [modelItems, setModelItems] = useState<LookupEntry[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
-  const [modelItems, setModelItems] = useState<LookupEntry[]>([]);
 
   useEffect(() => {
+    ipcClient.distribution.getActiveTailors().then(r => { if (r.success) setActiveTailors(r.data); });
     ipcClient.lookups.getModels().then(r => { if (r.success) setModelItems(r.data); });
   }, []);
 
-  // Reset quantity when combination changes
-  useEffect(() => { setQuantity(''); }, [selectedCombination]);
+  async function handleModelChange(name: string) {
+    setModelName(name);
+    setSizeLabel('');
+    setColor('');
+    setPartRows([]);
+    setAvailableParts([]);
+    setAvailableSizes([]);
+    setAvailableColors([]);
+    if (!name) return;
+    const res = await ipcClient.cutting.getAvailableSizesForModel({ modelName: name });
+    if (res.success) setAvailableSizes(res.data);
+  }
+
+  async function handleSizeChange(size: string) {
+    setSizeLabel(size);
+    setColor('');
+    setPartRows([]);
+    setAvailableParts([]);
+    setAvailableColors([]);
+    if (!size || !modelName) return;
+    const res = await ipcClient.cutting.getAvailableColorsForModelSize({ modelName, sizeLabel: size });
+    if (res.success) setAvailableColors(res.data);
+  }
+
+  async function handleColorChange(c: string) {
+    setColor(c);
+    setPartRows([]);
+    setAvailableParts([]);
+    if (!c || !modelName || !sizeLabel) return;
+    setIsLoadingParts(true);
+    const res = await ipcClient.distribution.getAvailablePartsForModel({ modelName, sizeLabel, color: c });
+    if (res.success) setAvailableParts(res.data);
+    setIsLoadingParts(false);
+  }
 
   async function handleAddModel(name: string) {
     const res = await ipcClient.lookups.createModel({ name });
@@ -42,30 +81,50 @@ export function DistributeModal({ onClose, onSuccess }: DistributeModalProps) {
     return res;
   }
 
-  const available = selectedCombination?.notDistributedCount ?? 0;
-  const qty = Number(quantity);
+  function addPartRow() {
+    setPartRows(prev => [...prev, { partName: '', quantity: 1 }]);
+  }
+
+  function updatePartRow(i: number, patch: Partial<PartQtyRow>) {
+    setPartRows(prev => prev.map((r, idx) => idx === i ? { ...r, ...patch } : r));
+  }
+
+  function removePartRow(i: number) {
+    setPartRows(prev => prev.filter((_, idx) => idx !== i));
+  }
+
+  function getAvailable(partName: string): number {
+    return availableParts.find(p => p.partName === partName)?.availableCount ?? 0;
+  }
+
+  const expectedCount = Number(expectedPiecesCount);
   const price = Number(pricePerPiece);
-  const totalCost = qty > 0 && price > 0 ? qty * price : 0;
+  const totalCost = expectedCount > 0 && price > 0 ? expectedCount * price : 0;
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     setError(null);
     if (!tailorId) { setError('يرجى اختيار الخياط'); return; }
-    if (!modelName) { setError('يرجى إدخال اسم النموذج'); return; }
-    if (!selectedCombination) { setError('يرجى اختيار تركيبة من الجدول'); return; }
-    if (qty < 1) { setError('الكمية يجب أن تكون أكبر من صفر'); return; }
-    if (qty > available) { setError(`الكمية (${qty}) تتجاوز المتاح (${available})`); return; }
-    if (price <= 0) { setError('سعر القطعة يجب أن يكون أكبر من صفر'); return; }
+    if (!modelName) { setError('يرجى اختيار الموديل'); return; }
+    if (!sizeLabel) { setError('يرجى اختيار المقاس'); return; }
+    if (!color) { setError('يرجى اختيار اللون'); return; }
+    if (expectedCount < 1) { setError('عدد القطع المتوقعة يجب أن يكون أكبر من صفر'); return; }
+    if (price <= 0) { setError('سعر الخياطة يجب أن يكون أكبر من صفر'); return; }
+    if (partRows.length === 0) { setError('يجب إضافة جزء واحد على الأقل'); return; }
+    const invalidRow = partRows.find(r => !r.partName || r.quantity < 1);
+    if (invalidRow) { setError('تأكد من اختيار اسم الجزء وإدخال الكمية لكل صف'); return; }
+    for (const row of partRows) {
+      const avail = getAvailable(row.partName);
+      if (row.quantity > avail) { setError(`الكمية المطلوبة من "${row.partName}" (${row.quantity}) تتجاوز المتاح (${avail})`); return; }
+    }
     setSubmitting(true);
     try {
       const res = await ipcClient.distribution.distribute({
-        tailorId, modelName,
-        partName: selectedCombination.partName,
-        sizeLabel: selectedCombination.sizeLabel,
-        color: selectedCombination.color,
-        quantity: qty,
+        tailorId, modelName, sizeLabel, color,
+        expectedPiecesCount: expectedCount,
         sewingPricePerPiece: price,
         distributionDate: new Date(distributionDate).getTime(),
+        parts: partRows,
       });
       if (res.success) { onSuccess(res.data); } else { setError(res.error); }
     } finally { setSubmitting(false); }
@@ -73,7 +132,7 @@ export function DistributeModal({ onClose, onSuccess }: DistributeModalProps) {
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40" dir="rtl">
-      <div className="w-full max-w-lg rounded-xl bg-white p-6 shadow-xl">
+      <div className="w-full max-w-lg rounded-xl bg-white p-6 shadow-xl max-h-[90vh] overflow-y-auto">
         <div className="mb-4 flex items-center justify-between">
           <h2 className="text-lg font-semibold">توزيع قطع</h2>
           <button onClick={onClose}><X size={20} /></button>
@@ -87,10 +146,10 @@ export function DistributeModal({ onClose, onSuccess }: DistributeModalProps) {
             </select>
           </div>
           <div>
-            <label className="mb-1 block text-sm font-medium">النموذج *</label>
+            <label className="mb-1 block text-sm font-medium">الموديل *</label>
             <ManagedDropdown
               value={modelName}
-              onChange={setModelName}
+              onChange={handleModelChange}
               items={modelItems}
               placeholder="اختر الموديل"
               addLabel="إضافة موديل"
@@ -98,44 +157,57 @@ export function DistributeModal({ onClose, onSuccess }: DistributeModalProps) {
             />
           </div>
           {modelName && (
-            <div>
-              <label className="mb-1 block text-sm font-medium">
-                اختر التركيبة (قطعة / مقاس / لون) *
-              </label>
-              {isLoadingCombinations ? (
-                <div className="rounded-lg border border-gray-200 py-4 text-center text-sm text-gray-400">جاري التحميل...</div>
-              ) : (
-                <AvailabilityTableSelector
-                  combinations={availabilityCombinations}
-                  selected={selectedCombination}
-                  onSelect={selectCombination}
-                />
-              )}
-            </div>
-          )}
-          {selectedCombination && (
-            <>
-              <div className="rounded-lg bg-blue-50 px-3 py-2 text-sm text-blue-700">
-                متاح: <strong>{available}</strong> قطعة
+            <div className="grid grid-cols-2 gap-3">
+              <div>
+                <label className="mb-1 block text-sm font-medium">المقاس *</label>
+                <select value={sizeLabel} onChange={e => handleSizeChange(e.target.value)} className="w-full rounded-lg border border-gray-200 px-3 py-2 text-sm focus:border-blue-400 focus:outline-none">
+                  <option value="">اختر المقاس</option>
+                  {availableSizes.map(s => <option key={s} value={s}>{s}</option>)}
+                </select>
               </div>
               <div>
-                <label className="mb-1 block text-sm font-medium">الكمية *</label>
-                <input
-                  type="number" min={1} max={available}
-                  value={quantity} onChange={e => setQuantity(e.target.value)}
-                  disabled={available === 0}
-                  className="w-full rounded-lg border border-gray-200 px-3 py-2 text-sm focus:border-blue-400 focus:outline-none disabled:bg-gray-50"
-                />
+                <label className="mb-1 block text-sm font-medium">اللون *</label>
+                <select value={color} onChange={e => handleColorChange(e.target.value)} disabled={!sizeLabel} className="w-full rounded-lg border border-gray-200 px-3 py-2 text-sm focus:border-blue-400 focus:outline-none disabled:opacity-50">
+                  <option value="">اختر اللون</option>
+                  {availableColors.map(c => <option key={c} value={c}>{c}</option>)}
+                </select>
               </div>
-            </>
+            </div>
           )}
+          <div>
+            <label className="mb-1 block text-sm font-medium">القطع المتوقعة (النهائية) *</label>
+            <input type="number" min={1} step={1} value={expectedPiecesCount} onChange={e => setExpectedPiecesCount(e.target.value)} className="w-full rounded-lg border border-gray-200 px-3 py-2 text-sm focus:border-blue-400 focus:outline-none" />
+          </div>
           <div>
             <label className="mb-1 block text-sm font-medium">سعر الخياطة للقطعة *</label>
             <input type="number" step="any" min={0.01} value={pricePerPiece} onChange={e => setPricePerPiece(e.target.value)} className="w-full rounded-lg border border-gray-200 px-3 py-2 text-sm focus:border-blue-400 focus:outline-none" />
           </div>
           {totalCost > 0 && (
-            <div className="rounded-lg bg-gray-50 px-3 py-2 text-sm">
-              الإجمالي: <strong>{totalCost.toFixed(2)} دج</strong>
+            <div className="rounded-lg bg-gray-50 px-3 py-2 text-sm">الإجمالي: <strong>{totalCost.toFixed(2)} دج</strong></div>
+          )}
+          {color && (
+            <div>
+              <div className="mb-2 flex items-center justify-between">
+                <span className="text-sm font-medium">الأجزاء المعطاة *</span>
+                <button type="button" onClick={addPartRow} className="flex items-center gap-1 text-xs text-blue-600 hover:underline"><Plus size={13} />إضافة جزء</button>
+              </div>
+              {isLoadingParts && <p className="text-xs text-gray-400">جاري التحميل...</p>}
+              {availableParts.length === 0 && !isLoadingParts && (
+                <p className="text-xs text-amber-600">لا توجد أجزاء متاحة لهذا الاختيار</p>
+              )}
+              {partRows.map((row, i) => {
+                const avail = getAvailable(row.partName);
+                return (
+                  <div key={i} className="mb-2 flex items-center gap-2">
+                    <select value={row.partName} onChange={e => updatePartRow(i, { partName: e.target.value })} className="flex-1 rounded-lg border border-gray-200 px-3 py-1.5 text-sm focus:border-blue-400 focus:outline-none">
+                      <option value="">اختر الجزء</option>
+                      {availableParts.map(p => <option key={p.partName} value={p.partName}>{p.partName} (متاح: {p.availableCount})</option>)}
+                    </select>
+                    <input type="number" min={1} max={avail || undefined} value={row.quantity || ''} onChange={e => updatePartRow(i, { quantity: Number(e.target.value) })} placeholder="الكمية" className="w-24 rounded-lg border border-gray-200 px-3 py-1.5 text-sm focus:border-blue-400 focus:outline-none" />
+                    <button type="button" onClick={() => removePartRow(i)} className="text-gray-400 hover:text-red-500"><X size={14} /></button>
+                  </div>
+                );
+              })}
             </div>
           )}
           <div>
@@ -145,7 +217,7 @@ export function DistributeModal({ onClose, onSuccess }: DistributeModalProps) {
           {error && <p className="text-xs text-red-500">{error}</p>}
           <div className="flex justify-end gap-2 pt-2">
             <button type="button" onClick={onClose} className="rounded-lg border border-gray-200 px-4 py-2 text-sm hover:bg-gray-50">إلغاء</button>
-            <button type="submit" disabled={submitting || !selectedCombination || available === 0} className="rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 disabled:opacity-60">
+            <button type="submit" disabled={submitting} className="rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 disabled:opacity-60">
               {submitting ? 'جاري التوزيع...' : 'توزيع'}
             </button>
           </div>

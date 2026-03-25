@@ -86,7 +86,11 @@ export function ReturnModal({ onClose, onSuccess }: ReturnModalProps) {
                 {batches.map(b => (
                   <button key={b.id} type="button" onClick={() => selectBatch(b)}
                     className="w-full rounded-lg border border-gray-200 px-3 py-2 text-right text-sm hover:border-blue-400 hover:bg-blue-50">
-                    <span className="font-medium">{b.modelName}</span> — {b.sizeLabel} — {b.color} — متبقي: {b.remainingQuantity} — {new Date(b.distributionDate).toLocaleDateString('en-GB')}
+                    <span className="font-medium">{b.modelName}</span>
+                    {b.sizeLabel && <> — {b.sizeLabel}</>}
+                    {b.color && <> — {b.color}</>}
+                    {b.parts.length > 0 && <> — {b.parts.map(p => `${p.partName}×${p.quantity}`).join('، ')}</>}
+                    {' '}— متبقي: {b.remainingQuantity} — {new Date(b.distributionDate).toLocaleDateString('en-GB')}
                   </button>
                 ))}
               </div>
@@ -95,9 +99,19 @@ export function ReturnModal({ onClose, onSuccess }: ReturnModalProps) {
 
           {selectedBatch && (
             <>
-              <div className="rounded-lg bg-blue-50 px-3 py-2 text-sm">
-                <button type="button" onClick={() => setSelectedBatch(null)} className="text-blue-500 hover:underline text-xs ml-2">تغيير</button>
-                <strong>{selectedBatch.modelName}</strong> — {selectedBatch.sizeLabel} — {selectedBatch.color} — متبقي: {selectedBatch.remainingQuantity}
+              <div className="rounded-lg bg-blue-50 px-3 py-2 text-sm space-y-1">
+                <div>
+                  <button type="button" onClick={() => setSelectedBatch(null)} className="text-blue-500 hover:underline text-xs ml-2">تغيير</button>
+                  <strong>{selectedBatch.modelName}</strong>
+                  {selectedBatch.sizeLabel && <> — {selectedBatch.sizeLabel}</>}
+                  {selectedBatch.color && <> — {selectedBatch.color}</>}
+                  {' '}— متبقي: {selectedBatch.remainingQuantity}
+                </div>
+                {selectedBatch.parts.length > 0 && (
+                  <div className="text-xs text-blue-600">
+                    الأجزاء: {selectedBatch.parts.map(p => `${p.partName}: ${p.quantity}`).join('، ')}
+                  </div>
+                )}
               </div>
               <div>
                 <label className="mb-1 block text-sm font-medium">الكمية المرتجعة *</label>

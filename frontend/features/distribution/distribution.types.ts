@@ -31,16 +31,23 @@ export interface DistributionReturnRow {
   consumptionEntries: ReturnConsumptionEntry[];
 }
 
+export interface DistributionBatchPart {
+  partName: string;
+  quantity: number;
+}
+
 export interface DistributionBatchRow {
   id: string;
   modelName: string;
-  sizeLabel: string;
-  color: string;
+  sizeLabel: string | null;
+  color: string | null;
   quantity: number;
+  expectedPiecesCount: number;
   remainingQuantity: number;
   sewingPricePerPiece: number;
   totalCost: number;
   distributionDate: number;
+  parts: DistributionBatchPart[];
   returns: DistributionReturnRow[];
 }
 
@@ -53,11 +60,13 @@ export interface DistributionTailorDetail {
 export interface DistributionBatchOption {
   id: string;
   modelName: string;
-  sizeLabel: string;
-  color: string;
+  sizeLabel: string | null;
+  color: string | null;
   quantityDistributed: number;
+  expectedPiecesCount: number;
   remainingQuantity: number;
   distributionDate: number;
+  parts: DistributionBatchPart[];
 }
 
 export interface AvailabilityCombination {
@@ -67,15 +76,23 @@ export interface AvailabilityCombination {
   notDistributedCount: number;
 }
 
+export interface AvailablePartForModel {
+  partName: string;
+  availableCount: number;
+}
+
 export interface DistributePayload {
   tailorId: string;
   modelName: string;
-  partName?: string | null;
   sizeLabel: string;
   color: string;
-  quantity: number;
+  expectedPiecesCount: number;
   sewingPricePerPiece: number;
   distributionDate: number;
+  parts: Array<{
+    partName: string;
+    quantity: number;
+  }>;
 }
 
 export interface ReturnConsumptionRowPayload {

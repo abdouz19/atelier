@@ -17,6 +17,7 @@ export function CuttingSessionRow({ session, onClick }: CuttingSessionRowProps) 
         {session.fabricName} — {session.fabricColor}
       </td>
       <td className="px-4 py-3 text-gray-700">{session.modelName}</td>
+      <td className="px-4 py-3 text-gray-600">{session.sizeLabel || '—'}</td>
       <td className="px-4 py-3 text-gray-600">{session.metersUsed} م</td>
       <td className="px-4 py-3 text-gray-700">{session.totalPieces}</td>
       <td className="px-4 py-3 text-gray-600">{session.employeeNames.join('، ')}</td>

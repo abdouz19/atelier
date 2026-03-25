@@ -11,8 +11,8 @@ interface CuttingKpiCardsProps { kpis: CuttingKpis }
 export function CuttingKpiCards({ kpis }: CuttingKpiCardsProps) {
   const cards = [
     { label: 'إجمالي الجلسات', value: kpis.totalSessions.toString() },
-    { label: 'القطع المنتجة', value: kpis.totalPieces.toString() },
-    { label: 'قطع غير موزعة', value: kpis.piecesNotDistributed.toString() },
+    { label: 'الأجزاء المنتجة', value: kpis.totalPartsProduced.toString() },
+    { label: 'الأجزاء المتاحة', value: kpis.totalPartsAvailable.toString() },
     { label: 'الأمتار المستهلكة', value: `${fmt(kpis.totalMetersConsumed)} م` },
     { label: 'التكلفة الإجمالية', value: `${fmt(kpis.totalCostPaid)} دج` },
   ];

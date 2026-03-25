@@ -4,7 +4,9 @@ import { useState, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { Scissors } from 'lucide-react';
 import { useCuttingList } from '@/hooks/useCuttingList';
+import { useCuttingPartsInventory } from '@/hooks/useCuttingPartsInventory';
 import { CuttingKpiCards } from '@/components/cutting/CuttingKpiCards';
+import { PartsInventoryPanel } from '@/components/cutting/PartsInventoryPanel';
 import { CuttingSessionTable } from '@/components/cutting/CuttingSessionTable';
 import { CuttingSessionDetail } from '@/components/cutting/CuttingSessionDetail';
 import { NewCuttingSessionModal } from '@/components/cutting/NewCuttingSessionModal';
@@ -16,6 +18,7 @@ function CuttingPageContent() {
   const searchParams = useSearchParams();
   const selectedId = searchParams.get('id') ?? '';
   const { kpis, sessions, loading, error, refetch } = useCuttingList();
+  const partsInventory = useCuttingPartsInventory();
   const [showCreate, setShowCreate] = useState(false);
   const [toast, setToast] = useState<{ message: string; type: 'success' | 'error' } | null>(null);
 
@@ -51,6 +54,11 @@ function CuttingPageContent() {
       ) : (
         <div className="space-y-6">
           {kpis && <CuttingKpiCards kpis={kpis} />}
+          <PartsInventoryPanel
+            rows={partsInventory.rows}
+            isLoading={partsInventory.isLoading}
+            error={partsInventory.error}
+          />
           <CuttingSessionTable sessions={sessions} onRowClick={(id) => setParam('id', id)} />
         </div>
       )}
@@ -60,7 +68,7 @@ function CuttingPageContent() {
           onSuccess={async () => {
             setShowCreate(false);
             setToast({ message: 'تم إنشاء جلسة القص بنجاح', type: 'success' });
-            await refetch();
+            await Promise.all([refetch(), partsInventory.refetch()]);
           }}
         />
       )}

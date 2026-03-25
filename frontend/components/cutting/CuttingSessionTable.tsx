@@ -38,6 +38,7 @@ export function CuttingSessionTable({ sessions, onRowClick }: CuttingSessionTabl
               <th className="px-4 py-3 text-right">التاريخ</th>
               <th className="px-4 py-3 text-right">القماش واللون</th>
               <th className="px-4 py-3 text-right">الموديل</th>
+              <th className="px-4 py-3 text-right">المقاس</th>
               <th className="px-4 py-3 text-right">الأمتار</th>
               <th className="px-4 py-3 text-right">القطع</th>
               <th className="px-4 py-3 text-right">الموظفون</th>

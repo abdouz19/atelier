@@ -1,7 +1,7 @@
 export interface CuttingKpis {
   totalSessions: number;
-  totalPieces: number;
-  piecesNotDistributed: number;
+  totalPartsProduced: number;
+  totalPartsAvailable: number;
   totalMetersConsumed: number;
   totalCostPaid: number;
 }
@@ -12,10 +12,16 @@ export interface CuttingSessionSummary {
   fabricName: string;
   fabricColor: string;
   modelName: string;
+  sizeLabel: string;
   metersUsed: number;
   totalPieces: number;
   employeeNames: string[];
   totalCost: number;
+}
+
+export interface PartRow {
+  partName: string;
+  count: number;
 }
 
 export interface CuttingSessionDetail {
@@ -25,19 +31,30 @@ export interface CuttingSessionDetail {
   fabricName: string;
   fabricColor: string;
   modelName: string;
+  sizeLabel: string;
   metersUsed: number;
   layers: number;
   pricePerLayer: number;
   notes: string | null;
   totalCost: number;
   employees: Array<{ id: string; name: string; earnings: number }>;
-  piecesBySize: Array<{ sizeLabel: string; count: number }>;
+  parts: PartRow[];
   consumptionEntries: Array<{
     stockItemId: string;
     stockItemName: string;
     color: string | null;
     quantity: number;
   }>;
+}
+
+export interface PartsInventoryRow {
+  modelName: string;
+  sizeLabel: string;
+  color: string;
+  partName: string;
+  totalProduced: number;
+  totalDistributed: number;
+  availableCount: number;
 }
 
 export interface FabricColorOption {
@@ -59,12 +76,6 @@ export interface NonFabricItem {
   totalAvailable: number;
 }
 
-export interface PieceRow {
-  partName: string;
-  sizeName: string;
-  quantity: number;
-}
-
 export interface ConsumptionRow {
   stockItemId: string;
   color: string | null;
@@ -75,12 +86,13 @@ export interface CreateCuttingSessionPayload {
   fabricItemId: string;
   fabricColor: string;
   modelName: string;
+  sizeLabel: string;
   metersUsed: number;
   employeeIds: string[];
   layers: number;
   pricePerLayer: number;
   sessionDate: number;
   notes?: string;
-  pieceRows: PieceRow[];
+  parts: PartRow[];
   consumptionRows: ConsumptionRow[];
 }

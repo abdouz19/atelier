@@ -98,7 +98,10 @@ declare global {
         getFabricColors: (payload: { fabricItemId: string }) => Promise<unknown>;
         getNonFabricItems: () => Promise<unknown>;
         getModelSuggestions: () => Promise<unknown>;
-        getSizeSuggestions: () => Promise<unknown>;
+        getPartSuggestions: (payload: { modelName: string }) => Promise<unknown>;
+        getPartsInventory: () => Promise<unknown>;
+        getAvailableSizesForModel: (payload: { modelName: string }) => Promise<unknown>;
+        getAvailableColorsForModelSize: (payload: { modelName: string; sizeLabel: string }) => Promise<unknown>;
         create: (payload: unknown) => Promise<unknown>;
       };
       tailors: {
@@ -116,10 +119,9 @@ declare global {
         getSummary: () => Promise<unknown>;
         getDetailByTailor: (payload: { tailorId: string }) => Promise<unknown>;
         getActiveTailors: () => Promise<unknown>;
-        getAvailablePieces: (payload: { modelName: string; sizeLabel: string; color: string }) => Promise<unknown>;
+        getAvailablePartsForModel: (payload: { modelName: string; sizeLabel: string; color: string }) => Promise<unknown>;
         getAvailabilityForModel: (payload: { modelName: string }) => Promise<unknown>;
         getModelSuggestions: () => Promise<unknown>;
-        getSizeSuggestions: () => Promise<unknown>;
         getBatchesForTailor: (payload: { tailorId: string }) => Promise<unknown>;
         distribute: (payload: unknown) => Promise<unknown>;
         return: (payload: unknown) => Promise<unknown>;

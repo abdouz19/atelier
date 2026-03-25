@@ -29,5 +29,37 @@
     "error": "حدث خطأ",
     "save": "حفظ",
     "cancel": "إلغاء"
+  },
+  "cutting": {
+    "parts": "الأجزاء",
+    "partName": "اسم الجزء",
+    "partCount": "العدد",
+    "partsInventory": "مخزون الأجزاء",
+    "availableCount": "المتاح",
+    "addPart": "إضافة جزء",
+    "noPartsAvailable": "لا توجد أجزاء متاحة",
+    "size": "المقاس",
+    "sizeRequired": "المقاس مطلوب",
+    "selectSize": "اختر المقاس",
+    "color": "اللون",
+    "colorFromFabric": "اللون من القماش",
+    "filterByModel": "تصفية حسب الموديل",
+    "filterBySize": "تصفية حسب المقاس",
+    "filterByColor": "تصفية حسب اللون",
+    "allModels": "جميع الموديلات",
+    "allSizes": "جميع المقاسات",
+    "allColors": "جميع الألوان",
+    "noFilterResults": "لا توجد نتائج تطابق الفلتر",
+    "selectPart": "اختر الجزء"
+  },
+  "distribution": {
+    "expectedPieces": "القطع المتوقعة",
+    "partsGiven": "الأجزاء المعطاة",
+    "partName": "اسم الجزء",
+    "quantity": "الكمية",
+    "selectSize": "اختر المقاس",
+    "selectColor": "اختر اللون",
+    "sizeRequired": "يرجى اختيار المقاس",
+    "colorRequired": "يرجى اختيار اللون"
   }
 }

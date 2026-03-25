@@ -39,6 +39,7 @@ import type {
   DistributionBatchOption,
   DistributePayload,
   ReturnPayload,
+  AvailablePartForModel,
 } from '@/features/distribution/distribution.types';
 import type {
   QcKpis,
@@ -74,6 +75,7 @@ import type {
   FabricColorOption,
   NonFabricItem,
   CreateCuttingSessionPayload,
+  PartsInventoryRow,
 } from '@/features/cutting/cutting.types';
 
 function getBridge() {
@@ -157,7 +159,10 @@ export const ipcClient = {
     getFabricColors: (payload: { fabricItemId: string }) => getBridge().cutting.getFabricColors(payload) as Promise<{ success: true; data: FabricColorOption[] } | { success: false; error: string }>,
     getNonFabricItems: () => getBridge().cutting.getNonFabricItems() as Promise<{ success: true; data: NonFabricItem[] } | { success: false; error: string }>,
     getModelSuggestions: () => getBridge().cutting.getModelSuggestions() as Promise<{ success: true; data: string[] } | { success: false; error: string }>,
-    getSizeSuggestions: () => getBridge().cutting.getSizeSuggestions() as Promise<{ success: true; data: string[] } | { success: false; error: string }>,
+    getPartSuggestions: (payload: { modelName: string }) => getBridge().cutting.getPartSuggestions(payload) as Promise<{ success: true; data: string[] } | { success: false; error: string }>,
+    getPartsInventory: () => getBridge().cutting.getPartsInventory() as Promise<{ success: true; data: PartsInventoryRow[] } | { success: false; error: string }>,
+    getAvailableSizesForModel: (payload: { modelName: string }) => getBridge().cutting.getAvailableSizesForModel(payload) as Promise<{ success: true; data: string[] } | { success: false; error: string }>,
+    getAvailableColorsForModelSize: (payload: { modelName: string; sizeLabel: string }) => getBridge().cutting.getAvailableColorsForModelSize(payload) as Promise<{ success: true; data: string[] } | { success: false; error: string }>,
     create: (payload: CreateCuttingSessionPayload) => getBridge().cutting.create(payload) as Promise<{ success: true; data: CuttingSessionSummary } | { success: false; error: string }>,
   },
   tailors: {
@@ -175,9 +180,8 @@ export const ipcClient = {
     getSummary: () => getBridge().distribution.getSummary() as Promise<{ success: true; data: DistributionTailorSummary[] } | { success: false; error: string }>,
     getDetailByTailor: (payload: { tailorId: string }) => getBridge().distribution.getDetailByTailor(payload) as Promise<{ success: true; data: DistributionTailorDetail } | { success: false; error: string }>,
     getActiveTailors: () => getBridge().distribution.getActiveTailors() as Promise<{ success: true; data: Array<{ id: string; name: string }> } | { success: false; error: string }>,
-    getAvailablePieces: (payload: { modelName: string; sizeLabel: string; color: string }) => getBridge().distribution.getAvailablePieces(payload) as Promise<{ success: true; data: { available: number } } | { success: false; error: string }>,
+    getAvailablePartsForModel: (payload: { modelName: string; sizeLabel: string; color: string }) => getBridge().distribution.getAvailablePartsForModel(payload) as Promise<{ success: true; data: AvailablePartForModel[] } | { success: false; error: string }>,
     getModelSuggestions: () => getBridge().distribution.getModelSuggestions() as Promise<{ success: true; data: string[] } | { success: false; error: string }>,
-    getSizeSuggestions: () => getBridge().distribution.getSizeSuggestions() as Promise<{ success: true; data: string[] } | { success: false; error: string }>,
     getBatchesForTailor: (payload: { tailorId: string }) => getBridge().distribution.getBatchesForTailor(payload) as Promise<{ success: true; data: DistributionBatchOption[] } | { success: false; error: string }>,
     getAvailabilityForModel: (payload: { modelName: string }) => getBridge().distribution.getAvailabilityForModel(payload) as Promise<{ success: true; data: AvailabilityCombination[] } | { success: false; error: string }>,
     distribute: (payload: DistributePayload) => getBridge().distribution.distribute(payload) as Promise<{ success: true; data: DistributionTailorSummary } | { success: false; error: string }>,

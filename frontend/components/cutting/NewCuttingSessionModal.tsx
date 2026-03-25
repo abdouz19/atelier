@@ -33,13 +33,14 @@ export function NewCuttingSessionModal({ onClose, onSuccess }: NewCuttingSession
       fabricItemId: step1Data.fabricItemId,
       fabricColor: step1Data.fabricColor,
       modelName: step1Data.modelName,
+      sizeLabel: step1Data.sizeLabel,
       metersUsed: step1Data.metersUsed,
       employeeIds: step1Data.employeeIds,
       layers: step1Data.layers,
       pricePerLayer: step1Data.pricePerLayer,
       sessionDate: new Date(step1Data.sessionDate).getTime(),
       notes: step1Data.notes || undefined,
-      pieceRows: values.pieceRows,
+      parts: values.parts,
       consumptionRows: values.consumptionRows,
     });
     setIsSubmitting(false);
@@ -67,6 +68,7 @@ export function NewCuttingSessionModal({ onClose, onSuccess }: NewCuttingSession
             isSubmitting={isSubmitting}
             submitError={submitError}
             availableMeters={step1Data?.availableMeters ?? 0}
+            modelName={step1Data?.modelName ?? ''}
           />
         )}
       </div>

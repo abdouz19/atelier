@@ -7,11 +7,14 @@ import { useAuth } from '@/hooks/useAuth';
 
 const navItems = [
   { href: '/dashboard', label: 'لوحة التحكم', icon: LayoutDashboard },
-  { href: '/stock', label: 'المخزون', icon: Package },
+  // Raw materials
   { href: '/suppliers', label: 'الموردون', icon: Truck },
+  { href: '/stock', label: 'المخزون', icon: Package },
+  // People
   { href: '/employees', label: 'الموظفون', icon: Users },
-  { href: '/cutting', label: 'القص', icon: Scissors },
   { href: '/tailors', label: 'الخياطون', icon: Shirt },
+  // Production flow
+  { href: '/cutting', label: 'القص', icon: Scissors },
   { href: '/distribution', label: 'التوزيع', icon: ArrowLeftRight },
   { href: '/qc', label: 'مراقبة الجودة', icon: ClipboardCheck },
   { href: '/final-stock', label: 'المخزون النهائي', icon: PackageCheck },
