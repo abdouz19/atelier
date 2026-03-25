@@ -3,26 +3,38 @@
 import { useState, useEffect } from 'react';
 import { X, Plus } from 'lucide-react';
 import { ipcClient } from '@/lib/ipc-client';
+import { ManagedDropdown } from '@/components/shared/ManagedDropdown';
 import type { PartRow } from '@/features/cutting/cutting.types';
-import type { PartEntry } from '@/features/lookups/lookups.types';
+import type { LookupEntry } from '@/features/lookups/lookups.types';
 
 interface PartRowsEditorProps {
   rows: PartRow[];
   onChange: (rows: PartRow[]) => void;
-  modelName: string;
   error?: string;
 }
 
-export function PartRowsEditor({ rows, onChange, modelName, error }: PartRowsEditorProps) {
-  const [parts, setParts] = useState<PartEntry[]>([]);
+export function PartRowsEditor({ rows, onChange, error }: PartRowsEditorProps) {
+  const [parts, setParts] = useState<LookupEntry[]>([]);
+  const [sizes, setSizes] = useState<LookupEntry[]>([]);
 
   useEffect(() => {
-    ipcClient.lookups.getParts().then((res) => {
-      if (res.success) setParts(res.data);
-    });
+    ipcClient.lookups.getParts().then(r => { if (r.success) setParts(r.data); });
+    ipcClient.lookups.getSizes().then(r => { if (r.success) setSizes(r.data); });
   }, []);
 
-  function addRow() { onChange([...rows, { partName: '', count: 1 }]); }
+  async function handleAddPart(name: string) {
+    const res = await ipcClient.lookups.createPart({ name });
+    if (res.success) ipcClient.lookups.getParts().then(r => { if (r.success) setParts(r.data); });
+    return res;
+  }
+
+  async function handleAddSize(name: string) {
+    const res = await ipcClient.lookups.createSize({ name });
+    if (res.success) ipcClient.lookups.getSizes().then(r => { if (r.success) setSizes(r.data); });
+    return res;
+  }
+
+  function addRow() { onChange([...rows, { partName: '', sizeLabel: '', count: 1 }]); }
   function removeRow(i: number) { onChange(rows.filter((_, idx) => idx !== i)); }
   function update(i: number, patch: Partial<PartRow>) {
     onChange(rows.map((r, idx) => (idx === i ? { ...r, ...patch } : r)));
@@ -37,23 +49,35 @@ export function PartRowsEditor({ rows, onChange, modelName, error }: PartRowsEdi
         </button>
       </div>
       {rows.map((row, i) => (
-        <div key={i} className="mb-2 flex items-center gap-2">
-          <select
-            value={row.partName}
-            onChange={(e) => update(i, { partName: e.target.value })}
-            className="flex-1 rounded-lg border border-gray-200 px-3 py-1.5 text-sm focus:border-blue-400 focus:outline-none"
-          >
-            <option value="">اختر الجزء</option>
-            {parts.map((p) => <option key={p.id} value={p.name}>{p.name}</option>)}
-          </select>
+        <div key={i} className="mb-2 flex flex-wrap items-center gap-2">
+          <div className="w-40">
+            <ManagedDropdown
+              value={row.partName}
+              onChange={v => update(i, { partName: v })}
+              items={parts}
+              placeholder="الجزء"
+              addLabel="إضافة جزء"
+              onAddNew={handleAddPart}
+            />
+          </div>
+          <div className="w-32">
+            <ManagedDropdown
+              value={row.sizeLabel}
+              onChange={v => update(i, { sizeLabel: v })}
+              items={sizes}
+              placeholder="المقاس"
+              addLabel="إضافة مقاس"
+              onAddNew={handleAddSize}
+            />
+          </div>
           <input
             type="number"
             min={1}
             step={1}
             value={row.count || ''}
-            onChange={(e) => update(i, { count: Math.max(1, parseInt(e.target.value, 10) || 0) })}
+            onChange={e => update(i, { count: Math.max(1, parseInt(e.target.value, 10) || 0) })}
             placeholder="العدد"
-            className="w-24 rounded-lg border border-gray-200 px-3 py-1.5 text-sm focus:border-blue-400 focus:outline-none"
+            className="w-20 rounded-lg border border-gray-200 px-3 py-1.5 text-sm focus:border-blue-400 focus:outline-none"
           />
           <button type="button" onClick={() => removeRow(i)} className="text-gray-400 hover:text-red-500">
             <X size={14} />

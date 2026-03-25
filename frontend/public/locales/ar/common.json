@@ -61,5 +61,15 @@
     "selectColor": "اختر اللون",
     "sizeRequired": "يرجى اختيار المقاس",
     "colorRequired": "يرجى اختيار اللون"
+  },
+  "consumedMaterials": {
+    "consumedMaterials": "مواد مستهلكة",
+    "addConsumedMaterial": "إضافة مادة مستهلكة",
+    "availableStock": "المخزون المتاح",
+    "exceedsAvailableStock": "الكمية تتجاوز المخزون المتاح",
+    "sizeLabel": "المقاس",
+    "addPart": "إضافة جزء",
+    "totalCost": "التكلفة الإجمالية",
+    "availableMeters": "متاح"
   }
 }

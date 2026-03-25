@@ -21,6 +21,7 @@ export interface CuttingSessionSummary {
 
 export interface PartRow {
   partName: string;
+  sizeLabel: string;
   count: number;
 }
 
@@ -86,7 +87,6 @@ export interface CreateCuttingSessionPayload {
   fabricItemId: string;
   fabricColor: string;
   modelName: string;
-  sizeLabel: string;
   metersUsed: number;
   employeeIds: string[];
   layers: number;

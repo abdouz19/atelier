@@ -3,7 +3,9 @@
 import { useState, useEffect } from 'react';
 import { X, Plus } from 'lucide-react';
 import { ipcClient } from '@/lib/ipc-client';
+import { ConsumedMaterialsEditor } from '@/components/shared/ConsumedMaterialsEditor';
 import type { DistributionTailorSummary, AvailablePartForModel } from '@/features/distribution/distribution.types';
+import type { NonFabricItem, ConsumptionRow } from '@/features/cutting/cutting.types';
 import type { LookupEntry } from '@/features/lookups/lookups.types';
 import { ManagedDropdown } from '@/components/shared/ManagedDropdown';
 
@@ -26,6 +28,8 @@ export function DistributeModal({ onClose, onSuccess }: DistributeModalProps) {
   const [pricePerPiece, setPricePerPiece] = useState('');
   const [distributionDate, setDistributionDate] = useState(new Date().toISOString().split('T')[0]);
   const [partRows, setPartRows] = useState<PartQtyRow[]>([]);
+  const [consumptionRows, setConsumptionRows] = useState<ConsumptionRow[]>([]);
+  const [nonFabricItems, setNonFabricItems] = useState<NonFabricItem[]>([]);
   const [availableParts, setAvailableParts] = useState<AvailablePartForModel[]>([]);
   const [availableSizes, setAvailableSizes] = useState<string[]>([]);
   const [availableColors, setAvailableColors] = useState<string[]>([]);
@@ -38,6 +42,7 @@ export function DistributeModal({ onClose, onSuccess }: DistributeModalProps) {
   useEffect(() => {
     ipcClient.distribution.getActiveTailors().then(r => { if (r.success) setActiveTailors(r.data); });
     ipcClient.lookups.getModels().then(r => { if (r.success) setModelItems(r.data); });
+    ipcClient.cutting.getNonFabricItems().then(r => { if (r.success) setNonFabricItems(r.data); });
   }, []);
 
   async function handleModelChange(name: string) {
@@ -125,6 +130,7 @@ export function DistributeModal({ onClose, onSuccess }: DistributeModalProps) {
         sewingPricePerPiece: price,
         distributionDate: new Date(distributionDate).getTime(),
         parts: partRows,
+        consumptionRows,
       });
       if (res.success) { onSuccess(res.data); } else { setError(res.error); }
     } finally { setSubmitting(false); }
@@ -214,6 +220,12 @@ export function DistributeModal({ onClose, onSuccess }: DistributeModalProps) {
             <label className="mb-1 block text-sm font-medium">التاريخ *</label>
             <input type="date" value={distributionDate} onChange={e => setDistributionDate(e.target.value)} className="w-full rounded-lg border border-gray-200 px-3 py-2 text-sm focus:border-blue-400 focus:outline-none" />
           </div>
+          <ConsumedMaterialsEditor
+            nonFabricItems={nonFabricItems}
+            value={consumptionRows}
+            onChange={setConsumptionRows}
+            disabled={submitting}
+          />
           {error && <p className="text-xs text-red-500">{error}</p>}
           <div className="flex justify-end gap-2 pt-2">
             <button type="button" onClick={onClose} className="rounded-lg border border-gray-200 px-4 py-2 text-sm hover:bg-gray-50">إلغاء</button>

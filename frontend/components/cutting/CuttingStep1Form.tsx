@@ -14,7 +14,6 @@ const schema = z.object({
   fabricItemId: z.string().min(1, 'اختر القماش'),
   fabricColor: z.string().min(1, 'اختر اللون'),
   modelName: z.string().min(1, 'الموديل مطلوب'),
-  sizeLabel: z.string().min(1, 'المقاس مطلوب'),
   metersUsed: z.coerce.number().positive('يجب أن تكون الأمتار أكبر من صفر'),
   employeeIds: z.array(z.string()).min(1, 'اختر موظفاً واحداً على الأقل'),
   layers: z.coerce.number().int().positive('عدد الطبقات مطلوب'),
@@ -35,7 +34,6 @@ export function CuttingStep1Form({ onNext, onClose }: CuttingStep1FormProps) {
   const [fabricColors, setFabricColors] = useState<FabricColorOption[]>([]);
   const [managedColors, setManagedColors] = useState<LookupEntry[]>([]);
   const [models, setModels] = useState<LookupEntry[]>([]);
-  const [sizes, setSizes] = useState<LookupEntry[]>([]);
   const [employees, setEmployees] = useState<EmployeeSummary[]>([]);
   const { register, handleSubmit, watch, setValue, setError, formState: { errors } } = useForm<FormInput, unknown, FormValues>({ resolver: zodResolver(schema), defaultValues: { sessionDate: new Date().toISOString().split('T')[0], employeeIds: [] } });
   const fabricId = watch('fabricItemId');
@@ -55,7 +53,6 @@ export function CuttingStep1Form({ onNext, onClose }: CuttingStep1FormProps) {
     ipcClient.employees.getAll().then(r => { if (r.success) setEmployees(r.data.filter(e => e.status === 'active')); });
     ipcClient.lookups.getColors().then(r => { if (r.success) setManagedColors(r.data); });
     ipcClient.lookups.getModels().then(r => { if (r.success) setModels(r.data); });
-    ipcClient.lookups.getSizes().then(r => { if (r.success) setSizes(r.data); });
   }, []);
 
   useEffect(() => {
@@ -114,27 +111,17 @@ export function CuttingStep1Form({ onNext, onClose }: CuttingStep1FormProps) {
           />
         </div>
       </div>
-      <div className="grid grid-cols-2 gap-3">
-        <div>
-          <label className="mb-1 block text-sm font-medium">الموديل *</label>
-          <ManagedDropdown
-            value={watch('modelName') ?? ''}
-            onChange={(v) => setValue('modelName', v, { shouldValidate: true })}
-            items={models}
-            placeholder="اختر الموديل"
-            addLabel="إضافة موديل"
-            onAddNew={handleAddModel}
-            error={errors.modelName?.message}
-          />
-        </div>
-        <div>
-          <label className="mb-1 block text-sm font-medium">المقاس *</label>
-          <select {...register('sizeLabel')} className="w-full rounded-lg border border-gray-200 px-3 py-2 text-sm focus:border-blue-400 focus:outline-none">
-            <option value="">اختر</option>
-            {sizes.map(s => <option key={s.id} value={s.name}>{s.name}</option>)}
-          </select>
-          {errors.sizeLabel && <p className="mt-1 text-xs text-red-500">{errors.sizeLabel.message}</p>}
-        </div>
+      <div>
+        <label className="mb-1 block text-sm font-medium">الموديل *</label>
+        <ManagedDropdown
+          value={watch('modelName') ?? ''}
+          onChange={(v) => setValue('modelName', v, { shouldValidate: true })}
+          items={models}
+          placeholder="اختر الموديل"
+          addLabel="إضافة موديل"
+          onAddNew={handleAddModel}
+          error={errors.modelName?.message}
+        />
       </div>
       <div>
         <label className="mb-1 block text-sm font-medium">الأمتار المستخدمة * {fabricColor && <span className="text-gray-400">(متاح: {availableMeters} م)</span>}</label>

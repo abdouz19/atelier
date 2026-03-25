@@ -2,9 +2,10 @@
 
 import { useState, useEffect } from 'react';
 import { X } from 'lucide-react';
-import { ReturnConsumptionEditor, type ReturnConsumptionRowData } from './ReturnConsumptionEditor';
+import { ConsumedMaterialsEditor } from '@/components/shared/ConsumedMaterialsEditor';
 import { ipcClient } from '@/lib/ipc-client';
-import type { DistributionBatchOption, DistributionTailorSummary, DistributionNonFabricItem } from '@/features/distribution/distribution.types';
+import type { DistributionBatchOption, DistributionTailorSummary } from '@/features/distribution/distribution.types';
+import type { NonFabricItem, ConsumptionRow } from '@/features/cutting/cutting.types';
 
 interface ReturnModalProps {
   onClose: () => void;
@@ -18,14 +19,14 @@ export function ReturnModal({ onClose, onSuccess }: ReturnModalProps) {
   const [selectedBatch, setSelectedBatch] = useState<DistributionBatchOption | null>(null);
   const [quantityReturned, setQuantityReturned] = useState('');
   const [returnDate, setReturnDate] = useState(new Date().toISOString().split('T')[0]);
-  const [consumptionRows, setConsumptionRows] = useState<ReturnConsumptionRowData[]>([]);
-  const [nonFabricItems, setNonFabricItems] = useState<DistributionNonFabricItem[]>([]);
+  const [consumptionRows, setConsumptionRows] = useState<ConsumptionRow[]>([]);
+  const [nonFabricItems, setNonFabricItems] = useState<NonFabricItem[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
 
   useEffect(() => {
     ipcClient.distribution.getActiveTailors().then(res => { if (res.success) setActiveTailors(res.data); });
-    ipcClient.cutting.getNonFabricItems().then(res => { if (res.success) setNonFabricItems(res.data as DistributionNonFabricItem[]); });
+    ipcClient.cutting.getNonFabricItems().then(res => { if (res.success) setNonFabricItems(res.data); });
   }, []);
 
   useEffect(() => {
@@ -53,7 +54,7 @@ export function ReturnModal({ onClose, onSuccess }: ReturnModalProps) {
       const res = await ipcClient.distribution.return({
         batchId: selectedBatch.id, quantityReturned: qty,
         returnDate: new Date(returnDate).getTime(),
-        consumptionRows: consumptionRows.filter(r => r.stockItemId && r.quantity > 0),
+        consumptionRows: consumptionRows,
       });
       if (res.success) { onSuccess(res.data); } else { setError(res.error); }
     } finally { setSubmitting(false); }
@@ -117,7 +118,12 @@ export function ReturnModal({ onClose, onSuccess }: ReturnModalProps) {
                 <label className="mb-1 block text-sm font-medium">الكمية المرتجعة *</label>
                 <input type="number" min={1} max={selectedBatch.remainingQuantity} value={quantityReturned} onChange={e => setQuantityReturned(e.target.value)} className="w-full rounded-lg border border-gray-200 px-3 py-2 text-sm focus:border-blue-400 focus:outline-none" />
               </div>
-              <ReturnConsumptionEditor rows={consumptionRows} onChange={setConsumptionRows} items={nonFabricItems} />
+              <ConsumedMaterialsEditor
+                nonFabricItems={nonFabricItems}
+                value={consumptionRows}
+                onChange={setConsumptionRows}
+                disabled={submitting}
+              />
               <div>
                 <label className="mb-1 block text-sm font-medium">التاريخ *</label>
                 <input type="date" value={returnDate} onChange={e => setReturnDate(e.target.value)} className="w-full rounded-lg border border-gray-200 px-3 py-2 text-sm focus:border-blue-400 focus:outline-none" />
