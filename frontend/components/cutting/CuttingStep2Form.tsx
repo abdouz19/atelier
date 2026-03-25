@@ -2,14 +2,13 @@
 
 import { useState, useEffect } from 'react';
 import { PartRowsEditor } from './PartRowsEditor';
-import { ConsumptionRowsEditor } from './ConsumptionRowsEditor';
+import { ConsumedMaterialsEditor } from '@/components/shared/ConsumedMaterialsEditor';
 import { ipcClient } from '@/lib/ipc-client';
-import type { PartRow, NonFabricItem } from '@/features/cutting/cutting.types';
-import type { ConsumptionRowData } from './ConsumptionRowsEditor';
+import type { PartRow, ConsumptionRow, NonFabricItem } from '@/features/cutting/cutting.types';
 
 export interface Step2Values {
   parts: PartRow[];
-  consumptionRows: ConsumptionRowData[];
+  consumptionRows: ConsumptionRow[];
 }
 
 interface CuttingStep2FormProps {
@@ -22,8 +21,8 @@ interface CuttingStep2FormProps {
 }
 
 export function CuttingStep2Form({ onSubmit, onBack, isSubmitting, submitError, modelName }: CuttingStep2FormProps) {
-  const [partRows, setPartRows] = useState<PartRow[]>([{ partName: '', count: 1 }]);
-  const [consumptionRows, setConsumptionRows] = useState<ConsumptionRowData[]>([]);
+  const [partRows, setPartRows] = useState<PartRow[]>([{ partName: '', sizeLabel: '', count: 1 }]);
+  const [consumptionRows, setConsumptionRows] = useState<ConsumptionRow[]>([]);
   const [nonFabricItems, setNonFabricItems] = useState<NonFabricItem[]>([]);
   const [partError, setPartError] = useState<string | null>(null);
 
@@ -33,8 +32,8 @@ export function CuttingStep2Form({ onSubmit, onBack, isSubmitting, submitError, 
 
   function handleSubmit() {
     if (partRows.length === 0) { setPartError('أضف جزءاً واحداً على الأقل'); return; }
-    const invalid = partRows.find(r => !r.partName.trim() || r.count < 1);
-    if (invalid) { setPartError('تأكد من إدخال اسم الجزء والعدد (على الأقل 1) لكل صف'); return; }
+    const invalid = partRows.find(r => !r.partName.trim() || !r.sizeLabel.trim() || r.count < 1);
+    if (invalid) { setPartError('تأكد من إدخال اسم الجزء والمقاس والعدد لكل صف'); return; }
     setPartError(null);
     onSubmit({ parts: partRows, consumptionRows });
   }
@@ -44,10 +43,14 @@ export function CuttingStep2Form({ onSubmit, onBack, isSubmitting, submitError, 
       <PartRowsEditor
         rows={partRows}
         onChange={setPartRows}
-        modelName={modelName}
         error={partError ?? undefined}
       />
-      <ConsumptionRowsEditor rows={consumptionRows} onChange={setConsumptionRows} items={nonFabricItems} />
+      <ConsumedMaterialsEditor
+        nonFabricItems={nonFabricItems}
+        value={consumptionRows}
+        onChange={setConsumptionRows}
+        disabled={isSubmitting}
+      />
       {submitError && <p className="text-xs text-red-500">{submitError}</p>}
       <div className="flex justify-between pt-2">
         <button type="button" onClick={onBack} className="rounded-lg border border-gray-200 px-4 py-2 text-sm hover:bg-gray-50">→ السابق</button>

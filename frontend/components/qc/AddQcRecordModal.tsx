@@ -2,9 +2,10 @@
 
 import { useState, useEffect } from 'react';
 import { X } from 'lucide-react';
-import { QcConsumptionEditor, type NonFabricStockItem } from './QcConsumptionEditor';
+import { ConsumedMaterialsEditor } from '@/components/shared/ConsumedMaterialsEditor';
 import { ipcClient } from '@/lib/ipc-client';
-import type { ReturnBatchForQc, ConsumptionEntryInput } from '@/features/qc/qc.types';
+import type { ReturnBatchForQc } from '@/features/qc/qc.types';
+import type { NonFabricItem, ConsumptionRow } from '@/features/cutting/cutting.types';
 
 interface ActiveEmployee { id: string; name: string }
 
@@ -16,7 +17,7 @@ interface AddQcRecordModalProps {
 export function AddQcRecordModal({ onClose, onSuccess }: AddQcRecordModalProps) {
   const [batches, setBatches] = useState<ReturnBatchForQc[]>([]);
   const [employees, setEmployees] = useState<ActiveEmployee[]>([]);
-  const [nonFabricItems, setNonFabricItems] = useState<NonFabricStockItem[]>([]);
+  const [nonFabricItems, setNonFabricItems] = useState<NonFabricItem[]>([]);
 
   const [selectedBatch, setSelectedBatch] = useState<ReturnBatchForQc | null>(null);
   const [employeeId, setEmployeeId] = useState('');
@@ -27,7 +28,7 @@ export function AddQcRecordModal({ onClose, onSuccess }: AddQcRecordModalProps) 
   const [qtyVeryGood, setQtyVeryGood] = useState('0');
   const [pricePerPiece, setPricePerPiece] = useState('');
   const [reviewDate, setReviewDate] = useState(new Date().toISOString().split('T')[0]);
-  const [consumptionRows, setConsumptionRows] = useState<ConsumptionEntryInput[]>([]);
+  const [consumptionRows, setConsumptionRows] = useState<ConsumptionRow[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
 
@@ -40,7 +41,7 @@ export function AddQcRecordModal({ onClose, onSuccess }: AddQcRecordModalProps) 
       }
     });
     ipcClient.cutting.getNonFabricItems().then(res => {
-      if (res.success) setNonFabricItems(res.data as NonFabricStockItem[]);
+      if (res.success) setNonFabricItems(res.data);
     });
   }, []);
 
@@ -76,7 +77,7 @@ export function AddQcRecordModal({ onClose, onSuccess }: AddQcRecordModalProps) 
         qtyVeryGood: Number(qtyVeryGood) || 0,
         pricePerPiece: Number(pricePerPiece) || 0,
         reviewDate: new Date(reviewDate).getTime(),
-        consumptionEntries: consumptionRows.filter(r => r.stockItemId && r.quantity > 0),
+        consumptionEntries: consumptionRows.map(r => ({ stockItemId: r.stockItemId, color: r.color ?? undefined, quantity: r.quantity })),
       });
       if (res.success) { onSuccess(); }
       else { setError(res.error); }
@@ -169,7 +170,12 @@ export function AddQcRecordModal({ onClose, onSuccess }: AddQcRecordModalProps) 
                   className="w-full rounded-lg border border-gray-200 px-3 py-2 text-sm text-gray-900 focus:border-blue-400 focus:outline-none" />
               </div>
 
-              <QcConsumptionEditor rows={consumptionRows} onChange={setConsumptionRows} items={nonFabricItems} />
+              <ConsumedMaterialsEditor
+                nonFabricItems={nonFabricItems}
+                value={consumptionRows}
+                onChange={setConsumptionRows}
+                disabled={submitting}
+              />
             </>
           )}
 

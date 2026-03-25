@@ -33,7 +33,6 @@ export function NewCuttingSessionModal({ onClose, onSuccess }: NewCuttingSession
       fabricItemId: step1Data.fabricItemId,
       fabricColor: step1Data.fabricColor,
       modelName: step1Data.modelName,
-      sizeLabel: step1Data.sizeLabel,
       metersUsed: step1Data.metersUsed,
       employeeIds: step1Data.employeeIds,
       layers: step1Data.layers,

@@ -2,13 +2,11 @@
 
 import { useState, useEffect } from 'react';
 import { X } from 'lucide-react';
-import { QcConsumptionEditor, type NonFabricStockItem } from '@/components/qc/QcConsumptionEditor';
+import { ConsumedMaterialsEditor } from '@/components/shared/ConsumedMaterialsEditor';
 import { AddToStockModal } from './AddToStockModal';
 import { ipcClient } from '@/lib/ipc-client';
 import type { QcRecordForFinition, AddToFinalStockPayload } from '@/features/finition/finition.types';
-import type { ConsumptionEntryInput } from '@/features/qc/qc.types';
-
-type FinitionConsumptionEntry = ConsumptionEntryInput;
+import type { NonFabricItem, ConsumptionRow } from '@/features/cutting/cutting.types';
 
 interface ActiveEmployee { id: string; name: string }
 
@@ -34,14 +32,14 @@ type Step =
 export function AddFinitionRecordModal({ onClose, onSuccess, onNotReady }: AddFinitionRecordModalProps) {
   const [qcRecords, setQcRecords] = useState<QcRecordForFinition[]>([]);
   const [employees, setEmployees] = useState<ActiveEmployee[]>([]);
-  const [nonFabricItems, setNonFabricItems] = useState<NonFabricStockItem[]>([]);
+  const [nonFabricItems, setNonFabricItems] = useState<NonFabricItem[]>([]);
 
   const [selectedQc, setSelectedQc] = useState<QcRecordForFinition | null>(null);
   const [employeeId, setEmployeeId] = useState('');
   const [quantity, setQuantity] = useState('');
   const [pricePerPiece, setPricePerPiece] = useState('');
   const [finitionDate, setFinitionDate] = useState(new Date().toISOString().split('T')[0]);
-  const [consumptionRows, setConsumptionRows] = useState<FinitionConsumptionEntry[]>([]);
+  const [consumptionRows, setConsumptionRows] = useState<ConsumptionRow[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
 
@@ -56,7 +54,7 @@ export function AddFinitionRecordModal({ onClose, onSuccess, onNotReady }: AddFi
       }
     });
     ipcClient.cutting.getNonFabricItems().then(res => {
-      if (res.success) setNonFabricItems(res.data as NonFabricStockItem[]);
+      if (res.success) setNonFabricItems(res.data);
     });
   }, []);
 
@@ -81,7 +79,7 @@ export function AddFinitionRecordModal({ onClose, onSuccess, onNotReady }: AddFi
         quantity: qty,
         pricePerPiece: Number(pricePerPiece) || 0,
         finitionDate: new Date(finitionDate).getTime(),
-        consumptionEntries: consumptionRows.filter(r => r.stockItemId && r.quantity > 0),
+        consumptionEntries: consumptionRows.map(r => ({ stockItemId: r.stockItemId, color: r.color ?? undefined, quantity: r.quantity })),
       });
       if (res.success) {
         setStep({
@@ -218,7 +216,12 @@ export function AddFinitionRecordModal({ onClose, onSuccess, onNotReady }: AddFi
                   className="w-full rounded-lg border border-gray-200 px-3 py-2 text-sm text-gray-900 focus:border-blue-400 focus:outline-none" />
               </div>
 
-              <QcConsumptionEditor rows={consumptionRows} onChange={setConsumptionRows} items={nonFabricItems} />
+              <ConsumedMaterialsEditor
+                nonFabricItems={nonFabricItems}
+                value={consumptionRows}
+                onChange={setConsumptionRows}
+                disabled={submitting}
+              />
             </>
           )}
 

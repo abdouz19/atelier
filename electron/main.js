@@ -508,6 +508,24 @@ function initDB() {
     db.exec(`ALTER TABLE cutting_sessions ADD COLUMN size_label TEXT NOT NULL DEFAULT ''`)
   }
 
+  // 015: Add size_label to cutting_session_parts (idempotent)
+  try { db.prepare(`SELECT size_label FROM cutting_session_parts LIMIT 1`).get() } catch (_) {
+    db.exec(`ALTER TABLE cutting_session_parts ADD COLUMN size_label TEXT NOT NULL DEFAULT ''`)
+  }
+
+  // 015: distribution_consumption_entries
+  db.exec(`
+    CREATE TABLE IF NOT EXISTS distribution_consumption_entries (
+      id            TEXT    PRIMARY KEY,
+      batch_id      TEXT    NOT NULL REFERENCES distribution_batches(id),
+      stock_item_id TEXT    NOT NULL REFERENCES stock_items(id),
+      color         TEXT,
+      quantity      REAL    NOT NULL CHECK(quantity > 0),
+      created_at    INTEGER NOT NULL,
+      updated_at    INTEGER NOT NULL
+    )
+  `)
+
   // 014: Migrate cutting_parts → aggregate table (model_name, size_label, color, part_name, count)
   try { db.prepare(`SELECT model_name FROM cutting_parts LIMIT 1`).get() } catch (_) {
     db.pragma('legacy_alter_table = ON')
@@ -2138,9 +2156,9 @@ function registerIpcHandlers() {
   // cutting:create
   ipcMain.handle('cutting:create', (_event, payload) => {
     try {
-      const { fabricItemId, fabricColor, modelName, sizeLabel = '', metersUsed, employeeIds, layers, pricePerLayer, sessionDate, notes, parts: partRows, consumptionRows } = payload;
+      const { fabricItemId, fabricColor, modelName, metersUsed, employeeIds, layers, pricePerLayer, sessionDate, notes, parts: partRows, consumptionRows } = payload;
       if (!partRows || partRows.length === 0) return { success: false, error: 'يجب إضافة جزء واحد على الأقل' };
-      if (partRows.some((r) => !r.partName || r.count < 1)) return { success: false, error: 'كل جزء يجب أن يحتوي على اسم وعدد صحيح أكبر من صفر' };
+      if (partRows.some((r) => !r.partName || !r.sizeLabel || r.count < 1)) return { success: false, error: 'كل جزء يجب أن يحتوي على اسم ومقاس وعدد صحيح أكبر من صفر' };
 
       const createSession = db.transaction(() => {
         const now = Date.now();
@@ -2173,17 +2191,17 @@ function registerIpcHandlers() {
 
         const sessionId = crypto.randomUUID();
 
-        // 1. Insert cutting_sessions
+        // 1. Insert cutting_sessions (size_label kept as '' — deprecated, moved to per-part-row)
         db.prepare(`INSERT INTO cutting_sessions (id, fabric_item_id, fabric_color, model_name, size_label, meters_used, layers, price_per_layer, session_date, notes, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
-        ).run(sessionId, fabricItemId, fabricColor, modelName, sizeLabel, metersUsed, layers, pricePerLayer, sessionDate, notes ?? null, now, now);
+        ).run(sessionId, fabricItemId, fabricColor, modelName, '', metersUsed, layers, pricePerLayer, sessionDate, notes ?? null, now, now);
 
-        // 2a. Insert per-session log into cutting_session_parts
-        const insertSessionPart = db.prepare(`INSERT INTO cutting_session_parts (id, session_id, part_name, count, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?)`);
+        // 2a. Insert per-session log into cutting_session_parts (with size_label per row)
+        const insertSessionPart = db.prepare(`INSERT INTO cutting_session_parts (id, session_id, part_name, size_label, count, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?)`);
         for (const row of partRows) {
-          insertSessionPart.run(crypto.randomUUID(), sessionId, row.partName, row.count, now, now);
+          insertSessionPart.run(crypto.randomUUID(), sessionId, row.partName, row.sizeLabel, row.count, now, now);
         }
 
-        // 2b. Upsert into cutting_parts aggregate by (model_name, size_label, color, part_name)
+        // 2b. Upsert into cutting_parts aggregate — size_label now comes from each part row
         const upsertPart = db.prepare(`
           INSERT INTO cutting_parts (id, model_name, size_label, color, part_name, count, created_at, updated_at)
           VALUES (?, ?, ?, ?, ?, ?, ?, ?)
@@ -2191,7 +2209,7 @@ function registerIpcHandlers() {
           DO UPDATE SET count = count + excluded.count, updated_at = excluded.updated_at
         `);
         for (const row of partRows) {
-          upsertPart.run(crypto.randomUUID(), modelName, sizeLabel, fabricColor, row.partName, row.count, now, now);
+          upsertPart.run(crypto.randomUUID(), modelName, row.sizeLabel, fabricColor, row.partName, row.count, now, now);
         }
 
         // 3. Fabric deduction (stock_transactions consumed, with model_name context)
@@ -2223,7 +2241,7 @@ function registerIpcHandlers() {
           fabricName: fabricItem?.name ?? '',
           fabricColor,
           modelName,
-          sizeLabel,
+          sizeLabel: '',
           metersUsed,
           totalPieces,
           employeeNames: empNames,
@@ -2473,6 +2491,21 @@ function registerIpcHandlers() {
         const insertBatchPart = db.prepare(`INSERT INTO distribution_batch_parts (id, batch_id, part_name, quantity, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?)`)
         for (const part of p.parts) {
           insertBatchPart.run(crypto.randomUUID(), batchId, part.partName, part.quantity, now, now)
+        }
+
+        // Validate and insert consumed materials
+        for (const row of (p.consumptionRows || [])) {
+          const avail = row.color
+            ? db.prepare(`SELECT COALESCE(SUM(CASE WHEN type='inbound' THEN quantity ELSE -quantity END), 0) AS available FROM stock_transactions WHERE stock_item_id = ? AND color = ?`).get(row.stockItemId, row.color)
+            : db.prepare(`SELECT COALESCE(SUM(CASE WHEN type='inbound' THEN quantity ELSE -quantity END), 0) AS available FROM stock_transactions WHERE stock_item_id = ? AND color IS NULL`).get(row.stockItemId)
+          if (!avail || avail.available < row.quantity) {
+            const item = db.prepare('SELECT name FROM stock_items WHERE id = ?').get(row.stockItemId)
+            throw new Error(`الكمية المتاحة من "${item?.name ?? row.stockItemId}" غير كافية`)
+          }
+          db.prepare(`INSERT INTO distribution_consumption_entries (id, batch_id, stock_item_id, color, quantity, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?)`
+          ).run(crypto.randomUUID(), batchId, row.stockItemId, row.color ?? null, row.quantity, now, now)
+          db.prepare(`INSERT INTO stock_transactions (id, stock_item_id, type, quantity, color, transaction_date, source_module, source_reference_id, model_name, created_at, updated_at) VALUES (?, ?, 'consumed', ?, ?, ?, 'distribution', ?, ?, ?, ?)`
+          ).run(crypto.randomUUID(), row.stockItemId, row.quantity, row.color ?? null, p.distributionDate, batchId, p.modelName ?? null, now, now)
         }
 
         const agg = db.prepare(`SELECT COALESCE(SUM(total_cost), 0) AS total_earned FROM distribution_batches WHERE tailor_id = ?`).get(p.tailorId)

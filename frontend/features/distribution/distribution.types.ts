@@ -93,6 +93,7 @@ export interface DistributePayload {
     partName: string;
     quantity: number;
   }>;
+  consumptionRows: ReturnConsumptionRowPayload[];
 }
 
 export interface ReturnConsumptionRowPayload {
