@@ -11,21 +11,21 @@ interface AvailabilityTableSelectorProps {
 export function AvailabilityTableSelector({ combinations, selected, onSelect }: AvailabilityTableSelectorProps) {
   if (combinations.length === 0) {
     return (
-      <div className="rounded-lg border border-dashed border-gray-200 py-6 text-center text-sm text-gray-400">
+      <div className="rounded-lg border border-dashed border-border py-6 text-center text-sm text-text-muted">
         لا توجد قطع متاحة لهذا النموذج
       </div>
     );
   }
 
   return (
-    <div className="max-h-52 overflow-y-auto rounded-lg border border-gray-200">
+    <div className="max-h-52 overflow-y-auto rounded-lg border border-border">
       <table className="w-full text-sm">
-        <thead className="sticky top-0 bg-gray-50">
+        <thead className="sticky top-0 bg-base/60">
           <tr>
-            <th className="px-3 py-2 text-right font-medium text-gray-600">القطعة</th>
-            <th className="px-3 py-2 text-right font-medium text-gray-600">المقاس</th>
-            <th className="px-3 py-2 text-right font-medium text-gray-600">اللون</th>
-            <th className="px-3 py-2 text-right font-medium text-gray-600">المتاح</th>
+            <th className="px-3 py-2 text-right font-medium text-text-muted">القطعة</th>
+            <th className="px-3 py-2 text-right font-medium text-text-muted">المقاس</th>
+            <th className="px-3 py-2 text-right font-medium text-text-muted">اللون</th>
+            <th className="px-3 py-2 text-right font-medium text-text-muted">المتاح</th>
           </tr>
         </thead>
         <tbody>
@@ -40,9 +40,9 @@ export function AvailabilityTableSelector({ combinations, selected, onSelect }: 
                 key={idx}
                 onClick={() => !isZero && onSelect(combo)}
                 className={[
-                  'border-t border-gray-100 transition-colors',
-                  isZero ? 'cursor-not-allowed opacity-40' : 'cursor-pointer hover:bg-blue-50',
-                  isSelected ? 'bg-blue-100 ring-1 ring-inset ring-blue-400' : '',
+                  'border-t border-border transition-colors',
+                  isZero ? 'cursor-not-allowed opacity-40' : 'cursor-pointer hover:bg-primary-50',
+                  isSelected ? 'bg-primary-100 ring-1 ring-inset ring-primary-400' : '',
                 ].join(' ')}
               >
                 <td className="px-3 py-2">{combo.partName ?? '—'}</td>

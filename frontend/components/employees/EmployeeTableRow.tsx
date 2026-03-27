@@ -12,11 +12,11 @@ interface EmployeeTableRowProps {
 
 export function EmployeeTableRow({ employee, onClick, onEdit, onSetStatus }: EmployeeTableRowProps) {
   const isActive = employee.status === 'active';
-  const balanceColor = employee.balanceDue < 0 ? 'text-red-600' : 'text-gray-900';
+  const balanceColor = employee.balanceDue < 0 ? 'text-red-600' : 'text-text-base';
 
   return (
     <tr
-      className="cursor-pointer transition-colors hover:bg-gray-50"
+      className="cursor-pointer transition-colors odd:bg-surface even:bg-base/30 hover:bg-primary-50"
       onClick={onClick}
     >
       <td className="px-4 py-3">
@@ -27,14 +27,14 @@ export function EmployeeTableRow({ employee, onClick, onEdit, onSetStatus }: Emp
             className="h-9 w-9 rounded-full object-cover"
           />
         ) : (
-          <div className="flex h-9 w-9 items-center justify-center rounded-full bg-gray-200 text-sm font-semibold text-gray-500">
+          <div className="flex h-9 w-9 items-center justify-center rounded-full bg-border text-sm font-semibold text-text-muted">
             {employee.name.charAt(0)}
           </div>
         )}
       </td>
-      <td className="px-4 py-3 font-medium text-gray-900">{employee.name}</td>
-      <td className="px-4 py-3 text-gray-600">{employee.role ?? '—'}</td>
-      <td className="px-4 py-3 text-gray-600">{employee.phone ?? '—'}</td>
+      <td className="px-4 py-3 font-medium text-text-base">{employee.name}</td>
+      <td className="px-4 py-3 text-text-muted">{employee.role ?? '—'}</td>
+      <td className="px-4 py-3 text-text-muted">{employee.phone ?? '—'}</td>
       <td className={`px-4 py-3 font-medium ${balanceColor}`}>
         {employee.balanceDue.toLocaleString('en-US')} دج
       </td>
@@ -53,14 +53,14 @@ export function EmployeeTableRow({ employee, onClick, onEdit, onSetStatus }: Emp
         <div className="flex items-center gap-1" onClick={(e) => e.stopPropagation()}>
           <button
             onClick={() => onEdit(employee)}
-            className="rounded p-1.5 text-gray-400 hover:bg-gray-100 hover:text-gray-700"
+            className="rounded p-1.5 text-text-muted hover:bg-base hover:text-text-base"
             title="تعديل"
           >
             <Pencil size={15} />
           </button>
           <button
             onClick={() => onSetStatus(employee)}
-            className="rounded p-1.5 text-gray-400 hover:bg-gray-100 hover:text-gray-700"
+            className="rounded p-1.5 text-text-muted hover:bg-base hover:text-text-base"
             title={isActive ? 'تعطيل' : 'تفعيل'}
           >
             {isActive ? <UserX size={15} /> : <UserCheck size={15} />}

@@ -36,20 +36,20 @@ export function SupplierTable({ suppliers, onRowClick, onEdit, onDelete }: Suppl
           value={search}
           onChange={(e) => setSearch(e.target.value)}
           placeholder="بحث بالاسم أو الهاتف..."
-          className="w-full rounded-lg border border-gray-300 py-2 pr-9 pl-3 text-sm text-gray-900 outline-none focus:border-blue-500"
+          className="w-full rounded-lg border border-border py-2 pr-9 pl-3 text-sm text-text-base outline-none focus:border-primary-500"
         />
       </div>
 
-      <div className="overflow-hidden rounded-xl border border-gray-200 bg-white">
+      <div className="overflow-hidden rounded-xl border border-border bg-surface">
         <table className="w-full text-right">
-          <thead className="border-b border-gray-100 bg-gray-50">
+          <thead className="sticky top-0 z-10 border-b border-border bg-base/60">
             <tr>
-              <th className="px-4 py-3 text-sm font-medium text-gray-600">الاسم</th>
-              <th className="px-4 py-3 text-sm font-medium text-gray-600">الهاتف</th>
-              <th className="px-4 py-3 text-sm font-medium text-gray-600">العنوان</th>
-              <th className="px-4 py-3 text-sm font-medium text-gray-600">المنتجات</th>
-              <th className="px-4 py-3 text-sm font-medium text-gray-600">ملاحظات</th>
-              <th className="px-4 py-3 text-sm font-medium text-gray-600"></th>
+              <th className="px-4 py-3 text-sm font-semibold text-text-muted">الاسم</th>
+              <th className="px-4 py-3 text-sm font-semibold text-text-muted">الهاتف</th>
+              <th className="px-4 py-3 text-sm font-semibold text-text-muted">العنوان</th>
+              <th className="px-4 py-3 text-sm font-semibold text-text-muted">المنتجات</th>
+              <th className="px-4 py-3 text-sm font-semibold text-text-muted">ملاحظات</th>
+              <th className="px-4 py-3 text-sm font-semibold text-text-muted"></th>
             </tr>
           </thead>
           <tbody>

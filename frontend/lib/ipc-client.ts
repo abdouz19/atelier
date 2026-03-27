@@ -1,4 +1,5 @@
 import type { LoginPayload, ChangePasswordPayload } from '@/features/auth/auth.types';
+import type { ThemeMode, PrimaryColor, AppearanceSettings } from '@/features/settings/settings.types';
 import type { LookupEntry, CreateLookupPayload, UpdateLookupPayload, DeleteLookupPayload, ModelEntry, PartEntry, SizeEntry } from '@/features/lookups/lookups.types';
 import type {
   StockItemSummary,
@@ -220,6 +221,33 @@ export const ipcClient = {
       getBridge().dashboard.getPeriodKpis(payload) as Promise<{ success: true; data: DashboardPeriodKpis } | { success: false; error: string }>,
     getChartData: (payload: { startDate: number; endDate: number; modelName?: string }) =>
       getBridge().dashboard.getChartData(payload) as Promise<{ success: true; data: DashboardChartData } | { success: false; error: string }>,
+  },
+  settings: {
+    getAppearance: () =>
+      getBridge().settings.getAppearance() as Promise<
+        { success: true; data: AppearanceSettings } | { success: false; error: string }
+      >,
+    setAppearance: (payload: AppearanceSettings) =>
+      getBridge().settings.setAppearance(payload) as Promise<
+        { success: true; data: null } | { success: false; error: string }
+      >,
+    getLogo: () =>
+      getBridge().settings.getLogo() as Promise<
+        { success: true; data: { logo: string | null } } | { success: false; error: string }
+      >,
+    setLogo: (payload: { dataUrl: string }) =>
+      getBridge().settings.setLogo(payload) as Promise<
+        { success: true; data: null } | { success: false; error: string }
+      >,
+    removeLogo: () =>
+      getBridge().settings.removeLogo() as Promise<
+        { success: true; data: null } | { success: false; error: string }
+      >,
+    resetToDefaults: () =>
+      getBridge().settings.resetToDefaults() as Promise<
+        | { success: true; data: { theme: ThemeMode; primaryColor: PrimaryColor; logo: null } }
+        | { success: false; error: string }
+      >,
   },
   on: (channel: string, callback: (...args: unknown[]) => void) =>
     getBridge().on(channel, callback),

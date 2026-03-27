@@ -27,10 +27,10 @@ export function OperationsHistory({ operationGroups, employeeId, onOperationAdde
   return (
     <div>
       <div className="mb-3 flex items-center justify-between">
-        <h3 className="font-semibold text-gray-700">سجل العمليات</h3>
+        <h3 className="font-semibold text-text-base">سجل العمليات</h3>
         <button
           onClick={() => setShowAdd(true)}
-          className="flex items-center gap-1.5 rounded-lg bg-blue-50 px-3 py-1.5 text-sm font-medium text-blue-700 hover:bg-blue-100"
+          className="flex items-center gap-1.5 rounded-lg bg-primary-50 px-3 py-1.5 text-sm font-medium text-primary-600 hover:bg-primary-100"
         >
           <Plus size={15} />
           إضافة عملية
@@ -42,15 +42,15 @@ export function OperationsHistory({ operationGroups, employeeId, onOperationAdde
       ) : (
         <div className="space-y-4">
           {operationGroups.map((group) => (
-            <div key={group.type} className="overflow-hidden rounded-xl border border-gray-200 bg-white">
-              <div className="flex items-center justify-between bg-gray-50 px-4 py-2">
-                <span className="text-sm font-semibold text-gray-700">{TYPE_LABELS[group.type]}</span>
+            <div key={group.type} className="overflow-hidden rounded-xl border border-border bg-white">
+              <div className="flex items-center justify-between bg-base/60 px-4 py-2">
+                <span className="text-sm font-semibold text-text-base">{TYPE_LABELS[group.type]}</span>
                 <span className="text-sm font-medium text-blue-700">
                   الإجمالي: {group.subtotal.toLocaleString('en-US')} دج
                 </span>
               </div>
               <table className="w-full text-sm">
-                <thead className="text-xs font-medium text-gray-500">
+                <thead className="text-xs font-medium text-text-muted">
                   <tr>
                     <th className="px-4 py-2 text-right">التاريخ</th>
                     <th className="px-4 py-2 text-right">الموديل / اللون</th>
@@ -60,25 +60,25 @@ export function OperationsHistory({ operationGroups, employeeId, onOperationAdde
                     <th className="px-4 py-2 text-right">ملاحظات</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-gray-100">
+                <tbody className="divide-y divide-border">
                   {group.operations.map((op) => {
                     const canNavigate = onNavigate && op.sourceReferenceId && op.operationType !== 'custom';
                     return (
                       <tr
                         key={op.id}
-                        className={`hover:bg-gray-50 ${canNavigate ? 'cursor-pointer' : ''}`}
+                        className={`hover:bg-base/60 ${canNavigate ? 'cursor-pointer' : ''}`}
                         onClick={canNavigate ? () => onNavigate!(op.operationType, op.sourceReferenceId!) : undefined}
                       >
-                        <td className="px-4 py-2 text-gray-600">
+                        <td className="px-4 py-2 text-text-muted">
                           {new Date(op.operationDate).toLocaleDateString('en-GB')}
                         </td>
-                        <td className="px-4 py-2 text-gray-700">
+                        <td className="px-4 py-2 text-text-base">
                           {op.modelName ?? '—'}{op.color ? ` / ${op.color}` : ''}
                         </td>
-                        <td className="px-4 py-2 text-gray-900">{op.quantity}</td>
-                        <td className="px-4 py-2 text-gray-900">{op.pricePerUnit.toLocaleString('en-US')} دج</td>
-                        <td className="px-4 py-2 font-medium text-gray-900">{op.totalAmount.toLocaleString('en-US')} دج</td>
-                        <td className="px-4 py-2 text-gray-500">{op.notes ?? '—'}</td>
+                        <td className="px-4 py-2 text-text-base">{op.quantity}</td>
+                        <td className="px-4 py-2 text-text-base">{op.pricePerUnit.toLocaleString('en-US')} دج</td>
+                        <td className="px-4 py-2 font-medium text-text-base">{op.totalAmount.toLocaleString('en-US')} دج</td>
+                        <td className="px-4 py-2 text-text-muted">{op.notes ?? '—'}</td>
                       </tr>
                     );
                   })}

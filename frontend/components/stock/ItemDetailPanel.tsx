@@ -55,31 +55,31 @@ export function ItemDetailPanel({ item, suppliers, onBack, onRefetch, onArchived
     <div dir="rtl">
       {/* Header */}
       <div className="mb-6 flex items-center gap-3">
-        <button onClick={onBack} className="rounded-lg p-2 text-gray-500 hover:bg-gray-100">
+        <button onClick={onBack} className="rounded-lg p-2 text-text-muted hover:bg-base">
           <ArrowRight size={20} />
         </button>
         <div className="flex-1">
-          <h1 className="text-2xl font-bold text-gray-900">{item.name}</h1>
-          <p className="text-sm text-gray-500">{item.type} · {item.unit}</p>
+          <h1 className="text-2xl font-bold text-text-base">{item.name}</h1>
+          <p className="text-sm text-text-muted">{item.type} · {item.unit}</p>
         </div>
         <div className="flex items-center gap-2">
           <button
             onClick={() => setShowAddInbound(true)}
-            className="flex items-center gap-2 rounded-lg bg-blue-600 px-3 py-2 text-sm font-medium text-white hover:bg-blue-700"
+            className="flex items-center gap-2 rounded-lg bg-primary-500 px-3 py-2 text-sm font-medium text-white hover:bg-primary-600"
           >
             <Plus size={16} />
             إضافة وارد
           </button>
           <button
             onClick={() => setShowEdit(true)}
-            className="flex items-center gap-2 rounded-lg border border-gray-300 px-3 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50"
+            className="flex items-center gap-2 rounded-lg border border-border px-3 py-2 text-sm font-medium text-text-base hover:bg-base/60"
           >
             <Pencil size={16} />
             تعديل
           </button>
           <button
             onClick={() => setShowArchiveConfirm(true)}
-            className="rounded-lg border border-gray-300 p-2 text-gray-500 hover:bg-red-50 hover:text-red-600"
+            className="rounded-lg border border-border p-2 text-text-muted hover:bg-red-50 hover:text-red-600"
             title="أرشفة"
           >
             <Archive size={16} />
@@ -88,7 +88,7 @@ export function ItemDetailPanel({ item, suppliers, onBack, onRefetch, onArchived
       </div>
 
       {/* Meta info */}
-      <div className="mb-6 grid grid-cols-1 gap-4 rounded-xl border border-gray-200 bg-white p-6 sm:grid-cols-2">
+      <div className="mb-6 grid grid-cols-1 gap-4 rounded-xl border border-border bg-white p-6 sm:grid-cols-2">
         {item.imagePath && (
           <div className="flex justify-center sm:col-span-2">
             <Image
@@ -103,21 +103,21 @@ export function ItemDetailPanel({ item, suppliers, onBack, onRefetch, onArchived
         )}
         {item.description && (
           <div>
-            <p className="mb-1 text-xs font-medium uppercase text-gray-400">الوصف</p>
-            <p className="text-sm text-gray-700">{item.description}</p>
+            <p className="mb-1 text-xs font-medium uppercase text-text-muted">الوصف</p>
+            <p className="text-sm text-text-base">{item.description}</p>
           </div>
         )}
         {item.notes && (
           <div>
-            <p className="mb-1 text-xs font-medium uppercase text-gray-400">ملاحظات</p>
-            <p className="text-sm text-gray-700">{item.notes}</p>
+            <p className="mb-1 text-xs font-medium uppercase text-text-muted">ملاحظات</p>
+            <p className="text-sm text-text-base">{item.notes}</p>
           </div>
         )}
       </div>
 
       {/* Variants */}
       <div className="mb-6">
-        <h2 className="mb-3 text-base font-semibold text-gray-800">الكميات</h2>
+        <h2 className="mb-3 text-base font-semibold text-text-base">الكميات</h2>
         <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">
           {item.variants.map((v) => (
             <ColorVariantCard key={v.color ?? '__default__'} variant={v} unit={item.unit} />
@@ -127,7 +127,7 @@ export function ItemDetailPanel({ item, suppliers, onBack, onRefetch, onArchived
 
       {/* Transaction history */}
       <div>
-        <h2 className="mb-3 text-base font-semibold text-gray-800">سجل الحركات</h2>
+        <h2 className="mb-3 text-base font-semibold text-text-base">سجل الحركات</h2>
         <TransactionHistory
           transactions={item.transactions}
           unit={item.unit}

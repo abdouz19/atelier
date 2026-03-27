@@ -18,9 +18,9 @@ export function FinalStockKpiCards({ kpis }: FinalStockKpiCardsProps) {
   return (
     <div className="grid grid-cols-3 gap-3" dir="rtl">
       {cards.map((c) => (
-        <div key={c.label} className="rounded-xl border border-gray-200 bg-white p-4 text-center">
-          <p className="text-2xl font-bold text-gray-900">{c.value}</p>
-          <p className="mt-1 text-xs text-gray-500">{c.label}</p>
+        <div key={c.label} className="rounded-xl border border-border bg-white p-4 text-center">
+          <p className="text-2xl font-bold text-text-base">{c.value}</p>
+          <p className="mt-1 text-xs text-text-muted">{c.label}</p>
         </div>
       ))}
     </div>

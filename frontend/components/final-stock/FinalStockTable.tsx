@@ -27,7 +27,7 @@ export function FinalStockTable({
   onRowClick,
 }: FinalStockTableProps) {
   const selectClass =
-    'rounded-lg border border-gray-300 px-3 py-2 text-sm text-gray-900 outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100';
+    'rounded-lg border border-gray-300 px-3 py-2 text-sm text-gray-900 outline-none focus:border-primary-500 focus:ring-2 focus:ring-primary-500/20';
 
   return (
     <div dir="rtl">
@@ -64,12 +64,12 @@ export function FinalStockTable({
         </select>
       </div>
 
-      <div className="overflow-hidden rounded-xl border border-gray-200 bg-white">
+      <div className="overflow-hidden rounded-xl border border-border bg-surface">
         {rows.length === 0 ? (
           <div className="py-12 text-center text-sm text-gray-400">لا توجد نتائج</div>
         ) : (
           <table className="w-full text-sm">
-            <thead className="bg-gray-50 text-right text-xs text-gray-500">
+            <thead className="sticky top-0 z-10 bg-base/60 text-right text-xs text-text-muted font-semibold">
               <tr>
                 <th className="px-4 py-3 font-medium">الموديل</th>
                 <th className="px-4 py-3 font-medium">القطعة</th>
@@ -79,14 +79,14 @@ export function FinalStockTable({
                 <th className="px-4 py-3 font-medium">آخر تحديث</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-gray-100">
+            <tbody className="divide-y divide-border">
               {rows.map((row, idx) => {
                 const isZero = row.currentQuantity === 0;
                 return (
                   <tr
                     key={idx}
                     onClick={() => onRowClick(row)}
-                    className={`cursor-pointer transition-colors hover:bg-blue-50 ${isZero ? 'opacity-50' : ''}`}
+                    className={`cursor-pointer transition-colors odd:bg-surface even:bg-base/30 hover:bg-primary-50 ${isZero ? 'opacity-50' : ''}`}
                   >
                     <td className="px-4 py-3 font-medium text-gray-900">{row.modelName}</td>
                     <td className="px-4 py-3 text-gray-600">{row.partName ?? '—'}</td>

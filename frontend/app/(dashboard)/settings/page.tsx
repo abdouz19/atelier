@@ -6,6 +6,9 @@ import { z } from 'zod';
 import { useUser } from '@/hooks/useUser';
 import { useLookups } from '@/hooks/useLookups';
 import { LookupSection } from '@/components/settings/LookupSection';
+import { AppearanceSettings } from '@/components/settings/AppearanceSettings';
+import { AppCard } from '@/components/shared/AppCard';
+import { PageHeader } from '@/components/shared/PageHeader';
 import { ipcClient } from '@/lib/ipc-client';
 
 const passwordSchema = z
@@ -82,8 +85,15 @@ export default function SettingsPage() {
   }
 
   return (
-    <div dir="rtl" className="max-w-2xl space-y-6">
-      <h1 className="text-2xl font-bold text-gray-900">الإعدادات</h1>
+    <div dir="rtl" className="space-y-6">
+      <PageHeader title="الإعدادات" />
+
+      <AppCard>
+        <h2 className="mb-4 text-base font-semibold text-text-base">تخصيص المنصة</h2>
+        <AppearanceSettings />
+      </AppCard>
+
+      <div className="max-w-2xl space-y-6">
 
       <LookupSection
         title="أنواع الأصناف"
@@ -208,6 +218,8 @@ export default function SettingsPage() {
             {isLoading ? 'جاري الحفظ...' : 'تغيير كلمة المرور'}
           </button>
         </form>
+      </div>
+
       </div>
     </div>
   );

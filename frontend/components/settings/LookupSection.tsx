@@ -53,15 +53,15 @@ export function LookupSection({ title, items, loading, addLabel, onAdd, onEdit, 
 
   return (
     <div dir="rtl" className="rounded-2xl bg-white p-5 shadow-sm">
-      <h2 className="mb-4 text-base font-semibold text-gray-800">{title}</h2>
+      <h2 className="mb-4 text-base font-semibold text-text-base">{title}</h2>
 
       <div className="mb-4 flex gap-2">
         <input value={addName} onChange={(e) => setAddName(e.target.value)}
           onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); handleAdd(); } }}
           placeholder={addLabel}
-          className="flex-1 rounded-lg border border-gray-300 px-3 py-1.5 text-sm text-gray-900 outline-none focus:border-blue-500" />
+          className="flex-1 rounded-lg border border-border px-3 py-1.5 text-sm text-text-base outline-none focus:border-primary-500" />
         <button type="button" onClick={handleAdd} disabled={addSaving}
-          className="rounded-lg bg-blue-600 px-3 py-1.5 text-sm font-medium text-white hover:bg-blue-700 disabled:opacity-60">
+          className="rounded-lg bg-primary-500 px-3 py-1.5 text-sm font-medium text-white hover:bg-primary-600 disabled:opacity-60">
           {addSaving ? '...' : 'إضافة'}
         </button>
       </div>
@@ -69,31 +69,31 @@ export function LookupSection({ title, items, loading, addLabel, onAdd, onEdit, 
 
       {loading ? (
         <div className="space-y-2">
-          {[1, 2, 3].map((n) => <div key={n} className="h-8 animate-pulse rounded-lg bg-gray-100" />)}
+          {[1, 2, 3].map((n) => <div key={n} className="h-8 animate-pulse rounded-lg bg-base" />)}
         </div>
       ) : items.length === 0 ? (
-        <p className="py-4 text-center text-sm text-gray-400">لا توجد عناصر</p>
+        <p className="py-4 text-center text-sm text-text-muted">لا توجد عناصر</p>
       ) : (
-        <ul className="divide-y divide-gray-100">
+        <ul className="divide-y divide-border">
           {items.map((item) => (
             <li key={item.id} className="flex items-center gap-2 py-2">
               {editingId === item.id ? (
                 <>
                   <input value={editName} onChange={(e) => setEditName(e.target.value)}
                     onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); handleEdit(item.id); } if (e.key === 'Escape') setEditingId(null); }}
-                    className="flex-1 rounded-lg border border-gray-300 px-2 py-1 text-sm text-gray-900 outline-none focus:border-blue-500" autoFocus />
+                    className="flex-1 rounded-lg border border-border px-2 py-1 text-sm text-text-base outline-none focus:border-primary-500" autoFocus />
                   {editError && <p className="text-xs text-red-600">{editError}</p>}
                   <button type="button" onClick={() => handleEdit(item.id)} className="text-green-600 hover:text-green-700"><Check size={15} /></button>
-                  <button type="button" onClick={() => setEditingId(null)} className="text-gray-400 hover:text-gray-600"><X size={15} /></button>
+                  <button type="button" onClick={() => setEditingId(null)} className="text-text-muted hover:text-text-base"><X size={15} /></button>
                 </>
               ) : (
                 <>
-                  <span className="flex-1 text-sm text-gray-800">{item.name}</span>
-                  {item.isPredefined && <span className="rounded bg-gray-100 px-1.5 py-0.5 text-xs text-gray-500">ثابت</span>}
+                  <span className="flex-1 text-sm text-text-base">{item.name}</span>
+                  {item.isPredefined && <span className="rounded bg-base px-1.5 py-0.5 text-xs text-text-muted">ثابت</span>}
                   <button type="button" disabled={item.isPredefined} onClick={() => { setEditingId(item.id); setEditName(item.name); setEditError(null); }}
-                    className="text-gray-400 hover:text-blue-600 disabled:opacity-30"><Pencil size={14} /></button>
+                    className="text-text-muted hover:text-primary-600 disabled:opacity-30"><Pencil size={14} /></button>
                   <button type="button" disabled={item.isPredefined} onClick={() => setDeleteId(item.id)}
-                    className="text-gray-400 hover:text-red-600 disabled:opacity-30"><Trash2 size={14} /></button>
+                    className="text-text-muted hover:text-red-600 disabled:opacity-30"><Trash2 size={14} /></button>
                 </>
               )}
             </li>
@@ -101,7 +101,7 @@ export function LookupSection({ title, items, loading, addLabel, onAdd, onEdit, 
         </ul>
       )}
       {userItems.length === 0 && !loading && items.length > 0 && (
-        <p className="mt-2 text-center text-xs text-gray-400">لا توجد عناصر مضافة من المستخدم</p>
+        <p className="mt-2 text-center text-xs text-text-muted">لا توجد عناصر مضافة من المستخدم</p>
       )}
 
       <ConfirmDialog

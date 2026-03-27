@@ -33,25 +33,25 @@ export function TransactionHistory({ transactions, unit, suppliers, onRefetch }:
   const [editTarget, setEditTarget] = useState<StockTransaction | null>(null);
 
   if (transactions.length === 0) {
-    return <p className="py-6 text-center text-sm text-gray-400">لا توجد حركات مسجلة</p>;
+    return <p className="py-6 text-center text-sm text-text-muted">لا توجد حركات مسجلة</p>;
   }
 
   return (
     <>
-      <div className="overflow-x-auto overflow-hidden rounded-xl border border-gray-200">
+      <div className="overflow-x-auto overflow-hidden rounded-xl border border-border">
         <table className="w-full text-right">
-          <thead className="border-b border-gray-100 bg-gray-50">
+          <thead className="border-b border-border bg-base/60">
             <tr>
-              <th className="px-4 py-3 text-sm font-medium text-gray-600">التاريخ</th>
-              <th className="px-4 py-3 text-sm font-medium text-gray-600">النوع</th>
-              <th className="px-4 py-3 text-sm font-medium text-gray-600">الكمية</th>
-              <th className="px-4 py-3 text-sm font-medium text-gray-600">اللون</th>
-              <th className="px-4 py-3 text-sm font-medium text-gray-600">المورد</th>
-              <th className="px-4 py-3 text-sm font-medium text-gray-600">سعر الوحدة</th>
-              <th className="px-4 py-3 text-sm font-medium text-gray-600">الإجمالي</th>
-              <th className="px-4 py-3 text-sm font-medium text-gray-600">المصدر</th>
-              <th className="px-4 py-3 text-sm font-medium text-gray-600">ملاحظات</th>
-              <th className="px-4 py-3 text-sm font-medium text-gray-600"></th>
+              <th className="px-4 py-3 text-sm font-medium text-text-muted">التاريخ</th>
+              <th className="px-4 py-3 text-sm font-medium text-text-muted">النوع</th>
+              <th className="px-4 py-3 text-sm font-medium text-text-muted">الكمية</th>
+              <th className="px-4 py-3 text-sm font-medium text-text-muted">اللون</th>
+              <th className="px-4 py-3 text-sm font-medium text-text-muted">المورد</th>
+              <th className="px-4 py-3 text-sm font-medium text-text-muted">سعر الوحدة</th>
+              <th className="px-4 py-3 text-sm font-medium text-text-muted">الإجمالي</th>
+              <th className="px-4 py-3 text-sm font-medium text-text-muted">المصدر</th>
+              <th className="px-4 py-3 text-sm font-medium text-text-muted">ملاحظات</th>
+              <th className="px-4 py-3 text-sm font-medium text-text-muted"></th>
             </tr>
           </thead>
           <tbody>
@@ -59,8 +59,8 @@ export function TransactionHistory({ transactions, unit, suppliers, onRefetch }:
               const isInbound = tx.type === 'inbound';
               const isEditable = isInbound && !tx.sourceModule;
               return (
-                <tr key={tx.id} className="border-b border-gray-100 last:border-0">
-                  <td className="px-4 py-3 text-sm text-gray-600">{formatDate(tx.transactionDate)}</td>
+                <tr key={tx.id} className="border-b border-border last:border-0">
+                  <td className="px-4 py-3 text-sm text-text-muted">{formatDate(tx.transactionDate)}</td>
                   <td className="px-4 py-3">
                     <span className={`rounded-full px-2 py-0.5 text-xs font-medium ${isInbound ? 'bg-green-100 text-green-700' : 'bg-orange-100 text-orange-700'}`}>
                       {isInbound ? 'وارد' : 'مستهلك'}
@@ -69,30 +69,30 @@ export function TransactionHistory({ transactions, unit, suppliers, onRefetch }:
                   <td className={`px-4 py-3 text-sm font-semibold ${isInbound ? 'text-green-700' : 'text-orange-700'}`}>
                     {isInbound ? '+' : '-'}{tx.quantity} {unit}
                   </td>
-                  <td className="px-4 py-3 text-sm text-gray-600">
-                    {tx.color ? <span className="rounded-full bg-gray-100 px-2 py-0.5 text-xs">{tx.color}</span> : null}
+                  <td className="px-4 py-3 text-sm text-text-muted">
+                    {tx.color ? <span className="rounded-full bg-base px-2 py-0.5 text-xs">{tx.color}</span> : null}
                   </td>
-                  <td className="px-4 py-3 text-sm text-gray-600">
+                  <td className="px-4 py-3 text-sm text-text-muted">
                     {tx.supplierName ?? '—'}
                   </td>
-                  <td className="px-4 py-3 text-sm text-gray-600">
+                  <td className="px-4 py-3 text-sm text-text-muted">
                     {tx.pricePerUnit != null ? `${formatPrice(tx.pricePerUnit)} دج` : '—'}
                   </td>
-                  <td className="px-4 py-3 text-sm font-medium text-gray-700">
+                  <td className="px-4 py-3 text-sm font-medium text-text-base">
                     {tx.totalPricePaid != null ? `${formatPrice(tx.totalPricePaid)} دج` : '—'}
                   </td>
-                  <td className="px-4 py-3 text-sm text-gray-500">
+                  <td className="px-4 py-3 text-sm text-text-muted">
                     {tx.sourceModule ? (SOURCE_LABELS[tx.sourceModule] ?? tx.sourceModule) : '—'}
-                    {!isInbound && tx.modelName ? <span className="mr-1 text-gray-400">— {tx.modelName}</span> : null}
+                    {!isInbound && tx.modelName ? <span className="mr-1 text-text-muted">— {tx.modelName}</span> : null}
                   </td>
-                  <td className="max-w-xs px-4 py-3 text-sm text-gray-500">
+                  <td className="max-w-xs px-4 py-3 text-sm text-text-muted">
                     <span className="line-clamp-1">{tx.notes}</span>
                   </td>
                   <td className="px-4 py-3">
                     {isEditable && (
                       <button
                         onClick={() => setEditTarget(tx)}
-                        className="rounded-lg p-1.5 text-gray-400 hover:bg-gray-100 hover:text-gray-600"
+                        className="rounded-lg p-1.5 text-text-muted hover:bg-base hover:text-text-muted"
                         title="تعديل"
                       >
                         <Pencil size={14} />

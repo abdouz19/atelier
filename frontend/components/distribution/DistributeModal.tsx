@@ -1,8 +1,9 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { X, Plus } from 'lucide-react';
+import { Plus, X } from 'lucide-react';
 import { ipcClient } from '@/lib/ipc-client';
+import { AppModal } from '@/components/shared/AppModal';
 import { ConsumedMaterialsEditor } from '@/components/shared/ConsumedMaterialsEditor';
 import type { DistributionTailorSummary, AvailablePartForModel } from '@/features/distribution/distribution.types';
 import type { NonFabricItem, ConsumptionRow } from '@/features/cutting/cutting.types';
@@ -137,104 +138,105 @@ export function DistributeModal({ onClose, onSuccess }: DistributeModalProps) {
   }
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40" dir="rtl">
-      <div className="w-full max-w-lg rounded-xl bg-white p-6 shadow-xl max-h-[90vh] overflow-y-auto">
-        <div className="mb-4 flex items-center justify-between">
-          <h2 className="text-lg font-semibold">توزيع قطع</h2>
-          <button onClick={onClose}><X size={20} /></button>
+    <AppModal
+      open
+      onClose={onClose}
+      title="توزيع قطع"
+      size="lg"
+      footer={
+        <>
+          <button type="button" onClick={onClose} className="rounded-lg border border-border bg-surface px-4 py-2 text-sm font-medium text-text-base hover:bg-base">إلغاء</button>
+          <button type="submit" form="distribute-modal-form" disabled={submitting} className="rounded-lg bg-primary-500 px-4 py-2 text-sm font-medium text-white hover:bg-primary-600 disabled:opacity-60">
+            {submitting ? 'جاري التوزيع...' : 'توزيع'}
+          </button>
+        </>
+      }
+    >
+      <form id="distribute-modal-form" onSubmit={handleSubmit} className="space-y-3">
+        <div>
+          <label className="mb-1 block text-sm font-medium text-text-base">الخياط *</label>
+          <select value={tailorId} onChange={e => setTailorId(e.target.value)} className="w-full rounded-lg border border-border px-3 py-2 text-sm outline-none focus:border-primary-500 focus:ring-2 focus:ring-primary-500/20">
+            <option value="">اختر الخياط</option>
+            {activeTailors.map(t => <option key={t.id} value={t.id}>{t.name}</option>)}
+          </select>
         </div>
-        <form onSubmit={handleSubmit} className="space-y-3">
-          <div>
-            <label className="mb-1 block text-sm font-medium">الخياط *</label>
-            <select value={tailorId} onChange={e => setTailorId(e.target.value)} className="w-full rounded-lg border border-gray-200 px-3 py-2 text-sm focus:border-blue-400 focus:outline-none">
-              <option value="">اختر الخياط</option>
-              {activeTailors.map(t => <option key={t.id} value={t.id}>{t.name}</option>)}
-            </select>
-          </div>
-          <div>
-            <label className="mb-1 block text-sm font-medium">الموديل *</label>
-            <ManagedDropdown
-              value={modelName}
-              onChange={handleModelChange}
-              items={modelItems}
-              placeholder="اختر الموديل"
-              addLabel="إضافة موديل"
-              onAddNew={handleAddModel}
-            />
-          </div>
-          {modelName && (
-            <div className="grid grid-cols-2 gap-3">
-              <div>
-                <label className="mb-1 block text-sm font-medium">المقاس *</label>
-                <select value={sizeLabel} onChange={e => handleSizeChange(e.target.value)} className="w-full rounded-lg border border-gray-200 px-3 py-2 text-sm focus:border-blue-400 focus:outline-none">
-                  <option value="">اختر المقاس</option>
-                  {availableSizes.map(s => <option key={s} value={s}>{s}</option>)}
-                </select>
-              </div>
-              <div>
-                <label className="mb-1 block text-sm font-medium">اللون *</label>
-                <select value={color} onChange={e => handleColorChange(e.target.value)} disabled={!sizeLabel} className="w-full rounded-lg border border-gray-200 px-3 py-2 text-sm focus:border-blue-400 focus:outline-none disabled:opacity-50">
-                  <option value="">اختر اللون</option>
-                  {availableColors.map(c => <option key={c} value={c}>{c}</option>)}
-                </select>
-              </div>
-            </div>
-          )}
-          <div>
-            <label className="mb-1 block text-sm font-medium">القطع المتوقعة (النهائية) *</label>
-            <input type="number" min={1} step={1} value={expectedPiecesCount} onChange={e => setExpectedPiecesCount(e.target.value)} className="w-full rounded-lg border border-gray-200 px-3 py-2 text-sm focus:border-blue-400 focus:outline-none" />
-          </div>
-          <div>
-            <label className="mb-1 block text-sm font-medium">سعر الخياطة للقطعة *</label>
-            <input type="number" step="any" min={0.01} value={pricePerPiece} onChange={e => setPricePerPiece(e.target.value)} className="w-full rounded-lg border border-gray-200 px-3 py-2 text-sm focus:border-blue-400 focus:outline-none" />
-          </div>
-          {totalCost > 0 && (
-            <div className="rounded-lg bg-gray-50 px-3 py-2 text-sm">الإجمالي: <strong>{totalCost.toFixed(2)} دج</strong></div>
-          )}
-          {color && (
-            <div>
-              <div className="mb-2 flex items-center justify-between">
-                <span className="text-sm font-medium">الأجزاء المعطاة *</span>
-                <button type="button" onClick={addPartRow} className="flex items-center gap-1 text-xs text-blue-600 hover:underline"><Plus size={13} />إضافة جزء</button>
-              </div>
-              {isLoadingParts && <p className="text-xs text-gray-400">جاري التحميل...</p>}
-              {availableParts.length === 0 && !isLoadingParts && (
-                <p className="text-xs text-amber-600">لا توجد أجزاء متاحة لهذا الاختيار</p>
-              )}
-              {partRows.map((row, i) => {
-                const avail = getAvailable(row.partName);
-                return (
-                  <div key={i} className="mb-2 flex items-center gap-2">
-                    <select value={row.partName} onChange={e => updatePartRow(i, { partName: e.target.value })} className="flex-1 rounded-lg border border-gray-200 px-3 py-1.5 text-sm focus:border-blue-400 focus:outline-none">
-                      <option value="">اختر الجزء</option>
-                      {availableParts.map(p => <option key={p.partName} value={p.partName}>{p.partName} (متاح: {p.availableCount})</option>)}
-                    </select>
-                    <input type="number" min={1} max={avail || undefined} value={row.quantity || ''} onChange={e => updatePartRow(i, { quantity: Number(e.target.value) })} placeholder="الكمية" className="w-24 rounded-lg border border-gray-200 px-3 py-1.5 text-sm focus:border-blue-400 focus:outline-none" />
-                    <button type="button" onClick={() => removePartRow(i)} className="text-gray-400 hover:text-red-500"><X size={14} /></button>
-                  </div>
-                );
-              })}
-            </div>
-          )}
-          <div>
-            <label className="mb-1 block text-sm font-medium">التاريخ *</label>
-            <input type="date" value={distributionDate} onChange={e => setDistributionDate(e.target.value)} className="w-full rounded-lg border border-gray-200 px-3 py-2 text-sm focus:border-blue-400 focus:outline-none" />
-          </div>
-          <ConsumedMaterialsEditor
-            nonFabricItems={nonFabricItems}
-            value={consumptionRows}
-            onChange={setConsumptionRows}
-            disabled={submitting}
+        <div>
+          <label className="mb-1 block text-sm font-medium text-text-base">الموديل *</label>
+          <ManagedDropdown
+            value={modelName}
+            onChange={handleModelChange}
+            items={modelItems}
+            placeholder="اختر الموديل"
+            addLabel="إضافة موديل"
+            onAddNew={handleAddModel}
           />
-          {error && <p className="text-xs text-red-500">{error}</p>}
-          <div className="flex justify-end gap-2 pt-2">
-            <button type="button" onClick={onClose} className="rounded-lg border border-gray-200 px-4 py-2 text-sm hover:bg-gray-50">إلغاء</button>
-            <button type="submit" disabled={submitting} className="rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 disabled:opacity-60">
-              {submitting ? 'جاري التوزيع...' : 'توزيع'}
-            </button>
+        </div>
+        {modelName && (
+          <div className="grid grid-cols-2 gap-3">
+            <div>
+              <label className="mb-1 block text-sm font-medium text-text-base">المقاس *</label>
+              <select value={sizeLabel} onChange={e => handleSizeChange(e.target.value)} className="w-full rounded-lg border border-border px-3 py-2 text-sm outline-none focus:border-primary-500 focus:ring-2 focus:ring-primary-500/20">
+                <option value="">اختر المقاس</option>
+                {availableSizes.map(s => <option key={s} value={s}>{s}</option>)}
+              </select>
+            </div>
+            <div>
+              <label className="mb-1 block text-sm font-medium text-text-base">اللون *</label>
+              <select value={color} onChange={e => handleColorChange(e.target.value)} disabled={!sizeLabel} className="w-full rounded-lg border border-border px-3 py-2 text-sm outline-none focus:border-primary-500 focus:ring-2 focus:ring-primary-500/20 disabled:opacity-50">
+                <option value="">اختر اللون</option>
+                {availableColors.map(c => <option key={c} value={c}>{c}</option>)}
+              </select>
+            </div>
           </div>
-        </form>
-      </div>
-    </div>
+        )}
+        <div>
+          <label className="mb-1 block text-sm font-medium text-text-base">القطع المتوقعة (النهائية) *</label>
+          <input type="number" min={1} step={1} value={expectedPiecesCount} onChange={e => setExpectedPiecesCount(e.target.value)} className="w-full rounded-lg border border-border px-3 py-2 text-sm outline-none focus:border-primary-500 focus:ring-2 focus:ring-primary-500/20" />
+        </div>
+        <div>
+          <label className="mb-1 block text-sm font-medium text-text-base">سعر الخياطة للقطعة *</label>
+          <input type="number" step="any" min={0.01} value={pricePerPiece} onChange={e => setPricePerPiece(e.target.value)} className="w-full rounded-lg border border-border px-3 py-2 text-sm outline-none focus:border-primary-500 focus:ring-2 focus:ring-primary-500/20" />
+        </div>
+        {totalCost > 0 && (
+          <div className="rounded-lg bg-base px-3 py-2 text-sm">الإجمالي: <strong>{totalCost.toFixed(2)} دج</strong></div>
+        )}
+        {color && (
+          <div>
+            <div className="mb-2 flex items-center justify-between">
+              <span className="text-sm font-medium text-text-base">الأجزاء المعطاة *</span>
+              <button type="button" onClick={addPartRow} className="flex items-center gap-1 text-xs text-primary-600 hover:underline"><Plus size={13} />إضافة جزء</button>
+            </div>
+            {isLoadingParts && <p className="text-xs text-text-muted">جاري التحميل...</p>}
+            {availableParts.length === 0 && !isLoadingParts && (
+              <p className="text-xs text-amber-600">لا توجد أجزاء متاحة لهذا الاختيار</p>
+            )}
+            {partRows.map((row, i) => {
+              const avail = getAvailable(row.partName);
+              return (
+                <div key={i} className="mb-2 flex items-center gap-2">
+                  <select value={row.partName} onChange={e => updatePartRow(i, { partName: e.target.value })} className="flex-1 rounded-lg border border-border px-3 py-1.5 text-sm outline-none focus:border-primary-500 focus:ring-2 focus:ring-primary-500/20">
+                    <option value="">اختر الجزء</option>
+                    {availableParts.map(p => <option key={p.partName} value={p.partName}>{p.partName} (متاح: {p.availableCount})</option>)}
+                  </select>
+                  <input type="number" min={1} max={avail || undefined} value={row.quantity || ''} onChange={e => updatePartRow(i, { quantity: Number(e.target.value) })} placeholder="الكمية" className="w-24 rounded-lg border border-border px-3 py-1.5 text-sm outline-none focus:border-primary-500 focus:ring-2 focus:ring-primary-500/20" />
+                  <button type="button" onClick={() => removePartRow(i)} className="text-text-muted hover:text-red-500"><X size={14} /></button>
+                </div>
+              );
+            })}
+          </div>
+        )}
+        <div>
+          <label className="mb-1 block text-sm font-medium text-text-base">التاريخ *</label>
+          <input type="date" value={distributionDate} onChange={e => setDistributionDate(e.target.value)} className="w-full rounded-lg border border-border px-3 py-2 text-sm outline-none focus:border-primary-500 focus:ring-2 focus:ring-primary-500/20" />
+        </div>
+        <ConsumedMaterialsEditor
+          nonFabricItems={nonFabricItems}
+          value={consumptionRows}
+          onChange={setConsumptionRows}
+          disabled={submitting}
+        />
+        {error && <p className="text-xs text-red-500">{error}</p>}
+      </form>
+    </AppModal>
   );
 }

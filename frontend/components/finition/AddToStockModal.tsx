@@ -71,27 +71,27 @@ export function AddToStockModal({
     <div className="fixed inset-0 z-60 flex items-center justify-center bg-black/50" dir="rtl">
       <div className="w-full max-w-sm rounded-xl bg-white p-6 shadow-xl">
         <div className="mb-4 flex items-center justify-between">
-          <h3 className="text-base font-semibold text-gray-900">إضافة إلى المخزون النهائي</h3>
+          <h3 className="text-base font-semibold text-text-base">إضافة إلى المخزون النهائي</h3>
           <button onClick={onCancel}><X size={18} /></button>
         </div>
         <div className="space-y-3">
           <div>
-            <label className="mb-1 block text-sm font-medium text-gray-700">الموديل *</label>
+            <label className="mb-1 block text-sm font-medium text-text-base">الموديل *</label>
             <ManagedDropdown value={modelName} onChange={setModelName} items={modelItems} placeholder="اختر الموديل" addLabel="إضافة موديل" onAddNew={handleAddModel} />
           </div>
           <div>
-            <label className="mb-1 block text-sm font-medium text-gray-700">المقاس *</label>
+            <label className="mb-1 block text-sm font-medium text-text-base">المقاس *</label>
             <ManagedDropdown value={sizeLabel} onChange={setSizeLabel} items={sizeItems} placeholder="اختر المقاس" addLabel="إضافة مقاس" onAddNew={handleAddSize} />
           </div>
           <div>
-            <label className="mb-1 block text-sm font-medium text-gray-700">اللون *</label>
+            <label className="mb-1 block text-sm font-medium text-text-base">اللون *</label>
             <ManagedDropdown value={color} onChange={setColor} items={colorItems} placeholder="اختر اللون" addLabel="إضافة لون" onAddNew={handleAddColor} />
           </div>
-          <p className="text-sm text-gray-600">الكمية: <strong className="text-gray-900">{quantity}</strong></p>
+          <p className="text-sm text-text-muted">الكمية: <strong className="text-text-base">{quantity}</strong></p>
           {error && <p className="text-xs text-red-500">{error}</p>}
         </div>
         <div className="mt-4 flex justify-end gap-2">
-          <button onClick={onCancel} className="rounded-lg border border-gray-200 px-4 py-2 text-sm hover:bg-gray-50">إلغاء</button>
+          <button onClick={onCancel} className="rounded-lg border border-border px-4 py-2 text-sm hover:bg-base/60">إلغاء</button>
           <button onClick={handleConfirm} disabled={submitting}
             className="rounded-lg bg-green-600 px-4 py-2 text-sm font-medium text-white hover:bg-green-700 disabled:opacity-60">
             {submitting ? 'جاري الحفظ...' : 'إضافة للمخزون'}

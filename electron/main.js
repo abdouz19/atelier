@@ -14,6 +14,8 @@ const finitionService = require('./features/finition/service')
 const finalStockService = require('./features/final-stock/service')
 const dashboardService = require('./features/dashboard/service')
 const piecesService = require('./features/pieces/service')
+const settingsQueries = require('./features/settings/queries')
+const settingsService = require('./features/settings/service')
 
 /** @type {import('better-sqlite3').Database} */
 let db
@@ -2754,6 +2756,71 @@ function registerIpcHandlers() {
       return { success: true }
     } catch (err) {
       return { success: false, error: err.message ?? 'حدث خطأ غير متوقع' }
+    }
+  })
+
+  // ─── Settings: appearance ─────────────────────────────────────────────────
+
+  // Synchronous — called from preload before renderer starts
+  ipcMain.on('settings:getAppearanceSync', (event) => {
+    try {
+      event.returnValue = settingsQueries.getAppearanceSettings(db)
+    } catch (err) {
+      event.returnValue = { theme: 'system', primaryColor: 'blue' }
+    }
+  })
+
+  ipcMain.handle('settings:getAppearance', () => {
+    try {
+      return { success: true, data: settingsQueries.getAppearanceSettings(db) }
+    } catch (err) {
+      return { success: false, error: err.message ?? 'حدث خطأ' }
+    }
+  })
+
+  ipcMain.handle('settings:setAppearance', (_event, payload) => {
+    try {
+      settingsService.validateAppearanceSettings(payload)
+      settingsQueries.setAppearanceSettings(db, payload)
+      return { success: true, data: null }
+    } catch (err) {
+      return { success: false, error: err.message ?? 'حدث خطأ' }
+    }
+  })
+
+  ipcMain.handle('settings:getLogo', () => {
+    try {
+      return { success: true, data: settingsQueries.getLogo(db) }
+    } catch (err) {
+      return { success: false, error: err.message ?? 'حدث خطأ' }
+    }
+  })
+
+  ipcMain.handle('settings:setLogo', (_event, { dataUrl }) => {
+    try {
+      settingsService.validateLogoUpload(dataUrl)
+      settingsQueries.setLogo(db, dataUrl)
+      return { success: true, data: null }
+    } catch (err) {
+      return { success: false, error: err.message ?? 'حدث خطأ' }
+    }
+  })
+
+  ipcMain.handle('settings:removeLogo', () => {
+    try {
+      settingsQueries.removeLogo(db)
+      return { success: true, data: null }
+    } catch (err) {
+      return { success: false, error: err.message ?? 'حدث خطأ' }
+    }
+  })
+
+  ipcMain.handle('settings:resetToDefaults', () => {
+    try {
+      const defaults = settingsQueries.resetAppearanceToDefaults(db)
+      return { success: true, data: defaults }
+    } catch (err) {
+      return { success: false, error: err.message ?? 'حدث خطأ' }
     }
   })
 }

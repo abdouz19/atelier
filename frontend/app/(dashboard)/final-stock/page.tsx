@@ -1,13 +1,13 @@
 'use client';
 
 import { Suspense } from 'react';
-import { PackageCheck } from 'lucide-react';
 import { useFinalStockList } from '@/hooks/useFinalStockList';
 import { useLookups } from '@/hooks/useLookups';
 import { FinalStockKpiCards } from '@/components/final-stock/FinalStockKpiCards';
 import { FinalStockTable } from '@/components/final-stock/FinalStockTable';
 import { FinalStockHistoryPanel } from '@/components/final-stock/FinalStockHistoryPanel';
 import { ErrorAlert } from '@/components/shared/ErrorAlert';
+import { PageHeader } from '@/components/shared/PageHeader';
 
 function FinalStockPageContent() {
   const {
@@ -29,10 +29,7 @@ function FinalStockPageContent() {
 
   return (
     <div dir="rtl">
-      <div className="mb-6 flex items-center gap-3">
-        <PackageCheck size={22} className="text-blue-600" />
-        <h1 className="text-2xl font-bold text-gray-900">المخزون النهائي</h1>
-      </div>
+      <PageHeader title="المخزون النهائي" />
 
       {error && (
         <div className="mb-4">

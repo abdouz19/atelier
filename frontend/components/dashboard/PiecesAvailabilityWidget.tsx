@@ -25,7 +25,7 @@ export function PiecesAvailabilityWidget({ criticalCombinations }: Props) {
         <h2 className="text-sm font-semibold text-gray-700">أبرز التركيبات الحرجة</h2>
         <button
           onClick={() => router.push('/distribution?tab=availability')}
-          className="text-xs text-blue-600 hover:underline"
+          className="text-xs text-primary-600 hover:underline"
         >
           عرض الكل
         </button>

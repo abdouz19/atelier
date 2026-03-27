@@ -20,11 +20,11 @@ export function PartsInventoryPanel({ rows, isLoading, error }: PartsInventoryPa
 
   if (isLoading) {
     return (
-      <div className="rounded-xl border border-gray-200 bg-white p-4" dir="rtl">
-        <h2 className="mb-3 text-base font-semibold text-gray-800">مخزون الأجزاء</h2>
+      <div className="rounded-xl border border-border bg-white p-4" dir="rtl">
+        <h2 className="mb-3 text-base font-semibold text-text-base">مخزون الأجزاء</h2>
         <div className="space-y-2">
           {[1, 2, 3].map((i) => (
-            <div key={i} className="h-8 animate-pulse rounded-md bg-gray-100" />
+            <div key={i} className="h-8 animate-pulse rounded-md bg-base" />
           ))}
         </div>
       </div>
@@ -51,13 +51,13 @@ export function PartsInventoryPanel({ rows, isLoading, error }: PartsInventoryPa
   }, {});
 
   return (
-    <div className="rounded-xl border border-gray-200 bg-white p-4" dir="rtl">
-      <h2 className="mb-3 text-base font-semibold text-gray-800">مخزون الأجزاء</h2>
+    <div className="rounded-xl border border-border bg-white p-4" dir="rtl">
+      <h2 className="mb-3 text-base font-semibold text-text-base">مخزون الأجزاء</h2>
       <div className="mb-4 flex flex-wrap gap-2">
         <select
           value={filterModel}
           onChange={(e) => setFilterModel(e.target.value)}
-          className="rounded-lg border border-gray-200 px-3 py-1.5 text-sm focus:border-blue-400 focus:outline-none"
+          className="rounded-lg border border-border px-3 py-1.5 text-sm focus:border-primary-500 focus:outline-none"
         >
           <option value="">كل الموديلات</option>
           {models.map((m) => <option key={m} value={m}>{m}</option>)}
@@ -65,7 +65,7 @@ export function PartsInventoryPanel({ rows, isLoading, error }: PartsInventoryPa
         <select
           value={filterSize}
           onChange={(e) => setFilterSize(e.target.value)}
-          className="rounded-lg border border-gray-200 px-3 py-1.5 text-sm focus:border-blue-400 focus:outline-none"
+          className="rounded-lg border border-border px-3 py-1.5 text-sm focus:border-primary-500 focus:outline-none"
         >
           <option value="">كل المقاسات</option>
           {sizes.map((s) => <option key={s} value={s}>{s}</option>)}
@@ -73,7 +73,7 @@ export function PartsInventoryPanel({ rows, isLoading, error }: PartsInventoryPa
         <select
           value={filterColor}
           onChange={(e) => setFilterColor(e.target.value)}
-          className="rounded-lg border border-gray-200 px-3 py-1.5 text-sm focus:border-blue-400 focus:outline-none"
+          className="rounded-lg border border-border px-3 py-1.5 text-sm focus:border-primary-500 focus:outline-none"
         >
           <option value="">كل الألوان</option>
           {colors.map((c) => <option key={c} value={c}>{c}</option>)}
@@ -89,10 +89,10 @@ export function PartsInventoryPanel({ rows, isLoading, error }: PartsInventoryPa
             const label = [modelName, sizeLabel, color].filter(Boolean).join(' — ');
             return (
               <div key={key}>
-                <p className="mb-2 text-sm font-medium text-gray-600">{label}</p>
-                <div className="overflow-hidden rounded-lg border border-gray-100">
+                <p className="mb-2 text-sm font-medium text-text-muted">{label}</p>
+                <div className="overflow-hidden rounded-lg border border-border">
                   <table className="w-full text-sm">
-                    <thead className="bg-gray-50 text-xs text-gray-500">
+                    <thead className="bg-base/60 text-xs text-text-muted">
                       <tr>
                         <th className="px-3 py-2 text-right">اسم الجزء</th>
                         <th className="px-3 py-2 text-center">المنتج</th>
@@ -100,11 +100,11 @@ export function PartsInventoryPanel({ rows, isLoading, error }: PartsInventoryPa
                         <th className="px-3 py-2 text-center">المتاح</th>
                       </tr>
                     </thead>
-                    <tbody className="divide-y divide-gray-100">
+                    <tbody className="divide-y divide-border">
                       {parts.map((p) => (
                         <tr
                           key={p.partName}
-                          className={p.availableCount === 0 ? 'bg-red-50 text-red-700' : 'bg-white text-gray-800'}
+                          className={p.availableCount === 0 ? 'bg-red-50 text-red-700' : 'bg-white text-text-base'}
                         >
                           <td className="px-3 py-2 font-medium">{p.partName}</td>
                           <td className="px-3 py-2 text-center">{p.totalProduced}</td>

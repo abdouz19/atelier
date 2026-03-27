@@ -38,7 +38,7 @@ export function PaymentsHistory({ payments, employeeId, onPaymentMutated }: Paym
   return (
     <div>
       <div className="mb-3 flex items-center justify-between">
-        <h3 className="font-semibold text-gray-700">سجل الدفعات</h3>
+        <h3 className="font-semibold text-text-base">سجل الدفعات</h3>
         <button
           onClick={() => setShowAdd(true)}
           className="flex items-center gap-1.5 rounded-lg bg-green-50 px-3 py-1.5 text-sm font-medium text-green-700 hover:bg-green-100"
@@ -51,9 +51,9 @@ export function PaymentsHistory({ payments, employeeId, onPaymentMutated }: Paym
       {payments.length === 0 ? (
         <EmptyState message="لا توجد دفعات بعد" />
       ) : (
-        <div className="overflow-hidden rounded-xl border border-gray-200 bg-white">
+        <div className="overflow-hidden rounded-xl border border-border bg-white">
           <table className="w-full text-sm">
-            <thead className="bg-gray-50 text-xs font-medium text-gray-500">
+            <thead className="bg-base/60 text-xs font-medium text-text-muted">
               <tr>
                 <th className="px-4 py-2 text-right">التاريخ</th>
                 <th className="px-4 py-2 text-right">المبلغ</th>
@@ -61,22 +61,22 @@ export function PaymentsHistory({ payments, employeeId, onPaymentMutated }: Paym
                 <th className="px-4 py-2 text-right">إجراءات</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-gray-100">
+            <tbody className="divide-y divide-border">
               {payments.map((payment) => (
-                <tr key={payment.id} className="hover:bg-gray-50">
-                  <td className="px-4 py-2 text-gray-600">
+                <tr key={payment.id} className="hover:bg-base/60">
+                  <td className="px-4 py-2 text-text-muted">
                     {new Date(payment.paymentDate).toLocaleDateString('en-GB')}
                   </td>
-                  <td className="px-4 py-2 font-medium text-gray-900">
+                  <td className="px-4 py-2 font-medium text-text-base">
                     {payment.amount.toLocaleString('en-US')} دج
                   </td>
-                  <td className="px-4 py-2 text-gray-500">{payment.notes ?? '—'}</td>
+                  <td className="px-4 py-2 text-text-muted">{payment.notes ?? '—'}</td>
                   <td className="px-4 py-2">
                     <div className="flex items-center gap-1">
-                      <button onClick={() => setEditTarget(payment)} className="rounded p-1 text-gray-400 hover:bg-gray-100 hover:text-gray-700" title="تعديل">
+                      <button onClick={() => setEditTarget(payment)} className="rounded p-1 text-text-muted hover:bg-base hover:text-text-base" title="تعديل">
                         <Pencil size={14} />
                       </button>
-                      <button onClick={() => setDeleteTarget(payment)} className="rounded p-1 text-gray-400 hover:bg-red-50 hover:text-red-600" title="حذف">
+                      <button onClick={() => setDeleteTarget(payment)} className="rounded p-1 text-text-muted hover:bg-red-50 hover:text-red-600" title="حذف">
                         <Trash2 size={14} />
                       </button>
                     </div>

@@ -1,7 +1,7 @@
 'use client';
 
 import { Suspense } from 'react';
-import { LayoutDashboard } from 'lucide-react';
+import { LayoutDashboard as _LayoutDashboard } from 'lucide-react';
 import { useDashboard } from '@/hooks/useDashboard';
 import { useLookups } from '@/hooks/useLookups';
 import { DashboardKpiCards } from '@/components/dashboard/DashboardKpiCards';
@@ -15,6 +15,8 @@ import { EmployeeDebtChart } from '@/components/dashboard/EmployeeDebtChart';
 import { ActivityFeed } from '@/components/dashboard/ActivityFeed';
 import { PiecesAvailabilityWidget } from '@/components/dashboard/PiecesAvailabilityWidget';
 import { ErrorAlert } from '@/components/shared/ErrorAlert';
+import { PageHeader } from '@/components/shared/PageHeader';
+import { AppCard } from '@/components/shared/AppCard';
 
 function DashboardFilters({
   filters,
@@ -89,12 +91,11 @@ function DashboardPageContent() {
 
   return (
     <div dir="rtl" className="space-y-6">
-      <div className="flex items-center gap-3">
-        <LayoutDashboard size={22} className="text-blue-600" />
-        <h1 className="text-2xl font-bold text-gray-900">لوحة التحكم</h1>
-      </div>
+      <PageHeader title="لوحة التحكم" />
 
-      <DashboardFilters filters={filters} models={modelNames} onFiltersChange={setFilters} />
+      <AppCard>
+        <DashboardFilters filters={filters} models={modelNames} onFiltersChange={setFilters} />
+      </AppCard>
 
       {error && <ErrorAlert message={error} />}
 

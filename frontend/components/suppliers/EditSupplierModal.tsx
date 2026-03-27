@@ -4,8 +4,9 @@ import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
-import { X } from 'lucide-react';
 import { ipcClient } from '@/lib/ipc-client';
+import { AppModal } from '@/components/shared/AppModal';
+import { FormField } from '@/components/shared/FormField';
 import type { SupplierSummary } from '@/features/suppliers/suppliers.types';
 
 const schema = z.object({
@@ -56,50 +57,42 @@ export function EditSupplierModal({ supplier, onClose, onSuccess }: EditSupplier
   }
 
   return (
-    <div className="fixed inset-0 z-40 flex items-center justify-center bg-black/40" dir="rtl">
-      <div className="w-full max-w-md rounded-xl bg-white p-6 shadow-xl">
-        <div className="mb-5 flex items-center justify-between">
-          <h2 className="text-lg font-semibold text-gray-900">تعديل مورد</h2>
-          <button onClick={onClose} className="rounded-lg p-1 text-gray-400 hover:text-gray-600"><X size={20} /></button>
-        </div>
+    <AppModal
+      open
+      onClose={onClose}
+      title="تعديل مورد"
+      footer={
+        <>
+          <button type="button" onClick={onClose} className="rounded-lg border border-border bg-surface px-4 py-2 text-sm font-medium text-text-base hover:bg-base">إلغاء</button>
+          <button type="submit" form="edit-supplier-form" disabled={submitting} className="rounded-lg bg-primary-500 px-4 py-2 text-sm font-medium text-white hover:bg-primary-600 disabled:opacity-60">
+            {submitting ? 'جاري الحفظ...' : 'حفظ'}
+          </button>
+        </>
+      }
+    >
+      {serverError && <div className="mb-4 rounded-lg bg-red-50 px-4 py-2 text-sm text-red-700">{serverError}</div>}
 
-        {serverError && <div className="mb-4 rounded-lg bg-red-50 px-4 py-2 text-sm text-red-700">{serverError}</div>}
+      <form id="edit-supplier-form" onSubmit={handleSubmit(onSubmit)} className="space-y-4" noValidate>
+        <FormField label="اسم المورد" error={errors.name?.message} required>
+          <input {...register('name')} className="w-full rounded-lg border border-border px-3 py-2 text-sm outline-none focus:border-primary-500 focus:ring-2 focus:ring-primary-500/20" />
+        </FormField>
 
-        <form onSubmit={handleSubmit(onSubmit)} className="space-y-4" noValidate>
-          <div>
-            <label className="mb-1 block text-sm font-medium text-gray-700">اسم المورد <span className="text-red-500">*</span></label>
-            <input {...register('name')} className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm text-gray-900 outline-none focus:border-blue-500" />
-            {errors.name && <p className="mt-1 text-xs text-red-600">{errors.name.message}</p>}
-          </div>
+        <FormField label="رقم الهاتف (اختياري)">
+          <input {...register('phone')} className="w-full rounded-lg border border-border px-3 py-2 text-sm outline-none focus:border-primary-500 focus:ring-2 focus:ring-primary-500/20" />
+        </FormField>
 
-          <div>
-            <label className="mb-1 block text-sm font-medium text-gray-700">رقم الهاتف (اختياري)</label>
-            <input {...register('phone')} className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm text-gray-900 outline-none focus:border-blue-500" />
-          </div>
+        <FormField label="العنوان (اختياري)">
+          <input {...register('address')} className="w-full rounded-lg border border-border px-3 py-2 text-sm outline-none focus:border-primary-500 focus:ring-2 focus:ring-primary-500/20" />
+        </FormField>
 
-          <div>
-            <label className="mb-1 block text-sm font-medium text-gray-700">العنوان (اختياري)</label>
-            <input {...register('address')} className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm text-gray-900 outline-none focus:border-blue-500" />
-          </div>
+        <FormField label="المنتجات (اختياري)">
+          <input {...register('productsSold')} className="w-full rounded-lg border border-border px-3 py-2 text-sm outline-none focus:border-primary-500 focus:ring-2 focus:ring-primary-500/20" />
+        </FormField>
 
-          <div>
-            <label className="mb-1 block text-sm font-medium text-gray-700">المنتجات (اختياري)</label>
-            <input {...register('productsSold')} className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm text-gray-900 outline-none focus:border-blue-500" />
-          </div>
-
-          <div>
-            <label className="mb-1 block text-sm font-medium text-gray-700">ملاحظات (اختيارية)</label>
-            <textarea {...register('notes')} rows={2} className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm text-gray-900 outline-none focus:border-blue-500" />
-          </div>
-
-          <div className="flex justify-end gap-3 pt-2">
-            <button type="button" onClick={onClose} className="rounded-lg border border-gray-300 px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50">إلغاء</button>
-            <button type="submit" disabled={submitting} className="rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 disabled:opacity-60">
-              {submitting ? 'جاري الحفظ...' : 'حفظ'}
-            </button>
-          </div>
-        </form>
-      </div>
-    </div>
+        <FormField label="ملاحظات (اختيارية)">
+          <textarea {...register('notes')} rows={2} className="w-full rounded-lg border border-border px-3 py-2 text-sm outline-none focus:border-primary-500 focus:ring-2 focus:ring-primary-500/20" />
+        </FormField>
+      </form>
+    </AppModal>
   );
 }

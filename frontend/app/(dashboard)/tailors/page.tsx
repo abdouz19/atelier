@@ -12,6 +12,8 @@ import { ConfirmDialog } from '@/components/shared/ConfirmDialog';
 import { ErrorAlert } from '@/components/shared/ErrorAlert';
 import { Toast } from '@/components/shared/Toast';
 import { ipcClient } from '@/lib/ipc-client';
+import { PageHeader } from '@/components/shared/PageHeader';
+import { AppCard } from '@/components/shared/AppCard';
 import type { TailorSummary } from '@/features/tailors/tailors.types';
 
 function TailorsPageContent() {
@@ -56,12 +58,14 @@ function TailorsPageContent() {
 
   return (
     <div dir="rtl">
-      <div className="mb-6 flex items-center justify-between">
-        <h1 className="text-2xl font-bold text-gray-900">الخياطون</h1>
-        <button onClick={() => setShowAdd(true)} className="flex items-center gap-2 rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700">
-          <Plus size={16} />إضافة خياط
-        </button>
-      </div>
+      <PageHeader
+        title="الخياطون"
+        actions={
+          <button onClick={() => setShowAdd(true)} className="flex items-center gap-2 rounded-lg bg-primary-500 px-4 py-2 text-sm font-medium text-white hover:bg-primary-600">
+            <Plus size={16} />إضافة خياط
+          </button>
+        }
+      />
 
       {error && <div className="mb-4"><ErrorAlert message={error} /></div>}
 

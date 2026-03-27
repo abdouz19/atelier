@@ -1,8 +1,8 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { X } from 'lucide-react';
 import { ConsumedMaterialsEditor } from '@/components/shared/ConsumedMaterialsEditor';
+import { AppModal } from '@/components/shared/AppModal';
 import { AddToStockModal } from './AddToStockModal';
 import { ipcClient } from '@/lib/ipc-client';
 import type { QcRecordForFinition, AddToFinalStockPayload } from '@/features/finition/finition.types';
@@ -104,9 +104,14 @@ export function AddFinitionRecordModal({ onClose, onSuccess, onNotReady }: AddFi
   // ready prompt step
   if (step.type === 'ready_prompt') {
     return (
-      <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40" dir="rtl">
-        <div className="w-full max-w-sm rounded-xl bg-white p-6 shadow-xl text-center">
-          <p className="text-base font-semibold text-gray-900 mb-6">هل المنتج جاهز للمخزون النهائي؟</p>
+      <AppModal
+        open
+        onClose={onClose}
+        title="إضافة سجل تشطيب"
+        size="sm"
+      >
+        <div className="text-center py-4">
+          <p className="text-base font-semibold text-text-base mb-6">هل المنتج جاهز للمخزون النهائي؟</p>
           <div className="flex gap-3 justify-center">
             <button
               onClick={() => setStep({ type: 'add_to_stock', finitionId: step.finitionId, modelName: step.modelName, sizeLabel: step.sizeLabel, color: step.color, quantity: step.quantity, finitionDate: step.finitionDate })}
@@ -122,13 +127,13 @@ export function AddFinitionRecordModal({ onClose, onSuccess, onNotReady }: AddFi
                   onSuccess();
                 }
               }}
-              className="rounded-lg border border-gray-200 px-5 py-2 text-sm text-gray-700 hover:bg-gray-50"
+              className="rounded-lg border border-border px-5 py-2 text-sm text-text-base hover:bg-base"
             >
               لا (خطوات إضافية)
             </button>
           </div>
         </div>
-      </div>
+      </AppModal>
     );
   }
 
@@ -151,90 +156,91 @@ export function AddFinitionRecordModal({ onClose, onSuccess, onNotReady }: AddFi
 
   // main form
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40" dir="rtl">
-      <div className="w-full max-w-xl rounded-xl bg-white p-6 shadow-xl max-h-[90vh] overflow-y-auto">
-        <div className="mb-4 flex items-center justify-between">
-          <h2 className="text-lg font-semibold text-gray-900">إضافة سجل تشطيب</h2>
-          <button onClick={onClose}><X size={20} /></button>
-        </div>
-        <form onSubmit={handleSubmit} className="space-y-4">
-          {!selectedQc ? (
-            <div>
-              <label className="mb-2 block text-sm font-medium text-gray-700">اختر سجل المراقبة *</label>
-              {qcRecords.length === 0 ? (
-                <p className="text-sm text-gray-500 text-center py-3">لا توجد سجلات مراقبة بكميات قابلة للتشطيب</p>
-              ) : (
-                <div className="space-y-2 max-h-48 overflow-y-auto">
-                  {qcRecords.map(r => (
-                    <button key={r.qcId} type="button" onClick={() => { setSelectedQc(r); setQuantity(String(r.finitionableRemaining)); }}
-                      className="w-full rounded-lg border border-gray-200 px-3 py-2 text-right text-sm hover:border-blue-400 hover:bg-blue-50">
-                      <span className="font-medium">{r.tailorName}</span> — {r.modelName} / {r.sizeLabel} / {r.color} — متاح: <strong>{r.finitionableRemaining}</strong>
-                    </button>
-                  ))}
-                </div>
-              )}
-            </div>
-          ) : (
-            <div className="rounded-lg bg-blue-50 px-3 py-2 text-sm text-gray-800">
-              <button type="button" onClick={() => setSelectedQc(null)} className="text-blue-500 hover:underline text-xs ml-2">تغيير</button>
-              <strong>{selectedQc.tailorName}</strong> — {selectedQc.modelName} / {selectedQc.sizeLabel} / {selectedQc.color} — متاح: {selectedQc.finitionableRemaining}
-            </div>
-          )}
-
-          {selectedQc && (
-            <>
-              <div>
-                <label className="mb-1 block text-sm font-medium text-gray-700">الموظف *</label>
-                <select value={employeeId} onChange={e => setEmployeeId(e.target.value)}
-                  className="w-full rounded-lg border border-gray-200 px-3 py-2 text-sm text-gray-900 focus:border-blue-400 focus:outline-none">
-                  <option value="">اختر الموظف</option>
-                  {employees.map(e => <option key={e.id} value={e.id}>{e.name}</option>)}
-                </select>
+    <AppModal
+      open
+      onClose={onClose}
+      title="إضافة سجل تشطيب"
+      size="lg"
+      footer={
+        <>
+          <button type="button" onClick={onClose} className="rounded-lg border border-border bg-surface px-4 py-2 text-sm font-medium text-text-base hover:bg-base">إلغاء</button>
+          <button type="submit" form="add-finition-form" disabled={submitting || !selectedQc}
+            className="rounded-lg bg-primary-500 px-4 py-2 text-sm font-medium text-white hover:bg-primary-600 disabled:opacity-60">
+            {submitting ? 'جاري الحفظ...' : 'حفظ'}
+          </button>
+        </>
+      }
+    >
+      <form id="add-finition-form" onSubmit={handleSubmit} className="space-y-4">
+        {!selectedQc ? (
+          <div>
+            <label className="mb-2 block text-sm font-medium text-text-base">اختر سجل المراقبة *</label>
+            {qcRecords.length === 0 ? (
+              <p className="text-sm text-text-muted text-center py-3">لا توجد سجلات مراقبة بكميات قابلة للتشطيب</p>
+            ) : (
+              <div className="space-y-2 max-h-48 overflow-y-auto">
+                {qcRecords.map(r => (
+                  <button key={r.qcId} type="button" onClick={() => { setSelectedQc(r); setQuantity(String(r.finitionableRemaining)); }}
+                    className="w-full rounded-lg border border-border px-3 py-2 text-right text-sm hover:border-primary-500 hover:bg-primary-50">
+                    <span className="font-medium">{r.tailorName}</span> — {r.modelName} / {r.sizeLabel} / {r.color} — متاح: <strong>{r.finitionableRemaining}</strong>
+                  </button>
+                ))}
               </div>
-
-              <div>
-                <label className="mb-1 block text-sm font-medium text-gray-700">الكمية *</label>
-                <input type="number" min={1} max={selectedQc.finitionableRemaining} value={quantity}
-                  onChange={e => setQuantity(e.target.value)}
-                  className="w-full rounded-lg border border-gray-200 px-3 py-2 text-sm text-gray-900 focus:border-blue-400 focus:outline-none" />
-              </div>
-
-              <div>
-                <label className="mb-1 block text-sm font-medium text-gray-700">سعر القطعة (دج) *</label>
-                <input type="number" min={0} step="any" value={pricePerPiece}
-                  onChange={e => setPricePerPiece(e.target.value)}
-                  className="w-full rounded-lg border border-gray-200 px-3 py-2 text-sm text-gray-900 focus:border-blue-400 focus:outline-none" />
-              </div>
-
-              {Number(pricePerPiece) > 0 && qty > 0 && (
-                <div className="text-sm text-gray-600">التكلفة الإجمالية: <strong className="text-gray-900">{totalCost.toLocaleString('en-US')} دج</strong></div>
-              )}
-
-              <div>
-                <label className="mb-1 block text-sm font-medium text-gray-700">التاريخ *</label>
-                <input type="date" value={finitionDate} onChange={e => setFinitionDate(e.target.value)}
-                  className="w-full rounded-lg border border-gray-200 px-3 py-2 text-sm text-gray-900 focus:border-blue-400 focus:outline-none" />
-              </div>
-
-              <ConsumedMaterialsEditor
-                nonFabricItems={nonFabricItems}
-                value={consumptionRows}
-                onChange={setConsumptionRows}
-                disabled={submitting}
-              />
-            </>
-          )}
-
-          {error && <p className="text-xs text-red-500">{error}</p>}
-          <div className="flex justify-end gap-2 pt-2">
-            <button type="button" onClick={onClose} className="rounded-lg border border-gray-200 px-4 py-2 text-sm hover:bg-gray-50">إلغاء</button>
-            <button type="submit" disabled={submitting || !selectedQc}
-              className="rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 disabled:opacity-60">
-              {submitting ? 'جاري الحفظ...' : 'حفظ'}
-            </button>
+            )}
           </div>
-        </form>
-      </div>
-    </div>
+        ) : (
+          <div className="rounded-lg bg-primary-50 px-3 py-2 text-sm text-gray-800">
+            <button type="button" onClick={() => setSelectedQc(null)} className="text-primary-600 hover:underline text-xs ml-2">تغيير</button>
+            <strong>{selectedQc.tailorName}</strong> — {selectedQc.modelName} / {selectedQc.sizeLabel} / {selectedQc.color} — متاح: {selectedQc.finitionableRemaining}
+          </div>
+        )}
+
+        {selectedQc && (
+          <>
+            <div>
+              <label className="mb-1 block text-sm font-medium text-text-base">الموظف *</label>
+              <select value={employeeId} onChange={e => setEmployeeId(e.target.value)}
+                className="w-full rounded-lg border border-border px-3 py-2 text-sm outline-none focus:border-primary-500 focus:ring-2 focus:ring-primary-500/20">
+                <option value="">اختر الموظف</option>
+                {employees.map(e => <option key={e.id} value={e.id}>{e.name}</option>)}
+              </select>
+            </div>
+
+            <div>
+              <label className="mb-1 block text-sm font-medium text-text-base">الكمية *</label>
+              <input type="number" min={1} max={selectedQc.finitionableRemaining} value={quantity}
+                onChange={e => setQuantity(e.target.value)}
+                className="w-full rounded-lg border border-border px-3 py-2 text-sm outline-none focus:border-primary-500 focus:ring-2 focus:ring-primary-500/20" />
+            </div>
+
+            <div>
+              <label className="mb-1 block text-sm font-medium text-text-base">سعر القطعة (دج) *</label>
+              <input type="number" min={0} step="any" value={pricePerPiece}
+                onChange={e => setPricePerPiece(e.target.value)}
+                className="w-full rounded-lg border border-border px-3 py-2 text-sm outline-none focus:border-primary-500 focus:ring-2 focus:ring-primary-500/20" />
+            </div>
+
+            {Number(pricePerPiece) > 0 && qty > 0 && (
+              <div className="text-sm text-text-muted">التكلفة الإجمالية: <strong className="text-text-base">{totalCost.toLocaleString('en-US')} دج</strong></div>
+            )}
+
+            <div>
+              <label className="mb-1 block text-sm font-medium text-text-base">التاريخ *</label>
+              <input type="date" value={finitionDate} onChange={e => setFinitionDate(e.target.value)}
+                className="w-full rounded-lg border border-border px-3 py-2 text-sm outline-none focus:border-primary-500 focus:ring-2 focus:ring-primary-500/20" />
+            </div>
+
+            <ConsumedMaterialsEditor
+              nonFabricItems={nonFabricItems}
+              value={consumptionRows}
+              onChange={setConsumptionRows}
+              disabled={submitting}
+            />
+          </>
+        )}
+
+        {error && <p className="text-xs text-red-500">{error}</p>}
+      </form>
+    </AppModal>
   );
 }

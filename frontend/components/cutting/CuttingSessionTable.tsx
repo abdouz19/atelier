@@ -19,21 +19,21 @@ export function CuttingSessionTable({ sessions, onRowClick }: CuttingSessionTabl
   );
 
   return (
-    <div className="overflow-hidden rounded-xl border border-gray-200 bg-white">
-      <div className="border-b border-gray-100 px-4 py-3">
+    <div className="overflow-hidden rounded-xl border border-border bg-surface">
+      <div className="border-b border-border px-4 py-3">
         <input
           type="text"
           placeholder="بحث بالموديل أو اسم القماش..."
           value={search}
           onChange={(e) => setSearch(e.target.value)}
-          className="w-full max-w-xs rounded-lg border border-gray-200 px-3 py-1.5 text-sm focus:border-blue-400 focus:outline-none"
+          className="w-full max-w-xs rounded-lg border border-border px-3 py-1.5 text-sm focus:border-primary-500 focus:outline-none"
         />
       </div>
       {filtered.length === 0 ? (
         <EmptyState message={search ? 'لا توجد نتائج مطابقة' : 'لا توجد جلسات قص بعد'} />
       ) : (
         <table className="w-full text-sm" dir="rtl">
-          <thead className="bg-gray-50 text-xs font-medium text-gray-500">
+          <thead className="sticky top-0 z-10 bg-base/60 text-xs font-semibold text-text-muted">
             <tr>
               <th className="px-4 py-3 text-right">التاريخ</th>
               <th className="px-4 py-3 text-right">القماش واللون</th>
@@ -45,7 +45,7 @@ export function CuttingSessionTable({ sessions, onRowClick }: CuttingSessionTabl
               <th className="px-4 py-3 text-right">التكلفة</th>
             </tr>
           </thead>
-          <tbody className="divide-y divide-gray-100">
+          <tbody className="divide-y divide-border">
             {filtered.map((s) => (
               <CuttingSessionRow key={s.id} session={s} onClick={() => onRowClick(s.id)} />
             ))}

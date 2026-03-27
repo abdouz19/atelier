@@ -16,19 +16,19 @@ export function EmployeeDetailView({ id, onBack }: EmployeeDetailViewProps) {
   if (loading) {
     return (
       <div className="animate-pulse space-y-4" dir="rtl">
-        <div className="h-4 w-32 rounded bg-gray-200" />
-        <div className="h-24 rounded-xl bg-gray-200" />
+        <div className="h-4 w-32 rounded bg-border" />
+        <div className="h-24 rounded-xl bg-border" />
         <div className="grid grid-cols-2 gap-4">
-          <div className="h-32 rounded-xl bg-gray-200" />
-          <div className="h-32 rounded-xl bg-gray-200" />
+          <div className="h-32 rounded-xl bg-border" />
+          <div className="h-32 rounded-xl bg-border" />
         </div>
-        <div className="h-48 rounded-xl bg-gray-200" />
+        <div className="h-48 rounded-xl bg-border" />
       </div>
     );
   }
 
   if (error) return <div dir="rtl"><ErrorAlert message={error} /></div>;
-  if (!detail) return <div dir="rtl" className="text-gray-400">الموظف غير موجود</div>;
+  if (!detail) return <div dir="rtl" className="text-text-muted">الموظف غير موجود</div>;
 
   function handleDetailUpdate(updated: EmployeeDetail) {
     setDetail(updated);

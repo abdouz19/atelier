@@ -43,33 +43,33 @@ export function PiecesAvailabilityTable({
         <FilterSelect label="اللون" value={filters.color} options={colors} onChange={v => onFilterChange({ ...filters, color: v })} />
         <div className="flex items-end gap-2">
           <div>
-            <label className="mb-1 block text-xs font-medium text-gray-600">حد المخزون المنخفض</label>
+            <label className="mb-1 block text-xs font-medium text-text-muted">حد المخزون المنخفض</label>
             <input
               type="number" min={0} value={pendingThreshold}
               onChange={e => setPendingThreshold(Number(e.target.value))}
-              className="w-24 rounded-lg border border-gray-200 px-2 py-2 text-sm focus:border-blue-400 focus:outline-none"
+              className="w-24 rounded-lg border border-border px-2 py-2 text-sm focus:border-primary-500 focus:outline-none"
             />
           </div>
-          <button onClick={handleThresholdSave} className="rounded-lg bg-gray-100 px-3 py-2 text-sm font-medium text-gray-700 hover:bg-gray-200">
+          <button onClick={handleThresholdSave} className="rounded-lg bg-base px-3 py-2 text-sm font-medium text-text-base hover:bg-border">
             حفظ
           </button>
         </div>
-        <button onClick={() => onFilterChange({ modelName: '', partName: '', sizeLabel: '', color: '' })} className="rounded-lg border border-gray-200 px-3 py-2 text-sm text-gray-500 hover:bg-gray-50">
+        <button onClick={() => onFilterChange({ modelName: '', partName: '', sizeLabel: '', color: '' })} className="rounded-lg border border-border px-3 py-2 text-sm text-text-muted hover:bg-base/60">
           مسح الفلاتر
         </button>
       </div>
 
       {rows.length === 0 ? (
-        <div className="rounded-lg border border-dashed border-gray-200 py-12 text-center text-sm text-gray-400">
+        <div className="rounded-lg border border-dashed border-border py-12 text-center text-sm text-text-muted">
           لا توجد نتائج
         </div>
       ) : (
-        <div className="overflow-x-auto rounded-lg border border-gray-200">
+        <div className="overflow-x-auto rounded-lg border border-border bg-surface">
           <table className="w-full text-sm">
-            <thead className="bg-gray-50">
+            <thead className="sticky top-0 z-10 bg-base/60">
               <tr>
                 {['النموذج', 'القطعة', 'المقاس', 'اللون', 'المنتج', 'غير موزع', 'في التوزيع', 'مرتجع', ''].map((h, i) => (
-                  <th key={i} className="px-3 py-2 text-right font-medium text-gray-600">{h}</th>
+                  <th key={i} className="px-3 py-2 text-right font-semibold text-text-muted">{h}</th>
                 ))}
               </tr>
             </thead>
@@ -78,7 +78,7 @@ export function PiecesAvailabilityTable({
                 const cls = classify(row);
                 const rowClass = cls === 'zero' ? 'bg-red-50' : cls === 'low' ? 'bg-amber-50' : '';
                 return (
-                  <tr key={idx} className={`border-t border-gray-100 ${rowClass}`}>
+                  <tr key={idx} className={`border-t border-border ${rowClass}`}>
                     <td className="px-3 py-2">{row.modelName}</td>
                     <td className="px-3 py-2">{row.partName ?? '—'}</td>
                     <td className="px-3 py-2">{row.sizeLabel}</td>
@@ -112,8 +112,8 @@ export function PiecesAvailabilityTable({
 function FilterSelect({ label, value, options, onChange }: { label: string; value: string; options: string[]; onChange: (v: string) => void }) {
   return (
     <div>
-      <label className="mb-1 block text-xs font-medium text-gray-600">{label}</label>
-      <select value={value} onChange={e => onChange(e.target.value)} className="rounded-lg border border-gray-200 px-2 py-2 text-sm focus:border-blue-400 focus:outline-none">
+      <label className="mb-1 block text-xs font-medium text-text-muted">{label}</label>
+      <select value={value} onChange={e => onChange(e.target.value)} className="rounded-lg border border-border px-2 py-2 text-sm focus:border-primary-500 focus:outline-none">
         <option value="">الكل</option>
         {options.map(o => <option key={o} value={o}>{o}</option>)}
       </select>

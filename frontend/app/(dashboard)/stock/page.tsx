@@ -15,6 +15,7 @@ import { ItemDetailPanel } from '@/components/stock/ItemDetailPanel';
 import { ConfirmDialog } from '@/components/shared/ConfirmDialog';
 import { ErrorAlert } from '@/components/shared/ErrorAlert';
 import { Toast } from '@/components/shared/Toast';
+import { PageHeader } from '@/components/shared/PageHeader';
 import { ipcClient } from '@/lib/ipc-client';
 import type { StockItemSummary } from '@/features/stock/stock.types';
 
@@ -124,17 +125,18 @@ function StockPageContent() {
 
   return (
     <div dir="rtl">
-      {/* Header */}
-      <div className="mb-6 flex items-center justify-between">
-        <h1 className="text-2xl font-bold text-gray-900">المخزون</h1>
-        <button
-          onClick={() => setShowAddItem(true)}
-          className="flex items-center gap-2 rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700"
-        >
-          <Plus size={16} />
-          إضافة صنف
-        </button>
-      </div>
+      <PageHeader
+        title="المخزون"
+        actions={
+          <button
+            onClick={() => setShowAddItem(true)}
+            className="flex items-center gap-2 rounded-lg bg-primary-500 px-4 py-2 text-sm font-medium text-white hover:bg-primary-600"
+          >
+            <Plus size={16} />
+            إضافة صنف
+          </button>
+        }
+      />
 
       {/* Tabs */}
       <div className="mb-5 flex gap-1 rounded-lg bg-gray-100 p-1 w-fit">

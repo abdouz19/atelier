@@ -12,6 +12,8 @@ import { CuttingSessionDetail } from '@/components/cutting/CuttingSessionDetail'
 import { NewCuttingSessionModal } from '@/components/cutting/NewCuttingSessionModal';
 import { ErrorAlert } from '@/components/shared/ErrorAlert';
 import { Toast } from '@/components/shared/Toast';
+import { PageHeader } from '@/components/shared/PageHeader';
+import { AppCard } from '@/components/shared/AppCard';
 
 function CuttingPageContent() {
   const router = useRouter();
@@ -39,12 +41,14 @@ function CuttingPageContent() {
 
   return (
     <div dir="rtl">
-      <div className="mb-6 flex items-center justify-between">
-        <h1 className="text-2xl font-bold text-gray-900">القص</h1>
-        <button onClick={() => setShowCreate(true)} className="flex items-center gap-2 rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700">
-          <Scissors size={16} />جلسة قص جديدة
-        </button>
-      </div>
+      <PageHeader
+        title="القص"
+        actions={
+          <button onClick={() => setShowCreate(true)} className="flex items-center gap-2 rounded-lg bg-primary-500 px-4 py-2 text-sm font-medium text-white hover:bg-primary-600">
+            <Scissors size={16} />جلسة قص جديدة
+          </button>
+        }
+      />
       {error && <div className="mb-4"><ErrorAlert message={error} /></div>}
       {loading ? (
         <div className="space-y-4">

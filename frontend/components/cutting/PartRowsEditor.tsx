@@ -44,7 +44,7 @@ export function PartRowsEditor({ rows, onChange, error }: PartRowsEditorProps) {
     <div dir="rtl">
       <div className="mb-2 flex items-center justify-between">
         <span className="text-sm font-medium">الأجزاء المنتجة</span>
-        <button type="button" onClick={addRow} className="flex items-center gap-1 text-xs text-blue-600 hover:underline">
+        <button type="button" onClick={addRow} className="flex items-center gap-1 text-xs text-primary-600 hover:underline">
           <Plus size={13} />إضافة جزء
         </button>
       </div>
@@ -77,7 +77,7 @@ export function PartRowsEditor({ rows, onChange, error }: PartRowsEditorProps) {
             value={row.count || ''}
             onChange={e => update(i, { count: Math.max(1, parseInt(e.target.value, 10) || 0) })}
             placeholder="العدد"
-            className="w-20 rounded-lg border border-gray-200 px-3 py-1.5 text-sm focus:border-blue-400 focus:outline-none"
+            className="w-20 rounded-lg border border-gray-200 px-3 py-1.5 text-sm focus:border-primary-500 focus:outline-none"
           />
           <button type="button" onClick={() => removeRow(i)} className="text-gray-400 hover:text-red-500">
             <X size={14} />

@@ -1,6 +1,6 @@
 # atelier Development Guidelines
 
-Auto-generated from all feature plans. Last updated: 2026-03-22
+Auto-generated from all feature plans. Last updated: 2026-03-27
 
 ## Active Technologies
 - TypeScript 5 (frontend) + Node.js / plain JavaScript (Electron main process) + Next.js 16 (App Router, `output: export`), Electron 41, better-sqlite3, react-hook-form, Zod, Tailwind CSS (003-suppliers-purchases)
@@ -26,6 +26,7 @@ Auto-generated from all feature plans. Last updated: 2026-03-22
 - SQLite via better-sqlite3 prepared statements in `electron/main.js`; Drizzle ORM schemas in `electron/db/schema/` are reference-only (not executed at runtime) (013-parts-distribution-fix)
 - TypeScript 5 (strict, frontend renderer) + Node.js plain JS (Electron main process) + Next.js 14 App Router (static export), Electron 41, better-sqlite3, react-hook-form + Zod, Tailwind CSS 4, Lucide Reac (014-cutting-parts-size-color)
 - SQLite via better-sqlite3 plain prepared statements in `electron/main.js`; Drizzle ORM schemas in `electron/db/schema/` are reference-only (014-cutting-parts-size-color)
+- TypeScript 5 strict (frontend renderer) + Node.js plain JS (Electron main process) + Next.js 14 App Router, Electron 41, better-sqlite3, react-hook-form + Zod, Tailwind CSS 4, Lucide React, shadcn/ui (015-consumed-materials-flows)
 
 - TypeScript 5 (strict mode) + Next.js 16 (App Router, static export), React 19, Electron 41, better-sqlite3 12, Drizzle ORM, Zod 4, react-hook-form 7, Zustand 5, Tailwind 4, Lucide Reac (002-stock-management)
 
@@ -60,9 +61,9 @@ npm run build:electron # Full Electron distribution build
 TypeScript 5 (strict mode): Follow standard conventions
 
 ## Recent Changes
+- 016-ui-overhaul-customization: Global UI overhaul (design system: AppCard, KpiCard, DataTable, AppModal, PageHeader, FormField, SkeletonCard, StepIndicator) + CSS custom property theming (6 primary color swatches + dark/light/system via data-* attributes) + platform customization section in Settings (logo upload, theme toggle, primary color picker, live preview, SQLite persistence via app_settings)
+- 015-consumed-materials-flows: Added TypeScript 5 strict (frontend renderer) + Node.js plain JS (Electron main process) + Next.js 14 App Router, Electron 41, better-sqlite3, react-hook-form + Zod, Tailwind CSS 4, Lucide React, shadcn/ui
 - 014-cutting-parts-size-color: Added TypeScript 5 (strict, frontend renderer) + Node.js plain JS (Electron main process) + Next.js 14 App Router (static export), Electron 41, better-sqlite3, react-hook-form + Zod, Tailwind CSS 4, Lucide Reac
-- 013-parts-distribution-fix: Added TypeScript 5 strict (frontend renderer) + Node.js plain JavaScript (Electron main process) + Next.js 14 App Router, Electron 41, better-sqlite3, react-hook-form + Zod, shadcn/ui + Tailwind CSS 4, Lucide Reac
-- 012-pieces-availability: Added TypeScript 5 strict (frontend) + Node.js plain JS (Electron main) + Next.js 14 App Router (static export), Electron 41, better-sqlite3, react-hook-form + Zod, Tailwind CSS 4, Lucide React, Recharts
 
 
 <!-- MANUAL ADDITIONS START -->

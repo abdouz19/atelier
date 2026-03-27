@@ -1,5 +1,13 @@
 import { contextBridge, ipcRenderer } from 'electron';
 
+// Read appearance synchronously before renderer starts (flash-free theme init)
+let __appearance: { theme: string; primaryColor: string };
+try {
+  __appearance = ipcRenderer.sendSync('settings:getAppearanceSync') as { theme: string; primaryColor: string };
+} catch {
+  __appearance = { theme: 'system', primaryColor: 'blue' };
+}
+
 const ipcBridge = {
   auth: {
     login: (payload: { username: string; password: string }) =>
@@ -41,6 +49,16 @@ const ipcBridge = {
     updatePayment: (payload: unknown) => ipcRenderer.invoke('employees:updatePayment', payload),
     deletePayment: (payload: { id: string }) => ipcRenderer.invoke('employees:deletePayment', payload),
   },
+  settings: {
+    getAppearanceSync: () => ipcRenderer.sendSync('settings:getAppearanceSync'),
+    getAppearance: () => ipcRenderer.invoke('settings:getAppearance'),
+    setAppearance: (payload: { theme: string; primaryColor: string }) =>
+      ipcRenderer.invoke('settings:setAppearance', payload),
+    getLogo: () => ipcRenderer.invoke('settings:getLogo'),
+    setLogo: (payload: { dataUrl: string }) => ipcRenderer.invoke('settings:setLogo', payload),
+    removeLogo: () => ipcRenderer.invoke('settings:removeLogo'),
+    resetToDefaults: () => ipcRenderer.invoke('settings:resetToDefaults'),
+  },
   on: (channel: string, callback: (...args: unknown[]) => void) => {
     ipcRenderer.on(channel, (_event, ...args) => callback(...args));
   },
@@ -50,9 +68,11 @@ const ipcBridge = {
 };
 
 contextBridge.exposeInMainWorld('ipcBridge', ipcBridge);
+contextBridge.exposeInMainWorld('__APPEARANCE__', __appearance);
 
 declare global {
   interface Window {
     ipcBridge: typeof ipcBridge;
+    __APPEARANCE__: { theme: string; primaryColor: string };
   }
 }

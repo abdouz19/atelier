@@ -23,15 +23,15 @@ export function SizeRowsEditor({ rows, onChange, suggestions, error }: SizeRowsE
     <div dir="rtl">
       <div className="mb-2 flex items-center justify-between">
         <span className="text-sm font-medium">المقاسات والقطع *</span>
-        <button type="button" onClick={addRow} className="flex items-center gap-1 text-xs text-blue-600 hover:underline"><Plus size={13} />إضافة مقاس</button>
+        <button type="button" onClick={addRow} className="flex items-center gap-1 text-xs text-primary-600 hover:underline"><Plus size={13} />إضافة مقاس</button>
       </div>
       {rows.map((row, i) => (
         <div key={i} className="mb-2 flex items-center gap-2">
           <input list={`sizes-${i}`} value={row.sizeLabel} onChange={(e) => update(i, 'sizeLabel', e.target.value)}
-            placeholder="المقاس" className="w-28 rounded-lg border border-gray-200 px-3 py-1.5 text-sm focus:border-blue-400 focus:outline-none" />
+            placeholder="المقاس" className="w-28 rounded-lg border border-gray-200 px-3 py-1.5 text-sm focus:border-primary-500 focus:outline-none" />
           <datalist id={`sizes-${i}`}>{suggestions.map(s => <option key={s} value={s} />)}</datalist>
           <input type="number" min={1} value={row.pieceCount || ''} onChange={(e) => update(i, 'pieceCount', Number(e.target.value))}
-            placeholder="عدد القطع" className="w-28 rounded-lg border border-gray-200 px-3 py-1.5 text-sm focus:border-blue-400 focus:outline-none" />
+            placeholder="عدد القطع" className="w-28 rounded-lg border border-gray-200 px-3 py-1.5 text-sm focus:border-primary-500 focus:outline-none" />
           <button type="button" onClick={() => removeRow(i)} className="text-gray-400 hover:text-red-500"><X size={14} /></button>
         </div>
       ))}

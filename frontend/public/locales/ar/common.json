@@ -5,8 +5,22 @@
   },
   "nav": {
     "dashboard": "لوحة التحكم",
+    "suppliers": "الموردون",
+    "stock": "المخزون",
+    "employees": "الموظفون",
+    "tailors": "الخياطون",
+    "cutting": "القص",
+    "distribution": "التوزيع",
+    "qc": "مراقبة الجودة",
+    "finalStock": "المخزون النهائي",
     "settings": "الإعدادات",
-    "logout": "تسجيل الخروج"
+    "logout": "تسجيل الخروج",
+    "groups": {
+      "production": "الإنتاج",
+      "management": "الإدارة",
+      "sales": "المبيعات",
+      "system": "النظام"
+    }
   },
   "settings": {
     "title": "الإعدادات",

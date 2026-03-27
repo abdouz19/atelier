@@ -1,7 +1,8 @@
 'use client';
 
 import { useState } from 'react';
-import { X } from 'lucide-react';
+import { AppModal } from '@/components/shared/AppModal';
+import { StepIndicator } from '@/components/shared/StepIndicator';
 import { CuttingStep1Form } from './CuttingStep1Form';
 import { CuttingStep2Form } from './CuttingStep2Form';
 import { ipcClient } from '@/lib/ipc-client';
@@ -48,29 +49,30 @@ export function NewCuttingSessionModal({ onClose, onSuccess }: NewCuttingSession
   }
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40" dir="rtl">
-      <div className="w-full max-w-lg rounded-xl bg-white p-6 shadow-xl max-h-[90vh] overflow-y-auto">
-        <div className="mb-4 flex items-center justify-between">
-          <h2 className="text-lg font-semibold">جلسة قص جديدة — الخطوة {step} من 2</h2>
-          <button onClick={onClose}><X size={20} /></button>
-        </div>
-        <div className="mb-4 flex gap-2">
-          <div className={`h-1.5 flex-1 rounded-full ${step >= 1 ? 'bg-blue-500' : 'bg-gray-200'}`} />
-          <div className={`h-1.5 flex-1 rounded-full ${step >= 2 ? 'bg-blue-500' : 'bg-gray-200'}`} />
-        </div>
-        {step === 1 ? (
-          <CuttingStep1Form onNext={handleNext} onClose={onClose} />
-        ) : (
-          <CuttingStep2Form
-            onSubmit={handleSubmit}
-            onBack={() => setStep(1)}
-            isSubmitting={isSubmitting}
-            submitError={submitError}
-            availableMeters={step1Data?.availableMeters ?? 0}
-            modelName={step1Data?.modelName ?? ''}
-          />
-        )}
-      </div>
-    </div>
+    <AppModal
+      open
+      onClose={onClose}
+      title="جلسة قص جديدة"
+      size="lg"
+      stepIndicator={
+        <StepIndicator
+          steps={['معلومات القص', 'الأجزاء والمواد']}
+          currentStep={step - 1}
+        />
+      }
+    >
+      {step === 1 ? (
+        <CuttingStep1Form onNext={handleNext} onClose={onClose} />
+      ) : (
+        <CuttingStep2Form
+          onSubmit={handleSubmit}
+          onBack={() => setStep(1)}
+          isSubmitting={isSubmitting}
+          submitError={submitError}
+          availableMeters={step1Data?.availableMeters ?? 0}
+          modelName={step1Data?.modelName ?? ''}
+        />
+      )}
+    </AppModal>
   );
 }

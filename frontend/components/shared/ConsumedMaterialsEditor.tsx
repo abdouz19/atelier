@@ -44,12 +44,12 @@ export function ConsumedMaterialsEditor({
   const completedCount = rows.filter(r => r.stockItemId !== '').length;
 
   return (
-    <div dir="rtl" className="mt-4 rounded-lg border border-gray-200">
+    <div dir="rtl" className="mt-4 rounded-lg border border-border">
       <button
         type="button"
         disabled={disabled}
         onClick={() => setExpanded(v => !v)}
-        className="flex w-full items-center justify-between px-4 py-2.5 text-sm font-medium text-gray-700 hover:bg-gray-50 disabled:opacity-50"
+        className="flex w-full items-center justify-between px-4 py-2.5 text-sm font-medium text-text-base hover:bg-base/60 disabled:opacity-50"
       >
         <span>
           مواد مستهلكة
@@ -63,7 +63,7 @@ export function ConsumedMaterialsEditor({
       </button>
 
       {expanded && (
-        <div className="border-t border-gray-200 px-4 pb-3 pt-3">
+        <div className="border-t border-border px-4 pb-3 pt-3">
           {rows.map((row, i) => (
             <ConsumptionRowItem
               key={i}
@@ -78,7 +78,7 @@ export function ConsumedMaterialsEditor({
             type="button"
             disabled={disabled}
             onClick={addRow}
-            className="mt-1 flex items-center gap-1 text-xs text-blue-600 hover:underline disabled:opacity-50"
+            className="mt-1 flex items-center gap-1 text-xs text-primary-600 hover:underline disabled:opacity-50"
           >
             <Plus size={13} />
             إضافة مادة مستهلكة

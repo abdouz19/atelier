@@ -14,19 +14,19 @@ export function FinancialSummaryCard({ totalEarned, totalPaid, balanceDue }: Fin
   const isNegative = balanceDue < 0;
 
   return (
-    <div className="rounded-xl border border-gray-200 bg-white p-4">
-      <h3 className="mb-3 text-sm font-semibold text-gray-500">الملخص المالي</h3>
+    <div className="rounded-xl border border-border bg-white p-4">
+      <h3 className="mb-3 text-sm font-semibold text-text-muted">الملخص المالي</h3>
       <div className="space-y-2">
         <div className="flex items-center justify-between">
-          <span className="text-sm text-gray-600">إجمالي المكتسب</span>
-          <span className="font-medium text-gray-900">{fmt(totalEarned)} دج</span>
+          <span className="text-sm text-text-muted">إجمالي المكتسب</span>
+          <span className="font-medium text-text-base">{fmt(totalEarned)} دج</span>
         </div>
         <div className="flex items-center justify-between">
-          <span className="text-sm text-gray-600">إجمالي المدفوع</span>
-          <span className="font-medium text-gray-900">{fmt(totalPaid)} دج</span>
+          <span className="text-sm text-text-muted">إجمالي المدفوع</span>
+          <span className="font-medium text-text-base">{fmt(totalPaid)} دج</span>
         </div>
-        <div className="mt-2 border-t border-gray-100 pt-2 flex items-center justify-between">
-          <span className="text-sm font-semibold text-gray-700">الرصيد المستحق</span>
+        <div className="mt-2 border-t border-border pt-2 flex items-center justify-between">
+          <span className="text-sm font-semibold text-text-base">الرصيد المستحق</span>
           <span className={`text-lg font-bold ${isNegative ? 'text-red-600' : 'text-blue-600'}`}>
             {isNegative ? '−' : ''}{fmt(Math.abs(balanceDue))} دج
           </span>

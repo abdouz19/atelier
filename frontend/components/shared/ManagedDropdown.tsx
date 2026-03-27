@@ -65,31 +65,31 @@ export function ManagedDropdown({
         type="button"
         disabled={disabled}
         onClick={() => setOpen((o) => !o)}
-        className={`flex w-full items-center justify-between rounded-lg border px-3 py-2 text-sm text-gray-900 outline-none focus:border-blue-500 disabled:opacity-50 ${error ? 'border-red-400' : 'border-gray-300'} bg-white`}
+        className={`flex w-full items-center justify-between rounded-lg border px-3 py-2 text-sm text-text-base outline-none focus:border-primary-500 disabled:opacity-50 ${error ? 'border-red-400' : 'border-border'} bg-white`}
       >
-        <span className={value ? 'text-gray-900' : 'text-gray-400'}>{value ? selectedLabel : placeholder}</span>
-        <ChevronDown size={14} className="text-gray-400 shrink-0" />
+        <span className={value ? 'text-text-base' : 'text-text-muted'}>{value ? selectedLabel : placeholder}</span>
+        <ChevronDown size={14} className="text-text-muted shrink-0" />
       </button>
       {error && <p className="mt-1 text-xs text-red-600">{error}</p>}
       {open && (
-        <div className="absolute z-50 mt-1 w-full rounded-lg border border-gray-200 bg-white shadow-lg">
+        <div className="absolute z-50 mt-1 w-full rounded-lg border border-border bg-white shadow-lg">
           <ul className="max-h-48 overflow-y-auto py-1">
             {items.map((item) => (
               <li key={item.id}>
                 <button
                   type="button"
                   onClick={() => { onChange(item.name); setOpen(false); }}
-                  className={`flex w-full items-center gap-2 px-3 py-1.5 text-sm text-gray-900 hover:bg-blue-50 ${item.name === value ? 'bg-blue-50 font-medium' : ''}`}
+                  className={`flex w-full items-center gap-2 px-3 py-1.5 text-sm text-text-base hover:bg-primary-50 ${item.name === value ? 'bg-primary-50 font-medium' : ''}`}
                 >
                   {item.name}
-                  {item.isPredefined && <span className="mr-auto rounded bg-gray-100 px-1.5 py-0.5 text-xs text-gray-500">ثابت</span>}
+                  {item.isPredefined && <span className="mr-auto rounded bg-base px-1.5 py-0.5 text-xs text-text-muted">ثابت</span>}
                 </button>
               </li>
             ))}
           </ul>
-          <div className="border-t border-gray-100 px-2 py-1.5">
+          <div className="border-t border-border px-2 py-1.5">
             {!addMode ? (
-              <button type="button" onClick={() => setAddMode(true)} className="w-full rounded px-2 py-1 text-right text-sm text-blue-600 hover:bg-blue-50">
+              <button type="button" onClick={() => setAddMode(true)} className="w-full rounded px-2 py-1 text-right text-sm text-primary-600 hover:bg-primary-50">
                 + {addLabel}
               </button>
             ) : (
@@ -100,14 +100,14 @@ export function ManagedDropdown({
                   onChange={(e) => setNewName(e.target.value)}
                   onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); handleSave(); } if (e.key === 'Escape') setAddMode(false); }}
                   placeholder={addLabel}
-                  className="w-full rounded border border-gray-300 px-2 py-1 text-sm text-gray-900 outline-none focus:border-blue-500"
+                  className="w-full rounded border border-border px-2 py-1 text-sm text-text-base outline-none focus:border-primary-500"
                 />
                 {addError && <p className="text-xs text-red-600">{addError}</p>}
                 <div className="flex gap-1">
-                  <button type="button" onClick={handleSave} disabled={saving} className="rounded bg-blue-600 px-2 py-1 text-xs text-white hover:bg-blue-700 disabled:opacity-60">
+                  <button type="button" onClick={handleSave} disabled={saving} className="rounded bg-primary-500 px-2 py-1 text-xs text-white hover:bg-primary-600 disabled:opacity-60">
                     {saving ? '...' : 'حفظ'}
                   </button>
-                  <button type="button" onClick={() => setAddMode(false)} className="rounded border border-gray-300 px-2 py-1 text-xs text-gray-600 hover:bg-gray-50">إلغاء</button>
+                  <button type="button" onClick={() => setAddMode(false)} className="rounded border border-border px-2 py-1 text-xs text-text-muted hover:bg-base/60">إلغاء</button>
                 </div>
               </div>
             )}

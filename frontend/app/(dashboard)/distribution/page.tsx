@@ -10,6 +10,8 @@ import { DistributeModal } from '@/components/distribution/DistributeModal';
 import { ReturnModal } from '@/components/distribution/ReturnModal';
 import { PiecesAvailabilityTab } from '@/components/distribution/PiecesAvailabilityTab';
 import { Toast } from '@/components/shared/Toast';
+import { PageHeader } from '@/components/shared/PageHeader';
+import { AppCard } from '@/components/shared/AppCard';
 import type { DistributionTailorSummary } from '@/features/distribution/distribution.types';
 
 function DistributionPageContent() {
@@ -58,19 +60,19 @@ function DistributionPageContent() {
 
   return (
     <div dir="rtl" className="space-y-6">
-      <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-bold text-gray-900">التوزيع</h1>
-        {activeTab === 'distribution' && (
+      <PageHeader
+        title="التوزيع"
+        actions={activeTab === 'distribution' ? (
           <div className="flex gap-3">
-            <button onClick={() => setShowDistribute(true)} className="rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700">
+            <button onClick={() => setShowDistribute(true)} className="rounded-lg bg-primary-500 px-4 py-2 text-sm font-medium text-white hover:bg-primary-600">
               توزيع
             </button>
-            <button onClick={() => setShowReturn(true)} className="rounded-lg border border-gray-200 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50">
+            <button onClick={() => setShowReturn(true)} className="rounded-lg border border-border bg-surface px-4 py-2 text-sm font-medium text-text-base hover:bg-base">
               ارتجاع
             </button>
           </div>
-        )}
-      </div>
+        ) : undefined}
+      />
 
       <div className="flex gap-1 border-b border-gray-200">
         <button

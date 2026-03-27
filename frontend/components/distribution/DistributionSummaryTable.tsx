@@ -16,14 +16,14 @@ export function DistributionSummaryTable({ summary, loading, error, onRowClick }
   if (error) return <ErrorAlert message={error} />;
 
   return (
-    <div className="overflow-hidden rounded-xl border border-gray-200 bg-white">
+    <div className="overflow-hidden rounded-xl border border-border bg-surface">
       {loading ? (
-        <div className="animate-pulse divide-y divide-gray-100">
+        <div className="animate-pulse divide-y divide-border">
           {Array.from({ length: 3 }).map((_, i) => (
             <div key={i} className="flex gap-4 px-4 py-4">
-              <div className="h-4 w-32 rounded bg-gray-200" />
-              <div className="h-4 w-16 rounded bg-gray-200" />
-              <div className="h-4 w-16 rounded bg-gray-200" />
+              <div className="h-4 w-32 rounded bg-border" />
+              <div className="h-4 w-16 rounded bg-border" />
+              <div className="h-4 w-16 rounded bg-border" />
             </div>
           ))}
         </div>
@@ -31,7 +31,7 @@ export function DistributionSummaryTable({ summary, loading, error, onRowClick }
         <EmptyState message="لا توجد توزيعات بعد" />
       ) : (
         <table className="w-full text-sm" dir="rtl">
-          <thead className="bg-gray-50 text-xs font-medium text-gray-500">
+          <thead className="sticky top-0 z-10 bg-base/60 text-xs font-semibold text-text-muted">
             <tr>
               <th className="px-4 py-3 text-right">الخياط</th>
               <th className="px-4 py-3 text-right">في التوزيع</th>
@@ -41,7 +41,7 @@ export function DistributionSummaryTable({ summary, loading, error, onRowClick }
               <th className="px-4 py-3 text-right">الرصيد المستحق</th>
             </tr>
           </thead>
-          <tbody className="divide-y divide-gray-100">
+          <tbody className="divide-y divide-border">
             {summary.map((s) => (
               <DistributionSummaryRow key={s.tailorId} summary={s} onClick={() => onRowClick(s.tailorId)} />
             ))}

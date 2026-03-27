@@ -29,7 +29,7 @@ export function LoginForm() {
 
   return (
     <div className="w-full max-w-sm rounded-2xl bg-white p-8 shadow-lg" dir="rtl">
-      <h1 className="mb-6 text-center text-2xl font-bold text-gray-900">
+      <h1 className="mb-6 text-center text-2xl font-bold text-text-base">
         تسجيل الدخول
       </h1>
 
@@ -43,7 +43,7 @@ export function LoginForm() {
         <div>
           <label
             htmlFor="username"
-            className="mb-1 block text-sm font-medium text-gray-700"
+            className="mb-1 block text-sm font-medium text-text-base"
           >
             اسم المستخدم
           </label>
@@ -52,7 +52,7 @@ export function LoginForm() {
             type="text"
             autoComplete="username"
             {...register('username')}
-            className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm text-right outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-200"
+            className="w-full rounded-lg border border-border px-3 py-2 text-sm text-right outline-none focus:border-primary-500 focus:ring-2 focus:ring-primary-500/20"
           />
           {errors.username && (
             <p className="mt-1 text-xs text-red-600">{errors.username.message}</p>
@@ -62,7 +62,7 @@ export function LoginForm() {
         <div>
           <label
             htmlFor="password"
-            className="mb-1 block text-sm font-medium text-gray-700"
+            className="mb-1 block text-sm font-medium text-text-base"
           >
             كلمة المرور
           </label>
@@ -71,7 +71,7 @@ export function LoginForm() {
             type="password"
             autoComplete="current-password"
             {...register('password')}
-            className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm text-right outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-200"
+            className="w-full rounded-lg border border-border px-3 py-2 text-sm text-right outline-none focus:border-primary-500 focus:ring-2 focus:ring-primary-500/20"
           />
           {errors.password && (
             <p className="mt-1 text-xs text-red-600">{errors.password.message}</p>
@@ -81,7 +81,7 @@ export function LoginForm() {
         <button
           type="submit"
           disabled={isLoading}
-          className="w-full rounded-lg bg-blue-600 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-blue-700 disabled:opacity-60"
+          className="w-full rounded-lg bg-primary-500 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-primary-600 disabled:opacity-60"
         >
           {isLoading ? 'جاري الدخول...' : 'دخول'}
         </button>

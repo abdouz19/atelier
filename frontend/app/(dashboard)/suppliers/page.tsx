@@ -5,6 +5,8 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import { Plus } from 'lucide-react';
 import { useSupplierList } from '@/hooks/useSupplierList';
 import { SupplierTable } from '@/components/suppliers/SupplierTable';
+import { PageHeader } from '@/components/shared/PageHeader';
+import { AppCard } from '@/components/shared/AppCard';
 import { SupplierDetailView } from '@/components/suppliers/SupplierDetailView';
 import { AddSupplierModal } from '@/components/suppliers/AddSupplierModal';
 import { EditSupplierModal } from '@/components/suppliers/EditSupplierModal';
@@ -62,16 +64,18 @@ function SuppliersPageContent() {
 
   return (
     <div dir="rtl">
-      <div className="mb-6 flex items-center justify-between">
-        <h1 className="text-2xl font-bold text-gray-900">الموردون</h1>
-        <button
-          onClick={() => setShowAdd(true)}
-          className="flex items-center gap-2 rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700"
-        >
-          <Plus size={16} />
-          إضافة مورد
-        </button>
-      </div>
+      <PageHeader
+        title="الموردون"
+        actions={
+          <button
+            onClick={() => setShowAdd(true)}
+            className="flex items-center gap-2 rounded-lg bg-primary-500 px-4 py-2 text-sm font-medium text-white hover:bg-primary-600"
+          >
+            <Plus size={16} />
+            إضافة مورد
+          </button>
+        }
+      />
 
       {error && <div className="mb-4"><ErrorAlert message={error} /></div>}
 

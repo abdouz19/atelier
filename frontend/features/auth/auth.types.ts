@@ -154,6 +154,14 @@ declare global {
         getPeriodKpis: (payload: unknown) => Promise<unknown>;
         getChartData: (payload: unknown) => Promise<unknown>;
       };
+      settings: {
+        getAppearance: () => Promise<unknown>;
+        setAppearance: (payload: unknown) => Promise<unknown>;
+        getLogo: () => Promise<unknown>;
+        setLogo: (payload: { dataUrl: string }) => Promise<unknown>;
+        removeLogo: () => Promise<unknown>;
+        resetToDefaults: () => Promise<unknown>;
+      };
       on: (channel: string, callback: (...args: unknown[]) => void) => void;
       off: (channel: string, callback: (...args: unknown[]) => void) => void;
     };

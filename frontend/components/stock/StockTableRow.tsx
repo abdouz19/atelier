@@ -17,21 +17,21 @@ export function StockTableRow({ item, onRowClick, onAddInbound, onArchive }: Sto
 
   return (
     <tr
-      className="cursor-pointer border-b border-gray-100 hover:bg-gray-50 transition-colors"
+      className="odd:bg-surface even:bg-base/30 hover:bg-primary-50 transition-colors"
       onClick={() => onRowClick(item.id)}
     >
       {/* Name */}
       <td className="px-4 py-3">
-        <span className="font-medium text-gray-900">{item.name}</span>
+        <span className="font-medium text-text-base">{item.name}</span>
       </td>
 
       {/* Type */}
-      <td className="px-4 py-3 text-sm text-gray-600">{item.type}</td>
+      <td className="px-4 py-3 text-sm text-text-muted">{item.type}</td>
 
       {/* Quantity */}
       <td className="px-4 py-3">
         <div className="flex items-center gap-2">
-          <span className={`text-sm font-semibold ${isLow ? 'text-red-600' : 'text-gray-800'}`}>
+          <span className={`text-sm font-semibold ${isLow ? 'text-red-600' : 'text-text-base'}`}>
             {item.totalQuantity} {item.unit}
           </span>
           {hasMultipleVariants && (
@@ -48,7 +48,7 @@ export function StockTableRow({ item, onRowClick, onAddInbound, onArchive }: Sto
       </td>
 
       {/* Color */}
-      <td className="px-4 py-3 text-sm text-gray-600">
+      <td className="px-4 py-3 text-sm text-text-muted">
         {item.color ? (
           <span className="rounded-full bg-gray-100 px-2 py-0.5 text-xs">{item.color}</span>
         ) : null}
@@ -71,7 +71,7 @@ export function StockTableRow({ item, onRowClick, onAddInbound, onArchive }: Sto
       </td>
 
       {/* Description */}
-      <td className="max-w-xs px-4 py-3 text-sm text-gray-500">
+      <td className="max-w-xs px-4 py-3 text-sm text-text-muted">
         <span className="line-clamp-1">{item.description}</span>
       </td>
 
@@ -81,7 +81,7 @@ export function StockTableRow({ item, onRowClick, onAddInbound, onArchive }: Sto
           <button
             onClick={() => onAddInbound(item)}
             title="إضافة وارد"
-            className="rounded-lg p-1.5 text-gray-500 hover:bg-blue-50 hover:text-blue-600"
+            className="rounded-lg p-1.5 text-gray-500 hover:bg-primary-50 hover:text-primary-600"
           >
             <Plus size={16} />
           </button>
