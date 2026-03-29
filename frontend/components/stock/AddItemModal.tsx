@@ -128,7 +128,7 @@ export function AddItemModal({ suppliers, onClose, onSuccess }: AddItemModalProp
       footer={
         <>
           <button type="button" onClick={onClose} className="rounded-lg border border-border bg-surface px-4 py-2 text-sm font-medium text-text-base hover:bg-base">إلغاء</button>
-          <button type="submit" form="add-item-form" disabled={submitting} className="rounded-lg bg-primary-500 px-4 py-2 text-sm font-medium text-white hover:bg-primary-600 disabled:opacity-60">
+          <button type="submit" form="add-item-form" disabled={submitting} className="btn-tactile rounded-lg bg-primary-500 px-4 py-2 text-sm font-medium text-white hover:bg-primary-600 disabled:opacity-60">
             {submitting ? 'جاري الإضافة...' : 'إضافة'}
           </button>
         </>
@@ -138,7 +138,7 @@ export function AddItemModal({ suppliers, onClose, onSuccess }: AddItemModalProp
 
       <form id="add-item-form" onSubmit={handleSubmit(onSubmit)} className="space-y-4" noValidate>
         <FormField label="اسم الصنف" error={errors.name?.message} required>
-          <input {...register('name')} className="w-full rounded-lg border border-border px-3 py-2 text-sm outline-none focus:border-primary-500 focus:ring-2 focus:ring-primary-500/20" />
+          <input {...register('name')} className="w-full rounded-lg border border-border px-3 py-2 text-sm outline-none input-transition focus:border-primary-500 focus:ring-2 focus:ring-primary-500/20" />
           {duplicateWarning && <p className="mt-1 text-xs text-amber-600">يوجد صنف آخر بنفس الاسم</p>}
         </FormField>
 
@@ -171,7 +171,7 @@ export function AddItemModal({ suppliers, onClose, onSuccess }: AddItemModalProp
 
         <div className="grid grid-cols-2 gap-3">
           <FormField label="الكمية الابتدائية" error={errors.initialQuantity?.message} required>
-            <input {...register('initialQuantity')} type="number" min="0" step="any" className="w-full rounded-lg border border-border px-3 py-2 text-sm outline-none focus:border-primary-500 focus:ring-2 focus:ring-primary-500/20" />
+            <input {...register('initialQuantity')} type="number" min="0" step="any" className="w-full rounded-lg border border-border px-3 py-2 text-sm outline-none input-transition focus:border-primary-500 focus:ring-2 focus:ring-primary-500/20" />
           </FormField>
           <div>
             <label className="mb-1 block text-sm font-medium text-text-base">اللون (اختياري)</label>
@@ -187,7 +187,7 @@ export function AddItemModal({ suppliers, onClose, onSuccess }: AddItemModalProp
         </div>
 
         <FormField label="المورد (اختياري)">
-          <select {...register('supplierId')} className="w-full rounded-lg border border-border px-3 py-2 text-sm outline-none focus:border-primary-500 focus:ring-2 focus:ring-primary-500/20">
+          <select {...register('supplierId')} className="w-full rounded-lg border border-border px-3 py-2 text-sm outline-none input-transition focus:border-primary-500 focus:ring-2 focus:ring-primary-500/20">
             <option value="">-- بدون مورد --</option>
             {suppliers.map((s) => <option key={s.id} value={s.id}>{s.name}</option>)}
           </select>
@@ -200,7 +200,7 @@ export function AddItemModal({ suppliers, onClose, onSuccess }: AddItemModalProp
                 {...register('pricePerUnit')}
                 type="number" min="0" step="any"
                 onChange={(e) => { totalOverridden.current = false; register('pricePerUnit').onChange(e); }}
-                className="w-full rounded-lg border border-border px-3 py-2 text-sm outline-none focus:border-primary-500 focus:ring-2 focus:ring-primary-500/20"
+                className="w-full rounded-lg border border-border px-3 py-2 text-sm outline-none input-transition focus:border-primary-500 focus:ring-2 focus:ring-primary-500/20"
               />
             </FormField>
             <FormField label="الإجمالي (دج)">
@@ -208,7 +208,7 @@ export function AddItemModal({ suppliers, onClose, onSuccess }: AddItemModalProp
                 {...register('totalPricePaid')}
                 type="number" min="0" step="any"
                 onChange={(e) => { totalOverridden.current = true; register('totalPricePaid').onChange(e); }}
-                className="w-full rounded-lg border border-border px-3 py-2 text-sm outline-none focus:border-primary-500 focus:ring-2 focus:ring-primary-500/20"
+                className="w-full rounded-lg border border-border px-3 py-2 text-sm outline-none input-transition focus:border-primary-500 focus:ring-2 focus:ring-primary-500/20"
               />
             </FormField>
           </div>
@@ -220,11 +220,11 @@ export function AddItemModal({ suppliers, onClose, onSuccess }: AddItemModalProp
         </FormField>
 
         <FormField label="الوصف (اختياري)">
-          <input {...register('description')} className="w-full rounded-lg border border-border px-3 py-2 text-sm outline-none focus:border-primary-500 focus:ring-2 focus:ring-primary-500/20" />
+          <input {...register('description')} className="w-full rounded-lg border border-border px-3 py-2 text-sm outline-none input-transition focus:border-primary-500 focus:ring-2 focus:ring-primary-500/20" />
         </FormField>
 
         <FormField label="ملاحظات (اختيارية)">
-          <textarea {...register('notes')} rows={2} className="w-full rounded-lg border border-border px-3 py-2 text-sm outline-none focus:border-primary-500 focus:ring-2 focus:ring-primary-500/20" />
+          <textarea {...register('notes')} rows={2} className="w-full rounded-lg border border-border px-3 py-2 text-sm outline-none input-transition focus:border-primary-500 focus:ring-2 focus:ring-primary-500/20" />
         </FormField>
       </form>
     </AppModal>

@@ -165,7 +165,7 @@ export function AddFinitionRecordModal({ onClose, onSuccess, onNotReady }: AddFi
         <>
           <button type="button" onClick={onClose} className="rounded-lg border border-border bg-surface px-4 py-2 text-sm font-medium text-text-base hover:bg-base">إلغاء</button>
           <button type="submit" form="add-finition-form" disabled={submitting || !selectedQc}
-            className="rounded-lg bg-primary-500 px-4 py-2 text-sm font-medium text-white hover:bg-primary-600 disabled:opacity-60">
+            className="btn-tactile rounded-lg bg-primary-500 px-4 py-2 text-sm font-medium text-white hover:bg-primary-600 disabled:opacity-60">
             {submitting ? 'جاري الحفظ...' : 'حفظ'}
           </button>
         </>
@@ -181,7 +181,7 @@ export function AddFinitionRecordModal({ onClose, onSuccess, onNotReady }: AddFi
               <div className="space-y-2 max-h-48 overflow-y-auto">
                 {qcRecords.map(r => (
                   <button key={r.qcId} type="button" onClick={() => { setSelectedQc(r); setQuantity(String(r.finitionableRemaining)); }}
-                    className="w-full rounded-lg border border-border px-3 py-2 text-right text-sm hover:border-primary-500 hover:bg-primary-50">
+                    className="w-full rounded-lg border border-border px-3 py-2 text-right text-sm hover:border-primary-500 hover:bg-primary-500/10">
                     <span className="font-medium">{r.tailorName}</span> — {r.modelName} / {r.sizeLabel} / {r.color} — متاح: <strong>{r.finitionableRemaining}</strong>
                   </button>
                 ))}
@@ -189,8 +189,8 @@ export function AddFinitionRecordModal({ onClose, onSuccess, onNotReady }: AddFi
             )}
           </div>
         ) : (
-          <div className="rounded-lg bg-primary-50 px-3 py-2 text-sm text-gray-800">
-            <button type="button" onClick={() => setSelectedQc(null)} className="text-primary-600 hover:underline text-xs ml-2">تغيير</button>
+          <div className="rounded-lg border border-primary-500/20 px-3 py-2 text-sm text-text-base" style={{ background: 'rgba(96,165,250,0.08)' }}>
+            <button type="button" onClick={() => setSelectedQc(null)} className="text-primary-500 hover:underline text-xs ml-2">تغيير</button>
             <strong>{selectedQc.tailorName}</strong> — {selectedQc.modelName} / {selectedQc.sizeLabel} / {selectedQc.color} — متاح: {selectedQc.finitionableRemaining}
           </div>
         )}
@@ -200,7 +200,7 @@ export function AddFinitionRecordModal({ onClose, onSuccess, onNotReady }: AddFi
             <div>
               <label className="mb-1 block text-sm font-medium text-text-base">الموظف *</label>
               <select value={employeeId} onChange={e => setEmployeeId(e.target.value)}
-                className="w-full rounded-lg border border-border px-3 py-2 text-sm outline-none focus:border-primary-500 focus:ring-2 focus:ring-primary-500/20">
+                className="w-full rounded-lg border border-border px-3 py-2 text-sm outline-none input-transition focus:border-primary-500 focus:ring-2 focus:ring-primary-500/20">
                 <option value="">اختر الموظف</option>
                 {employees.map(e => <option key={e.id} value={e.id}>{e.name}</option>)}
               </select>
@@ -210,14 +210,14 @@ export function AddFinitionRecordModal({ onClose, onSuccess, onNotReady }: AddFi
               <label className="mb-1 block text-sm font-medium text-text-base">الكمية *</label>
               <input type="number" min={1} max={selectedQc.finitionableRemaining} value={quantity}
                 onChange={e => setQuantity(e.target.value)}
-                className="w-full rounded-lg border border-border px-3 py-2 text-sm outline-none focus:border-primary-500 focus:ring-2 focus:ring-primary-500/20" />
+                className="w-full rounded-lg border border-border px-3 py-2 text-sm outline-none input-transition focus:border-primary-500 focus:ring-2 focus:ring-primary-500/20" />
             </div>
 
             <div>
               <label className="mb-1 block text-sm font-medium text-text-base">سعر القطعة (دج) *</label>
               <input type="number" min={0} step="any" value={pricePerPiece}
                 onChange={e => setPricePerPiece(e.target.value)}
-                className="w-full rounded-lg border border-border px-3 py-2 text-sm outline-none focus:border-primary-500 focus:ring-2 focus:ring-primary-500/20" />
+                className="w-full rounded-lg border border-border px-3 py-2 text-sm outline-none input-transition focus:border-primary-500 focus:ring-2 focus:ring-primary-500/20" />
             </div>
 
             {Number(pricePerPiece) > 0 && qty > 0 && (
@@ -227,7 +227,7 @@ export function AddFinitionRecordModal({ onClose, onSuccess, onNotReady }: AddFi
             <div>
               <label className="mb-1 block text-sm font-medium text-text-base">التاريخ *</label>
               <input type="date" value={finitionDate} onChange={e => setFinitionDate(e.target.value)}
-                className="w-full rounded-lg border border-border px-3 py-2 text-sm outline-none focus:border-primary-500 focus:ring-2 focus:ring-primary-500/20" />
+                className="w-full rounded-lg border border-border px-3 py-2 text-sm outline-none input-transition focus:border-primary-500 focus:ring-2 focus:ring-primary-500/20" />
             </div>
 
             <ConsumedMaterialsEditor

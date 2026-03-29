@@ -93,7 +93,7 @@ export function AddInboundModal({ item, suppliers: initialSuppliers, onClose, on
         footer={
           <>
             <button type="button" onClick={onClose} className="rounded-lg border border-border bg-surface px-4 py-2 text-sm font-medium text-text-base hover:bg-base">إلغاء</button>
-            <button type="submit" form="add-inbound-form" disabled={submitting} className="rounded-lg bg-primary-500 px-4 py-2 text-sm font-medium text-white hover:bg-primary-600 disabled:opacity-60">
+            <button type="submit" form="add-inbound-form" disabled={submitting} className="btn-tactile rounded-lg bg-primary-500 px-4 py-2 text-sm font-medium text-white hover:bg-primary-600 disabled:opacity-60">
               {submitting ? 'جاري الإضافة...' : 'إضافة'}
             </button>
           </>
@@ -103,7 +103,7 @@ export function AddInboundModal({ item, suppliers: initialSuppliers, onClose, on
 
         <form id="add-inbound-form" onSubmit={handleSubmit(onSubmit)} className="space-y-4" noValidate>
           <FormField label="الكمية" error={errors.quantity?.message} required>
-            <input {...register('quantity')} type="number" min="0" step="any" className="w-full rounded-lg border border-border px-3 py-2 text-sm outline-none focus:border-primary-500 focus:ring-2 focus:ring-primary-500/20" />
+            <input {...register('quantity')} type="number" min="0" step="any" className="w-full rounded-lg border border-border px-3 py-2 text-sm outline-none input-transition focus:border-primary-500 focus:ring-2 focus:ring-primary-500/20" />
           </FormField>
 
           <div>
@@ -119,12 +119,12 @@ export function AddInboundModal({ item, suppliers: initialSuppliers, onClose, on
           </div>
 
           <FormField label="التاريخ" error={errors.transactionDate?.message} required>
-            <input {...register('transactionDate')} type="date" max={todayStr()} className="w-full rounded-lg border border-border px-3 py-2 text-sm outline-none focus:border-primary-500 focus:ring-2 focus:ring-primary-500/20" />
+            <input {...register('transactionDate')} type="date" max={todayStr()} className="w-full rounded-lg border border-border px-3 py-2 text-sm outline-none input-transition focus:border-primary-500 focus:ring-2 focus:ring-primary-500/20" />
           </FormField>
 
           <FormField label="المورد" error={errors.supplierId?.message} required>
             <div className="flex gap-2">
-              <select {...register('supplierId')} className="flex-1 rounded-lg border border-border px-3 py-2 text-sm outline-none focus:border-primary-500 focus:ring-2 focus:ring-primary-500/20">
+              <select {...register('supplierId')} className="flex-1 rounded-lg border border-border px-3 py-2 text-sm outline-none input-transition focus:border-primary-500 focus:ring-2 focus:ring-primary-500/20">
                 <option value="">-- اختر المورد --</option>
                 {suppliers.map((s) => <option key={s.id} value={s.id}>{s.name}</option>)}
               </select>
@@ -138,17 +138,17 @@ export function AddInboundModal({ item, suppliers: initialSuppliers, onClose, on
           <FormField label="سعر الوحدة" error={errors.pricePerUnit?.message} required>
             <input {...register('pricePerUnit')} type="number" min="0" step="any"
               onChange={(e) => { totalOverridden.current = false; register('pricePerUnit').onChange(e); }}
-              className="w-full rounded-lg border border-border px-3 py-2 text-sm outline-none focus:border-primary-500 focus:ring-2 focus:ring-primary-500/20" />
+              className="w-full rounded-lg border border-border px-3 py-2 text-sm outline-none input-transition focus:border-primary-500 focus:ring-2 focus:ring-primary-500/20" />
           </FormField>
 
           <FormField label="الإجمالي المدفوع (دج)" error={errors.totalPricePaid?.message} required>
             <input {...register('totalPricePaid')} type="number" min="0" step="any"
               onChange={(e) => { totalOverridden.current = true; register('totalPricePaid').onChange(e); }}
-              className="w-full rounded-lg border border-border px-3 py-2 text-sm outline-none focus:border-primary-500 focus:ring-2 focus:ring-primary-500/20" />
+              className="w-full rounded-lg border border-border px-3 py-2 text-sm outline-none input-transition focus:border-primary-500 focus:ring-2 focus:ring-primary-500/20" />
           </FormField>
 
           <FormField label="ملاحظات (اختيارية)">
-            <textarea {...register('notes')} rows={2} className="w-full rounded-lg border border-border px-3 py-2 text-sm outline-none focus:border-primary-500 focus:ring-2 focus:ring-primary-500/20" />
+            <textarea {...register('notes')} rows={2} className="w-full rounded-lg border border-border px-3 py-2 text-sm outline-none input-transition focus:border-primary-500 focus:ring-2 focus:ring-primary-500/20" />
           </FormField>
         </form>
       </AppModal>

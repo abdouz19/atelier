@@ -29,7 +29,7 @@ export function DistributionTailorDetail({ tailorId, onBack }: DistributionTailo
       ) : (
         <div className="space-y-4">
           {detail.batches.map((batch) => (
-            <div key={batch.id} className="rounded-xl border border-border bg-white overflow-hidden">
+            <div key={batch.id} className="rounded-xl border border-border bg-surface overflow-hidden">
               <div className="bg-base/60 px-4 py-3 flex flex-wrap gap-x-6 gap-y-1 text-sm">
                 <span><span className="text-text-muted">النموذج:</span> <strong>{batch.modelName}</strong></span>
                 {batch.expectedPiecesCount > 0 && (
@@ -48,7 +48,7 @@ export function DistributionTailorDetail({ tailorId, onBack }: DistributionTailo
                   <p className="mb-2 text-xs font-medium text-text-muted">الأجزاء المعطاة</p>
                   <div className="flex flex-wrap gap-2">
                     {batch.parts.map(p => (
-                      <span key={p.partName} className="rounded-md bg-blue-50 px-2 py-1 text-xs text-blue-700">{p.partName}: {p.quantity}</span>
+                      <span key={p.partName} className="rounded-md px-2 py-1 text-xs" style={{ background: 'rgba(59,130,246,0.12)', color: '#60a5fa' }}>{p.partName}: {p.quantity}</span>
                     ))}
                   </div>
                 </div>

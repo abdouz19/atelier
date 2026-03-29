@@ -146,7 +146,7 @@ export function DistributeModal({ onClose, onSuccess }: DistributeModalProps) {
       footer={
         <>
           <button type="button" onClick={onClose} className="rounded-lg border border-border bg-surface px-4 py-2 text-sm font-medium text-text-base hover:bg-base">إلغاء</button>
-          <button type="submit" form="distribute-modal-form" disabled={submitting} className="rounded-lg bg-primary-500 px-4 py-2 text-sm font-medium text-white hover:bg-primary-600 disabled:opacity-60">
+          <button type="submit" form="distribute-modal-form" disabled={submitting} className="btn-tactile rounded-lg bg-primary-500 px-4 py-2 text-sm font-medium text-white hover:bg-primary-600 disabled:opacity-60">
             {submitting ? 'جاري التوزيع...' : 'توزيع'}
           </button>
         </>
@@ -155,7 +155,7 @@ export function DistributeModal({ onClose, onSuccess }: DistributeModalProps) {
       <form id="distribute-modal-form" onSubmit={handleSubmit} className="space-y-3">
         <div>
           <label className="mb-1 block text-sm font-medium text-text-base">الخياط *</label>
-          <select value={tailorId} onChange={e => setTailorId(e.target.value)} className="w-full rounded-lg border border-border px-3 py-2 text-sm outline-none focus:border-primary-500 focus:ring-2 focus:ring-primary-500/20">
+          <select value={tailorId} onChange={e => setTailorId(e.target.value)} className="w-full rounded-lg border border-border px-3 py-2 text-sm outline-none input-transition focus:border-primary-500 focus:ring-2 focus:ring-primary-500/20">
             <option value="">اختر الخياط</option>
             {activeTailors.map(t => <option key={t.id} value={t.id}>{t.name}</option>)}
           </select>
@@ -175,14 +175,14 @@ export function DistributeModal({ onClose, onSuccess }: DistributeModalProps) {
           <div className="grid grid-cols-2 gap-3">
             <div>
               <label className="mb-1 block text-sm font-medium text-text-base">المقاس *</label>
-              <select value={sizeLabel} onChange={e => handleSizeChange(e.target.value)} className="w-full rounded-lg border border-border px-3 py-2 text-sm outline-none focus:border-primary-500 focus:ring-2 focus:ring-primary-500/20">
+              <select value={sizeLabel} onChange={e => handleSizeChange(e.target.value)} className="w-full rounded-lg border border-border px-3 py-2 text-sm outline-none input-transition focus:border-primary-500 focus:ring-2 focus:ring-primary-500/20">
                 <option value="">اختر المقاس</option>
                 {availableSizes.map(s => <option key={s} value={s}>{s}</option>)}
               </select>
             </div>
             <div>
               <label className="mb-1 block text-sm font-medium text-text-base">اللون *</label>
-              <select value={color} onChange={e => handleColorChange(e.target.value)} disabled={!sizeLabel} className="w-full rounded-lg border border-border px-3 py-2 text-sm outline-none focus:border-primary-500 focus:ring-2 focus:ring-primary-500/20 disabled:opacity-50">
+              <select value={color} onChange={e => handleColorChange(e.target.value)} disabled={!sizeLabel} className="w-full rounded-lg border border-border px-3 py-2 text-sm outline-none input-transition focus:border-primary-500 focus:ring-2 focus:ring-primary-500/20 disabled:opacity-50">
                 <option value="">اختر اللون</option>
                 {availableColors.map(c => <option key={c} value={c}>{c}</option>)}
               </select>
@@ -191,11 +191,11 @@ export function DistributeModal({ onClose, onSuccess }: DistributeModalProps) {
         )}
         <div>
           <label className="mb-1 block text-sm font-medium text-text-base">القطع المتوقعة (النهائية) *</label>
-          <input type="number" min={1} step={1} value={expectedPiecesCount} onChange={e => setExpectedPiecesCount(e.target.value)} className="w-full rounded-lg border border-border px-3 py-2 text-sm outline-none focus:border-primary-500 focus:ring-2 focus:ring-primary-500/20" />
+          <input type="number" min={1} step={1} value={expectedPiecesCount} onChange={e => setExpectedPiecesCount(e.target.value)} className="w-full rounded-lg border border-border px-3 py-2 text-sm outline-none input-transition focus:border-primary-500 focus:ring-2 focus:ring-primary-500/20" />
         </div>
         <div>
           <label className="mb-1 block text-sm font-medium text-text-base">سعر الخياطة للقطعة *</label>
-          <input type="number" step="any" min={0.01} value={pricePerPiece} onChange={e => setPricePerPiece(e.target.value)} className="w-full rounded-lg border border-border px-3 py-2 text-sm outline-none focus:border-primary-500 focus:ring-2 focus:ring-primary-500/20" />
+          <input type="number" step="any" min={0.01} value={pricePerPiece} onChange={e => setPricePerPiece(e.target.value)} className="w-full rounded-lg border border-border px-3 py-2 text-sm outline-none input-transition focus:border-primary-500 focus:ring-2 focus:ring-primary-500/20" />
         </div>
         {totalCost > 0 && (
           <div className="rounded-lg bg-base px-3 py-2 text-sm">الإجمالي: <strong>{totalCost.toFixed(2)} دج</strong></div>
@@ -214,11 +214,11 @@ export function DistributeModal({ onClose, onSuccess }: DistributeModalProps) {
               const avail = getAvailable(row.partName);
               return (
                 <div key={i} className="mb-2 flex items-center gap-2">
-                  <select value={row.partName} onChange={e => updatePartRow(i, { partName: e.target.value })} className="flex-1 rounded-lg border border-border px-3 py-1.5 text-sm outline-none focus:border-primary-500 focus:ring-2 focus:ring-primary-500/20">
+                  <select value={row.partName} onChange={e => updatePartRow(i, { partName: e.target.value })} className="flex-1 rounded-lg border border-border px-3 py-1.5 text-sm outline-none input-transition focus:border-primary-500 focus:ring-2 focus:ring-primary-500/20">
                     <option value="">اختر الجزء</option>
                     {availableParts.map(p => <option key={p.partName} value={p.partName}>{p.partName} (متاح: {p.availableCount})</option>)}
                   </select>
-                  <input type="number" min={1} max={avail || undefined} value={row.quantity || ''} onChange={e => updatePartRow(i, { quantity: Number(e.target.value) })} placeholder="الكمية" className="w-24 rounded-lg border border-border px-3 py-1.5 text-sm outline-none focus:border-primary-500 focus:ring-2 focus:ring-primary-500/20" />
+                  <input type="number" min={1} max={avail || undefined} value={row.quantity || ''} onChange={e => updatePartRow(i, { quantity: Number(e.target.value) })} placeholder="الكمية" className="w-24 rounded-lg border border-border px-3 py-1.5 text-sm outline-none input-transition focus:border-primary-500 focus:ring-2 focus:ring-primary-500/20" />
                   <button type="button" onClick={() => removePartRow(i)} className="text-text-muted hover:text-red-500"><X size={14} /></button>
                 </div>
               );
@@ -227,7 +227,7 @@ export function DistributeModal({ onClose, onSuccess }: DistributeModalProps) {
         )}
         <div>
           <label className="mb-1 block text-sm font-medium text-text-base">التاريخ *</label>
-          <input type="date" value={distributionDate} onChange={e => setDistributionDate(e.target.value)} className="w-full rounded-lg border border-border px-3 py-2 text-sm outline-none focus:border-primary-500 focus:ring-2 focus:ring-primary-500/20" />
+          <input type="date" value={distributionDate} onChange={e => setDistributionDate(e.target.value)} className="w-full rounded-lg border border-border px-3 py-2 text-sm outline-none input-transition focus:border-primary-500 focus:ring-2 focus:ring-primary-500/20" />
         </div>
         <ConsumedMaterialsEditor
           nonFabricItems={nonFabricItems}

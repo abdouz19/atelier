@@ -41,9 +41,10 @@ export function AvailabilityTableSelector({ combinations, selected, onSelect }: 
                 onClick={() => !isZero && onSelect(combo)}
                 className={[
                   'border-t border-border transition-colors',
-                  isZero ? 'cursor-not-allowed opacity-40' : 'cursor-pointer hover:bg-primary-50',
-                  isSelected ? 'bg-primary-100 ring-1 ring-inset ring-primary-400' : '',
+                  isZero ? 'cursor-not-allowed opacity-30' : 'cursor-pointer hover:bg-white/3',
+                  isSelected ? 'ring-1 ring-inset ring-primary-500/40' : '',
                 ].join(' ')}
+                style={isSelected ? { background: 'rgba(96,165,250,0.08)' } : undefined}
               >
                 <td className="px-3 py-2">{combo.partName ?? '—'}</td>
                 <td className="px-3 py-2">{combo.sizeLabel}</td>

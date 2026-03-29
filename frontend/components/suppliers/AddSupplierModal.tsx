@@ -54,7 +54,7 @@ export function AddSupplierModal({ onClose, onSuccess }: AddSupplierModalProps) 
       footer={
         <>
           <button type="button" onClick={onClose} className="rounded-lg border border-border bg-surface px-4 py-2 text-sm font-medium text-text-base hover:bg-base">إلغاء</button>
-          <button type="submit" form="add-supplier-form" disabled={submitting} className="rounded-lg bg-primary-500 px-4 py-2 text-sm font-medium text-white hover:bg-primary-600 disabled:opacity-60">
+          <button type="submit" form="add-supplier-form" disabled={submitting} className="btn-tactile rounded-lg bg-primary-500 px-4 py-2 text-sm font-medium text-white hover:bg-primary-600 disabled:opacity-60">
             {submitting ? 'جاري الإضافة...' : 'إضافة'}
           </button>
         </>
@@ -64,23 +64,23 @@ export function AddSupplierModal({ onClose, onSuccess }: AddSupplierModalProps) 
 
       <form id="add-supplier-form" onSubmit={handleSubmit(onSubmit)} className="space-y-4" noValidate>
         <FormField label="اسم المورد" error={errors.name?.message} required>
-          <input {...register('name')} className="w-full rounded-lg border border-border px-3 py-2 text-sm outline-none focus:border-primary-500 focus:ring-2 focus:ring-primary-500/20" />
+          <input {...register('name')} className="w-full rounded-lg border border-border px-3 py-2 text-sm outline-none input-transition focus:border-primary-500 focus:ring-2 focus:ring-primary-500/20" />
         </FormField>
 
         <FormField label="رقم الهاتف (اختياري)">
-          <input {...register('phone')} className="w-full rounded-lg border border-border px-3 py-2 text-sm outline-none focus:border-primary-500 focus:ring-2 focus:ring-primary-500/20" />
+          <input {...register('phone')} className="w-full rounded-lg border border-border px-3 py-2 text-sm outline-none input-transition focus:border-primary-500 focus:ring-2 focus:ring-primary-500/20" />
         </FormField>
 
         <FormField label="العنوان (اختياري)">
-          <input {...register('address')} className="w-full rounded-lg border border-border px-3 py-2 text-sm outline-none focus:border-primary-500 focus:ring-2 focus:ring-primary-500/20" />
+          <input {...register('address')} className="w-full rounded-lg border border-border px-3 py-2 text-sm outline-none input-transition focus:border-primary-500 focus:ring-2 focus:ring-primary-500/20" />
         </FormField>
 
         <FormField label="المنتجات (اختياري)">
-          <input {...register('productsSold')} className="w-full rounded-lg border border-border px-3 py-2 text-sm outline-none focus:border-primary-500 focus:ring-2 focus:ring-primary-500/20" />
+          <input {...register('productsSold')} className="w-full rounded-lg border border-border px-3 py-2 text-sm outline-none input-transition focus:border-primary-500 focus:ring-2 focus:ring-primary-500/20" />
         </FormField>
 
         <FormField label="ملاحظات (اختيارية)">
-          <textarea {...register('notes')} rows={2} className="w-full rounded-lg border border-border px-3 py-2 text-sm outline-none focus:border-primary-500 focus:ring-2 focus:ring-primary-500/20" />
+          <textarea {...register('notes')} rows={2} className="w-full rounded-lg border border-border px-3 py-2 text-sm outline-none input-transition focus:border-primary-500 focus:ring-2 focus:ring-primary-500/20" />
         </FormField>
       </form>
     </AppModal>

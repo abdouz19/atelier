@@ -1,6 +1,6 @@
 # atelier Development Guidelines
 
-Auto-generated from all feature plans. Last updated: 2026-03-27
+Auto-generated from all feature plans. Last updated: 2026-03-28
 
 ## Active Technologies
 - TypeScript 5 (frontend) + Node.js / plain JavaScript (Electron main process) + Next.js 16 (App Router, `output: export`), Electron 41, better-sqlite3, react-hook-form, Zod, Tailwind CSS (003-suppliers-purchases)

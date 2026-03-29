@@ -31,21 +31,21 @@ export function ConsumptionRowsEditor({ rows, onChange, items, error }: Consumpt
         return (
           <div key={i} className="mb-2 flex flex-wrap items-center gap-2">
             <select value={row.stockItemId} onChange={(e) => update(i, { stockItemId: e.target.value, color: null })}
-              className="rounded-lg border border-gray-200 px-3 py-1.5 text-sm focus:border-primary-500 focus:outline-none">
+              className="rounded-lg border border-border px-3 py-1.5 text-sm input-transition focus:border-primary-500 focus:outline-none">
               <option value="">اختر المادة</option>
               {items.map(it => <option key={it.id} value={it.id}>{it.name}</option>)}
             </select>
             {item && item.colors.length > 0 && (
               <select value={row.color ?? ''} onChange={(e) => update(i, { color: e.target.value || null })}
-                className="rounded-lg border border-gray-200 px-3 py-1.5 text-sm focus:border-primary-500 focus:outline-none">
+                className="rounded-lg border border-border px-3 py-1.5 text-sm input-transition focus:border-primary-500 focus:outline-none">
                 <option value="">اللون</option>
                 {item.colors.map(c => <option key={c.color} value={c.color}>{c.color} ({c.available})</option>)}
               </select>
             )}
             <input type="number" min={0.01} step="any" value={row.quantity || ''} onChange={(e) => update(i, { quantity: Number(e.target.value) })}
               placeholder={`الكمية (متاح: ${availForColor})`}
-              className="w-32 rounded-lg border border-gray-200 px-3 py-1.5 text-sm focus:border-primary-500 focus:outline-none" />
-            <button type="button" onClick={() => removeRow(i)} className="text-gray-400 hover:text-red-500"><X size={14} /></button>
+              className="w-32 rounded-lg border border-border px-3 py-1.5 text-sm input-transition focus:border-primary-500 focus:outline-none" />
+            <button type="button" onClick={() => removeRow(i)} className="text-text-muted hover:text-red-400"><X size={14} /></button>
           </div>
         );
       })}

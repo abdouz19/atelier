@@ -99,7 +99,7 @@ export function AppearanceSettings() {
             <p className="mb-2 text-sm font-semibold text-text-base">الشعار</p>
             <div className="flex items-center gap-3">
               {currentLogo ? (
-                <img src={currentLogo} alt="الشعار" className="h-12 w-auto max-w-[120px] rounded-lg border border-border object-contain p-1" />
+                <img src={currentLogo} alt="الشعار" className="h-12 w-auto max-w-30 rounded-lg border border-border object-contain p-1" />
               ) : (
                 <div className="flex h-12 w-24 items-center justify-center rounded-lg border-2 border-dashed border-border text-xs text-text-muted">
                   لا يوجد شعار
@@ -115,7 +115,10 @@ export function AppearanceSettings() {
               {currentLogo && (
                 <button
                   onClick={() => { setStagedLogo(null); setStoreLogo(null); }}
-                  className="flex items-center gap-1.5 rounded-lg border border-red-200 bg-red-50 px-3 py-1.5 text-sm font-medium text-red-600 hover:bg-red-100"
+                  className="flex items-center gap-1.5 rounded-lg border px-3 py-1.5 text-sm font-medium transition-colors"
+                  style={{ borderColor: 'rgba(239,68,68,0.25)', background: 'rgba(239,68,68,0.08)', color: '#f87171' }}
+                  onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.background = 'rgba(239,68,68,0.14)'; }}
+                  onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.background = 'rgba(239,68,68,0.08)'; }}
                 >
                   <X size={14} />
                   إزالة
@@ -141,8 +144,8 @@ export function AppearanceSettings() {
                   onClick={() => handleThemeChange(id)}
                   className={`flex flex-1 flex-col items-center gap-2 rounded-xl border-2 px-4 py-3 transition-colors ${
                     currentTheme === id
-                      ? 'border-primary-500 bg-primary-50 text-primary-600'
-                      : 'border-border bg-surface text-text-muted hover:border-primary-500/40'
+                      ? 'border-primary-500 bg-primary-500/10 text-primary-500'
+                      : 'border-border bg-surface text-text-muted hover:border-primary-500/40 hover:bg-white/3'
                   }`}
                 >
                   <Icon size={20} />
@@ -197,7 +200,7 @@ export function AppearanceSettings() {
         </div>
 
         {/* Right: live preview */}
-        <div className="flex-shrink-0">
+        <div className="shrink-0">
           <LivePreview />
         </div>
       </div>

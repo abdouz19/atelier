@@ -12,11 +12,11 @@ interface EmployeeTableRowProps {
 
 export function EmployeeTableRow({ employee, onClick, onEdit, onSetStatus }: EmployeeTableRowProps) {
   const isActive = employee.status === 'active';
-  const balanceColor = employee.balanceDue < 0 ? 'text-red-600' : 'text-text-base';
+  const balanceColor = employee.balanceDue < 0 ? 'text-red-400' : 'text-text-base';
 
   return (
     <tr
-      className="cursor-pointer transition-colors odd:bg-surface even:bg-base/30 hover:bg-primary-50"
+      className="cursor-pointer transition-colors odd:bg-surface even:bg-base/30 hover:bg-white/3"
       onClick={onClick}
     >
       <td className="px-4 py-3">
@@ -40,11 +40,10 @@ export function EmployeeTableRow({ employee, onClick, onEdit, onSetStatus }: Emp
       </td>
       <td className="px-4 py-3">
         <span
-          className={`inline-flex rounded-full px-2.5 py-0.5 text-xs font-medium ${
-            isActive
-              ? 'bg-green-100 text-green-800'
-              : 'bg-gray-100 text-gray-600'
-          }`}
+          className="inline-flex rounded-full px-2.5 py-0.5 text-xs font-medium"
+          style={isActive
+            ? { background: 'rgba(16,185,129,0.15)', color: '#34d399' }
+            : { background: 'rgba(100,116,139,0.15)', color: '#94a3b8' }}
         >
           {isActive ? 'نشط' : 'غير نشط'}
         </span>

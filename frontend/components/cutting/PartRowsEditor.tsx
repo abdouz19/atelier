@@ -77,15 +77,15 @@ export function PartRowsEditor({ rows, onChange, error }: PartRowsEditorProps) {
             value={row.count || ''}
             onChange={e => update(i, { count: Math.max(1, parseInt(e.target.value, 10) || 0) })}
             placeholder="العدد"
-            className="w-20 rounded-lg border border-gray-200 px-3 py-1.5 text-sm focus:border-primary-500 focus:outline-none"
+            className="w-20 rounded-lg border border-border px-3 py-1.5 text-sm input-transition focus:border-primary-500 focus:outline-none"
           />
-          <button type="button" onClick={() => removeRow(i)} className="text-gray-400 hover:text-red-500">
+          <button type="button" onClick={() => removeRow(i)} className="text-text-muted hover:text-red-400">
             <X size={14} />
           </button>
         </div>
       ))}
       {rows.length === 0 && (
-        <p className="text-xs text-gray-400">أضف جزءاً واحداً على الأقل</p>
+        <p className="text-xs text-text-muted">أضف جزءاً واحداً على الأقل</p>
       )}
       {error && <p className="mt-1 text-xs text-red-500">{error}</p>}
     </div>

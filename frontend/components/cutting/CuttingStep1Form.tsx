@@ -91,7 +91,7 @@ export function CuttingStep1Form({ onNext, onClose }: CuttingStep1FormProps) {
       <div className="grid grid-cols-2 gap-3">
         <div>
           <label className="mb-1 block text-sm font-medium">القماش *</label>
-          <select {...register('fabricItemId')} className="w-full rounded-lg border border-border px-3 py-2 text-sm focus:border-primary-500 focus:outline-none">
+          <select {...register('fabricItemId')} className="w-full rounded-lg border border-border px-3 py-2 text-sm input-transition focus:border-primary-500 focus:outline-none">
             <option value="">اختر</option>
             {fabrics.map(f => <option key={f.id} value={f.id}>{f.name}</option>)}
           </select>
@@ -125,7 +125,7 @@ export function CuttingStep1Form({ onNext, onClose }: CuttingStep1FormProps) {
       </div>
       <div>
         <label className="mb-1 block text-sm font-medium">الأمتار المستخدمة * {fabricColor && <span className="text-text-muted">(متاح: {availableMeters} م)</span>}</label>
-        <input type="number" step="any" {...register('metersUsed')} className="w-full rounded-lg border border-border px-3 py-2 text-sm focus:border-primary-500 focus:outline-none" />
+        <input type="number" step="any" {...register('metersUsed')} className="w-full rounded-lg border border-border px-3 py-2 text-sm input-transition focus:border-primary-500 focus:outline-none" />
         {errors.metersUsed && <p className="mt-1 text-xs text-red-500">{errors.metersUsed.message}</p>}
       </div>
       <div>
@@ -142,29 +142,33 @@ export function CuttingStep1Form({ onNext, onClose }: CuttingStep1FormProps) {
       <div className="grid grid-cols-2 gap-3">
         <div>
           <label className="mb-1 block text-sm font-medium">عدد الطبقات *</label>
-          <input type="number" min={1} {...register('layers')} className="w-full rounded-lg border border-border px-3 py-2 text-sm focus:border-primary-500 focus:outline-none" />
+          <input type="number" min={1} {...register('layers')} className="w-full rounded-lg border border-border px-3 py-2 text-sm input-transition focus:border-primary-500 focus:outline-none" />
           {errors.layers && <p className="mt-1 text-xs text-red-500">{errors.layers.message}</p>}
         </div>
         <div>
           <label className="mb-1 block text-sm font-medium">سعر الطبقة *</label>
-          <input type="number" step="any" {...register('pricePerLayer')} className="w-full rounded-lg border border-border px-3 py-2 text-sm focus:border-primary-500 focus:outline-none" />
+          <input type="number" step="any" {...register('pricePerLayer')} className="w-full rounded-lg border border-border px-3 py-2 text-sm input-transition focus:border-primary-500 focus:outline-none" />
           {errors.pricePerLayer && <p className="mt-1 text-xs text-red-500">{errors.pricePerLayer.message}</p>}
         </div>
       </div>
-      {totalCost > 0 && <div className="rounded-lg bg-primary-50 px-3 py-2 text-sm">التكلفة لكل موظف: <strong>{totalCost.toLocaleString('en-US')} دج</strong></div>}
+      {totalCost > 0 && (
+        <div className="rounded-lg border px-3 py-2 text-sm" style={{ background: 'rgba(96,165,250,0.08)', borderColor: 'rgba(96,165,250,0.2)', color: '#94a3b8' }}>
+          التكلفة لكل موظف: <strong style={{ color: '#60a5fa' }}>{totalCost.toLocaleString('en-US')} دج</strong>
+        </div>
+      )}
       <div className="grid grid-cols-2 gap-3">
         <div>
           <label className="mb-1 block text-sm font-medium">التاريخ *</label>
-          <input type="date" {...register('sessionDate')} className="w-full rounded-lg border border-border px-3 py-2 text-sm focus:border-primary-500 focus:outline-none" />
+          <input type="date" {...register('sessionDate')} className="w-full rounded-lg border border-border px-3 py-2 text-sm input-transition focus:border-primary-500 focus:outline-none" />
         </div>
         <div>
           <label className="mb-1 block text-sm font-medium">ملاحظات</label>
-          <input {...register('notes')} className="w-full rounded-lg border border-border px-3 py-2 text-sm focus:border-primary-500 focus:outline-none" />
+          <input {...register('notes')} className="w-full rounded-lg border border-border px-3 py-2 text-sm input-transition focus:border-primary-500 focus:outline-none" />
         </div>
       </div>
       <div className="flex justify-end gap-2 pt-2">
         <button type="button" onClick={onClose} className="rounded-lg border border-border px-4 py-2 text-sm hover:bg-base/60">إلغاء</button>
-        <button type="submit" className="rounded-lg bg-primary-500 px-4 py-2 text-sm font-medium text-white hover:bg-primary-600">التالي ←</button>
+        <button type="submit" className="btn-tactile rounded-lg bg-primary-500 px-4 py-2 text-sm font-medium text-white hover:bg-primary-600">التالي ←</button>
       </div>
     </form>
   );

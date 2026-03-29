@@ -26,7 +26,7 @@ export function QcConsumptionEditor({ rows, onChange, items }: QcConsumptionEdit
   return (
     <div dir="rtl">
       <div className="mb-2 flex items-center justify-between">
-        <span className="text-sm font-medium text-gray-700">مواد مستهلكة (اختياري)</span>
+        <span className="text-sm font-medium text-text-base">مواد مستهلكة (اختياري)</span>
         <button type="button" onClick={addRow} className="flex items-center gap-1 text-xs text-primary-600 hover:underline">
           <Plus size={13} />إضافة مادة
         </button>
@@ -41,7 +41,7 @@ export function QcConsumptionEditor({ rows, onChange, items }: QcConsumptionEdit
             <select
               value={row.stockItemId}
               onChange={(e) => update(i, { stockItemId: e.target.value, color: undefined })}
-              className="rounded-lg border border-gray-200 px-3 py-1.5 text-sm text-gray-900 focus:border-primary-500 focus:outline-none"
+              className="rounded-lg border border-border px-3 py-1.5 text-sm text-text-base input-transition focus:border-primary-500 focus:outline-none"
             >
               <option value="">اختر المادة</option>
               {items.map(it => <option key={it.id} value={it.id}>{it.name}</option>)}
@@ -50,7 +50,7 @@ export function QcConsumptionEditor({ rows, onChange, items }: QcConsumptionEdit
               <select
                 value={row.color ?? ''}
                 onChange={(e) => update(i, { color: e.target.value || undefined })}
-                className="rounded-lg border border-gray-200 px-3 py-1.5 text-sm text-gray-900 focus:border-primary-500 focus:outline-none"
+                className="rounded-lg border border-border px-3 py-1.5 text-sm text-text-base input-transition focus:border-primary-500 focus:outline-none"
               >
                 <option value="">اللون</option>
                 {item.colors.map(c => <option key={c.color} value={c.color}>{c.color} ({c.available})</option>)}
@@ -63,9 +63,9 @@ export function QcConsumptionEditor({ rows, onChange, items }: QcConsumptionEdit
               value={row.quantity || ''}
               onChange={(e) => update(i, { quantity: Number(e.target.value) })}
               placeholder={`الكمية (متاح: ${availForColor})`}
-              className="w-32 rounded-lg border border-gray-200 px-3 py-1.5 text-sm text-gray-900 focus:border-primary-500 focus:outline-none"
+              className="w-32 rounded-lg border border-border px-3 py-1.5 text-sm text-text-base input-transition focus:border-primary-500 focus:outline-none"
             />
-            <button type="button" onClick={() => removeRow(i)} className="text-gray-400 hover:text-red-500">
+            <button type="button" onClick={() => removeRow(i)} className="text-text-muted hover:text-red-400">
               <X size={14} />
             </button>
           </div>

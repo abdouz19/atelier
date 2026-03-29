@@ -69,7 +69,7 @@ export function ReturnModal({ onClose, onSuccess }: ReturnModalProps) {
       footer={
         <>
           <button type="button" onClick={onClose} className="rounded-lg border border-border bg-surface px-4 py-2 text-sm font-medium text-text-base hover:bg-base">إلغاء</button>
-          <button type="submit" form="return-modal-form" disabled={submitting || !selectedBatch} className="rounded-lg bg-primary-500 px-4 py-2 text-sm font-medium text-white hover:bg-primary-600 disabled:opacity-60">
+          <button type="submit" form="return-modal-form" disabled={submitting || !selectedBatch} className="btn-tactile rounded-lg bg-primary-500 px-4 py-2 text-sm font-medium text-white hover:bg-primary-600 disabled:opacity-60">
             {submitting ? 'جاري الحفظ...' : 'تسجيل الارتجاع'}
           </button>
         </>
@@ -78,7 +78,7 @@ export function ReturnModal({ onClose, onSuccess }: ReturnModalProps) {
       <form id="return-modal-form" onSubmit={handleSubmit} className="space-y-4">
         <div>
           <label className="mb-1 block text-sm font-medium text-text-base">الخياط *</label>
-          <select value={tailorId} onChange={e => { setTailorId(e.target.value); setSelectedBatch(null); }} className="w-full rounded-lg border border-border px-3 py-2 text-sm outline-none focus:border-primary-500 focus:ring-2 focus:ring-primary-500/20">
+          <select value={tailorId} onChange={e => { setTailorId(e.target.value); setSelectedBatch(null); }} className="w-full rounded-lg border border-border px-3 py-2 text-sm outline-none input-transition focus:border-primary-500 focus:ring-2 focus:ring-primary-500/20">
             <option value="">اختر الخياط</option>
             {activeTailors.map(t => <option key={t.id} value={t.id}>{t.name}</option>)}
           </select>
@@ -94,7 +94,7 @@ export function ReturnModal({ onClose, onSuccess }: ReturnModalProps) {
             <div className="space-y-2 max-h-48 overflow-y-auto">
               {batches.map(b => (
                 <button key={b.id} type="button" onClick={() => selectBatch(b)}
-                  className="w-full rounded-lg border border-border px-3 py-2 text-right text-sm hover:border-primary-500 hover:bg-primary-50">
+                  className="w-full rounded-lg border border-border px-3 py-2 text-right text-sm hover:border-primary-500 hover:bg-primary-500/10">
                   <span className="font-medium">{b.modelName}</span>
                   {b.sizeLabel && <> — {b.sizeLabel}</>}
                   {b.color && <> — {b.color}</>}
@@ -108,9 +108,9 @@ export function ReturnModal({ onClose, onSuccess }: ReturnModalProps) {
 
         {selectedBatch && (
           <>
-            <div className="rounded-lg bg-primary-50 px-3 py-2 text-sm space-y-1">
+            <div className="rounded-lg border border-primary-500/20 px-3 py-2 text-sm space-y-1" style={{ background: 'rgba(96,165,250,0.08)' }}>
               <div>
-                <button type="button" onClick={() => setSelectedBatch(null)} className="text-primary-600 hover:underline text-xs ml-2">تغيير</button>
+                <button type="button" onClick={() => setSelectedBatch(null)} className="text-primary-500 hover:underline text-xs ml-2">تغيير</button>
                 <strong>{selectedBatch.modelName}</strong>
                 {selectedBatch.sizeLabel && <> — {selectedBatch.sizeLabel}</>}
                 {selectedBatch.color && <> — {selectedBatch.color}</>}
@@ -124,7 +124,7 @@ export function ReturnModal({ onClose, onSuccess }: ReturnModalProps) {
             </div>
             <div>
               <label className="mb-1 block text-sm font-medium text-text-base">الكمية المرتجعة *</label>
-              <input type="number" min={1} max={selectedBatch.remainingQuantity} value={quantityReturned} onChange={e => setQuantityReturned(e.target.value)} className="w-full rounded-lg border border-border px-3 py-2 text-sm outline-none focus:border-primary-500 focus:ring-2 focus:ring-primary-500/20" />
+              <input type="number" min={1} max={selectedBatch.remainingQuantity} value={quantityReturned} onChange={e => setQuantityReturned(e.target.value)} className="w-full rounded-lg border border-border px-3 py-2 text-sm outline-none input-transition focus:border-primary-500 focus:ring-2 focus:ring-primary-500/20" />
             </div>
             <ConsumedMaterialsEditor
               nonFabricItems={nonFabricItems}
@@ -134,7 +134,7 @@ export function ReturnModal({ onClose, onSuccess }: ReturnModalProps) {
             />
             <div>
               <label className="mb-1 block text-sm font-medium text-text-base">التاريخ *</label>
-              <input type="date" value={returnDate} onChange={e => setReturnDate(e.target.value)} className="w-full rounded-lg border border-border px-3 py-2 text-sm outline-none focus:border-primary-500 focus:ring-2 focus:ring-primary-500/20" />
+              <input type="date" value={returnDate} onChange={e => setReturnDate(e.target.value)} className="w-full rounded-lg border border-border px-3 py-2 text-sm outline-none input-transition focus:border-primary-500 focus:ring-2 focus:ring-primary-500/20" />
             </div>
           </>
         )}

@@ -34,8 +34,8 @@ export function FinalStockHistoryPanel({
   }
 
   return (
-    <div className="mt-4 overflow-hidden rounded-xl border border-primary-200 bg-primary-50" dir="rtl">
-      <div className="flex items-center justify-between border-b border-primary-200 bg-white px-4 py-3">
+    <div className="mt-4 overflow-hidden rounded-xl border border-border bg-surface" dir="rtl">
+      <div className="flex items-center justify-between border-b border-border bg-base/60 px-4 py-3">
         <div className="text-sm font-medium text-text-base">
           {row.modelName}
           {row.partName ? <span className="mx-1 text-text-muted">·</span> : null}
@@ -69,7 +69,7 @@ export function FinalStockHistoryPanel({
               <button
                 key={entry.id}
                 onClick={() => handleEntryClick(entry)}
-                className="flex w-full items-center justify-between rounded-lg border border-border bg-white px-4 py-3 text-right text-sm transition-colors hover:border-primary-300 hover:bg-primary-50"
+                className="flex w-full items-center justify-between rounded-lg border border-border bg-base/30 px-4 py-3 text-right text-sm transition-colors hover:border-primary-500/30 row-hover"
               >
                 <div className="flex items-center gap-3">
                   <span className="inline-block rounded bg-base px-2 py-0.5 text-xs font-medium text-text-muted">
@@ -77,7 +77,7 @@ export function FinalStockHistoryPanel({
                   </span>
                   <span className="text-text-muted">{formatDate(entry.entryDate)}</span>
                 </div>
-                <span className="font-semibold text-green-700">+{entry.quantityAdded}</span>
+                <span className="font-semibold text-emerald-400">+{entry.quantityAdded}</span>
               </button>
             ))}
           </div>

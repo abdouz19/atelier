@@ -22,41 +22,46 @@ export function ArchivedItemsView({ items, onRefetch, onToast }: ArchivedItemsVi
 
   if (items.length === 0) {
     return (
-      <div className="rounded-xl border border-border bg-white px-6 py-12 text-center">
-        <p className="text-sm text-text-muted">لا توجد أصناف مؤرشفة</p>
+      <div className="rounded-2xl border px-6 py-12 text-center" style={{ background: 'var(--card-bg)', borderColor: 'var(--card-border)' }}>
+        <p className="text-sm" style={{ color: 'var(--cell-dim)' }}>لا توجد أصناف مؤرشفة</p>
       </div>
     );
   }
 
   return (
-    <div className="overflow-hidden rounded-xl border border-border bg-white">
-      <table className="w-full text-right">
-        <thead className="border-b border-border bg-base/60">
-          <tr>
-            <th className="px-4 py-3 text-sm font-medium text-text-muted">الاسم</th>
-            <th className="px-4 py-3 text-sm font-medium text-text-muted">النوع</th>
-            <th className="px-4 py-3 text-sm font-medium text-text-muted">الوحدة</th>
-            <th className="px-4 py-3 text-sm font-medium text-text-muted">إجراءات</th>
-          </tr>
-        </thead>
-        <tbody>
-          {items.map((item) => (
-            <tr key={item.id} className="border-b border-border last:border-0">
-              <td className="px-4 py-3 font-medium text-text-base">{item.name}</td>
-              <td className="px-4 py-3 text-sm text-text-muted">{item.type}</td>
-              <td className="px-4 py-3 text-sm text-text-muted">{item.unit}</td>
-              <td className="px-4 py-3">
-                <button
-                  onClick={() => handleRestore(item.id)}
-                  className="rounded-lg border border-border px-3 py-1 text-xs font-medium text-text-base hover:bg-base/60"
-                >
-                  استعادة
-                </button>
-              </td>
+    <div className="overflow-hidden rounded-2xl border" style={{ background: 'var(--card-bg)', borderColor: 'var(--card-border)', boxShadow: 'var(--card-shadow)' }}>
+      <div className="h-0.5 w-full" style={{ background: 'linear-gradient(90deg, transparent, #fb923c, transparent)', opacity: 0.7 }} />
+      <div className="overflow-x-auto">
+        <table className="w-full text-right text-sm">
+          <thead className="sticky top-0 z-10 text-xs font-semibold" style={{ background: 'var(--table-head-bg)' }}>
+            <tr>
+              {['الاسم', 'النوع', 'الوحدة', 'إجراءات'].map((h) => (
+                <th key={h} className="px-4 py-3 text-right" style={{ color: '#334155', borderBottom: '1px solid var(--table-head-border)' }}>{h}</th>
+              ))}
             </tr>
-          ))}
-        </tbody>
-      </table>
+          </thead>
+          <tbody className="divide-y divide-border/30">
+            {items.map((item) => (
+              <tr key={item.id} className="odd:bg-surface even:bg-base/30 row-hover transition-colors">
+                <td className="px-4 py-3 font-medium" style={{ color: 'var(--cell-text)' }}>{item.name}</td>
+                <td className="px-4 py-3 text-xs" style={{ color: 'var(--cell-muted)' }}>{item.type}</td>
+                <td className="px-4 py-3 text-xs" style={{ color: 'var(--cell-muted)' }}>{item.unit}</td>
+                <td className="px-4 py-3">
+                  <button
+                    onClick={() => handleRestore(item.id)}
+                    className="rounded-lg border px-3 py-1 text-xs font-medium transition-colors"
+                    style={{ borderColor: 'rgba(251,146,60,0.25)', background: 'rgba(249,115,22,0.08)', color: '#fb923c' }}
+                    onMouseEnter={e => { (e.currentTarget as HTMLElement).style.background = 'rgba(249,115,22,0.14)'; }}
+                    onMouseLeave={e => { (e.currentTarget as HTMLElement).style.background = 'rgba(249,115,22,0.08)'; }}
+                  >
+                    استعادة
+                  </button>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
     </div>
   );
 }

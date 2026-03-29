@@ -47,7 +47,7 @@ export function PiecesAvailabilityTable({
             <input
               type="number" min={0} value={pendingThreshold}
               onChange={e => setPendingThreshold(Number(e.target.value))}
-              className="w-24 rounded-lg border border-border px-2 py-2 text-sm focus:border-primary-500 focus:outline-none"
+              className="w-24 rounded-lg border border-border px-2 py-2 text-sm input-transition focus:border-primary-500 focus:outline-none"
             />
           </div>
           <button onClick={handleThresholdSave} className="rounded-lg bg-base px-3 py-2 text-sm font-medium text-text-base hover:bg-border">
@@ -76,9 +76,9 @@ export function PiecesAvailabilityTable({
             <tbody>
               {rows.map((row, idx) => {
                 const cls = classify(row);
-                const rowClass = cls === 'zero' ? 'bg-red-50' : cls === 'low' ? 'bg-amber-50' : '';
+                const rowStyle = cls === 'zero' ? { background: 'rgba(239,68,68,0.08)' } : cls === 'low' ? { background: 'rgba(245,158,11,0.08)' } : undefined;
                 return (
-                  <tr key={idx} className={`border-t border-border ${rowClass}`}>
+                  <tr key={idx} className="border-t border-border" style={rowStyle}>
                     <td className="px-3 py-2">{row.modelName}</td>
                     <td className="px-3 py-2">{row.partName ?? '—'}</td>
                     <td className="px-3 py-2">{row.sizeLabel}</td>
@@ -91,7 +91,8 @@ export function PiecesAvailabilityTable({
                       {cls !== 'ok' && (
                         <button
                           onClick={() => onRecut(row)}
-                          className="flex items-center gap-1 rounded-md bg-amber-100 px-2 py-1 text-xs font-medium text-amber-800 hover:bg-amber-200"
+                          className="flex items-center gap-1 rounded-md px-2 py-1 text-xs font-medium"
+                          style={{ background: 'rgba(245,158,11,0.15)', color: '#fbbf24' }}
                         >
                           <Scissors size={12} />
                           قطع مرة أخرى
@@ -113,7 +114,7 @@ function FilterSelect({ label, value, options, onChange }: { label: string; valu
   return (
     <div>
       <label className="mb-1 block text-xs font-medium text-text-muted">{label}</label>
-      <select value={value} onChange={e => onChange(e.target.value)} className="rounded-lg border border-border px-2 py-2 text-sm focus:border-primary-500 focus:outline-none">
+      <select value={value} onChange={e => onChange(e.target.value)} className="rounded-lg border border-border px-2 py-2 text-sm input-transition focus:border-primary-500 focus:outline-none">
         <option value="">الكل</option>
         {options.map(o => <option key={o} value={o}>{o}</option>)}
       </select>

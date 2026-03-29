@@ -136,7 +136,7 @@ export function AddStepModal({ finitionId, modelName, sizeLabel, color, maxQuant
         <>
           <button type="button" onClick={onClose} className="rounded-lg border border-border bg-surface px-4 py-2 text-sm font-medium text-text-base hover:bg-base">إلغاء</button>
           <button type="submit" form="add-step-form" disabled={submitting}
-            className="rounded-lg bg-primary-500 px-4 py-2 text-sm font-medium text-white hover:bg-primary-600 disabled:opacity-60">
+            className="btn-tactile rounded-lg bg-primary-500 px-4 py-2 text-sm font-medium text-white hover:bg-primary-600 disabled:opacity-60">
             {submitting ? 'جاري الحفظ...' : 'حفظ الخطوة'}
           </button>
         </>
@@ -146,19 +146,19 @@ export function AddStepModal({ finitionId, modelName, sizeLabel, color, maxQuant
         <div>
           <label className="mb-1 block text-sm font-medium text-text-base">اسم الخطوة *</label>
           <input value={stepName} onChange={e => setStepName(e.target.value)} placeholder="مثال: كي، تغليف، تعبئة"
-            className="w-full rounded-lg border border-border px-3 py-2 text-sm outline-none focus:border-primary-500 focus:ring-2 focus:ring-primary-500/20" />
+            className="w-full rounded-lg border border-border px-3 py-2 text-sm outline-none input-transition focus:border-primary-500 focus:ring-2 focus:ring-primary-500/20" />
         </div>
 
         <div>
           <label className="mb-1 block text-sm font-medium text-text-base">الكمية *</label>
           <input type="number" min={1} max={maxQuantity} value={quantity} onChange={e => setQuantity(e.target.value)}
-            className="w-full rounded-lg border border-border px-3 py-2 text-sm outline-none focus:border-primary-500 focus:ring-2 focus:ring-primary-500/20" />
+            className="w-full rounded-lg border border-border px-3 py-2 text-sm outline-none input-transition focus:border-primary-500 focus:ring-2 focus:ring-primary-500/20" />
         </div>
 
         <div>
           <label className="mb-1 block text-sm font-medium text-text-base">الموظف (اختياري)</label>
           <select value={employeeId} onChange={e => setEmployeeId(e.target.value)}
-            className="w-full rounded-lg border border-border px-3 py-2 text-sm outline-none focus:border-primary-500 focus:ring-2 focus:ring-primary-500/20">
+            className="w-full rounded-lg border border-border px-3 py-2 text-sm outline-none input-transition focus:border-primary-500 focus:ring-2 focus:ring-primary-500/20">
             <option value="">اختر الموظف</option>
             {employees.map(e => <option key={e.id} value={e.id}>{e.name}</option>)}
           </select>
@@ -167,7 +167,7 @@ export function AddStepModal({ finitionId, modelName, sizeLabel, color, maxQuant
         <div>
           <label className="mb-1 block text-sm font-medium text-text-base">سعر القطعة (دج) — اختياري</label>
           <input type="number" min={0} step="any" value={pricePerPiece} onChange={e => setPricePerPiece(e.target.value)}
-            className="w-full rounded-lg border border-border px-3 py-2 text-sm outline-none focus:border-primary-500 focus:ring-2 focus:ring-primary-500/20" />
+            className="w-full rounded-lg border border-border px-3 py-2 text-sm outline-none input-transition focus:border-primary-500 focus:ring-2 focus:ring-primary-500/20" />
         </div>
 
         {Number(pricePerPiece) > 0 && qty > 0 && (
@@ -177,7 +177,7 @@ export function AddStepModal({ finitionId, modelName, sizeLabel, color, maxQuant
         <div>
           <label className="mb-1 block text-sm font-medium text-text-base">التاريخ *</label>
           <input type="date" value={stepDate} onChange={e => setStepDate(e.target.value)}
-            className="w-full rounded-lg border border-border px-3 py-2 text-sm outline-none focus:border-primary-500 focus:ring-2 focus:ring-primary-500/20" />
+            className="w-full rounded-lg border border-border px-3 py-2 text-sm outline-none input-transition focus:border-primary-500 focus:ring-2 focus:ring-primary-500/20" />
         </div>
 
         <QcConsumptionEditor rows={consumptionRows} onChange={setConsumptionRows} items={nonFabricItems} />

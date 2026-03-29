@@ -65,21 +65,21 @@ export function ManagedDropdown({
         type="button"
         disabled={disabled}
         onClick={() => setOpen((o) => !o)}
-        className={`flex w-full items-center justify-between rounded-lg border px-3 py-2 text-sm text-text-base outline-none focus:border-primary-500 disabled:opacity-50 ${error ? 'border-red-400' : 'border-border'} bg-white`}
+        className={`flex w-full items-center justify-between rounded-lg border px-3 py-2 text-sm text-text-base input-transition outline-none focus:border-primary-500 disabled:opacity-50 ${error ? 'border-red-400' : 'border-border'} bg-surface`}
       >
         <span className={value ? 'text-text-base' : 'text-text-muted'}>{value ? selectedLabel : placeholder}</span>
         <ChevronDown size={14} className="text-text-muted shrink-0" />
       </button>
       {error && <p className="mt-1 text-xs text-red-600">{error}</p>}
       {open && (
-        <div className="absolute z-50 mt-1 w-full rounded-lg border border-border bg-white shadow-lg">
+        <div className="absolute z-50 mt-1 w-full rounded-lg border border-border bg-surface shadow-lg">
           <ul className="max-h-48 overflow-y-auto py-1">
             {items.map((item) => (
               <li key={item.id}>
                 <button
                   type="button"
                   onClick={() => { onChange(item.name); setOpen(false); }}
-                  className={`flex w-full items-center gap-2 px-3 py-1.5 text-sm text-text-base hover:bg-primary-50 ${item.name === value ? 'bg-primary-50 font-medium' : ''}`}
+                  className={`flex w-full items-center gap-2 px-3 py-1.5 text-sm text-text-base hover:bg-primary-500/10 ${item.name === value ? 'bg-primary-500/10 font-medium' : ''}`}
                 >
                   {item.name}
                   {item.isPredefined && <span className="mr-auto rounded bg-base px-1.5 py-0.5 text-xs text-text-muted">ثابت</span>}
@@ -89,7 +89,7 @@ export function ManagedDropdown({
           </ul>
           <div className="border-t border-border px-2 py-1.5">
             {!addMode ? (
-              <button type="button" onClick={() => setAddMode(true)} className="w-full rounded px-2 py-1 text-right text-sm text-primary-600 hover:bg-primary-50">
+              <button type="button" onClick={() => setAddMode(true)} className="w-full rounded px-2 py-1 text-right text-sm text-primary-500 hover:bg-primary-500/10">
                 + {addLabel}
               </button>
             ) : (
@@ -100,7 +100,7 @@ export function ManagedDropdown({
                   onChange={(e) => setNewName(e.target.value)}
                   onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); handleSave(); } if (e.key === 'Escape') setAddMode(false); }}
                   placeholder={addLabel}
-                  className="w-full rounded border border-border px-2 py-1 text-sm text-text-base outline-none focus:border-primary-500"
+                  className="w-full rounded border border-border px-2 py-1 text-sm text-text-base input-transition outline-none focus:border-primary-500"
                 />
                 {addError && <p className="text-xs text-red-600">{addError}</p>}
                 <div className="flex gap-1">

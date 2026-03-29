@@ -30,7 +30,10 @@ export function OperationsHistory({ operationGroups, employeeId, onOperationAdde
         <h3 className="font-semibold text-text-base">سجل العمليات</h3>
         <button
           onClick={() => setShowAdd(true)}
-          className="flex items-center gap-1.5 rounded-lg bg-primary-50 px-3 py-1.5 text-sm font-medium text-primary-600 hover:bg-primary-100"
+          className="flex items-center gap-1.5 rounded-lg border px-3 py-1.5 text-sm font-medium transition-colors"
+          style={{ borderColor: 'rgba(96,165,250,0.25)', background: 'rgba(59,130,246,0.08)', color: '#60a5fa' }}
+          onMouseEnter={e => { (e.currentTarget as HTMLElement).style.background = 'rgba(59,130,246,0.14)'; }}
+          onMouseLeave={e => { (e.currentTarget as HTMLElement).style.background = 'rgba(59,130,246,0.08)'; }}
         >
           <Plus size={15} />
           إضافة عملية
@@ -42,10 +45,10 @@ export function OperationsHistory({ operationGroups, employeeId, onOperationAdde
       ) : (
         <div className="space-y-4">
           {operationGroups.map((group) => (
-            <div key={group.type} className="overflow-hidden rounded-xl border border-border bg-white">
+            <div key={group.type} className="overflow-hidden rounded-xl border border-border bg-surface">
               <div className="flex items-center justify-between bg-base/60 px-4 py-2">
                 <span className="text-sm font-semibold text-text-base">{TYPE_LABELS[group.type]}</span>
-                <span className="text-sm font-medium text-blue-700">
+                <span className="text-sm font-medium" style={{ color: '#60a5fa' }}>
                   الإجمالي: {group.subtotal.toLocaleString('en-US')} دج
                 </span>
               </div>

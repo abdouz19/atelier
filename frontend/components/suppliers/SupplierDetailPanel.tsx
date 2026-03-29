@@ -29,7 +29,7 @@ export function SupplierDetailPanel({ supplier, onBack }: SupplierDetailPanelPro
       </button>
 
       {/* Profile */}
-      <div className="rounded-xl border border-border bg-white p-6">
+      <div className="rounded-2xl border p-6" style={{ background: 'var(--card-bg)', borderColor: 'var(--card-border)', boxShadow: 'var(--card-shadow)' }}>
         <h2 className="mb-4 text-xl font-bold text-text-base">{supplier.name}</h2>
         <dl className="grid grid-cols-2 gap-x-6 gap-y-3 text-sm">
           {supplier.phone && (
@@ -63,7 +63,7 @@ export function SupplierDetailPanel({ supplier, onBack }: SupplierDetailPanelPro
       <div>
         <div className="mb-3 flex items-center justify-between">
           <h3 className="text-lg font-semibold text-text-base">سجل المشتريات</h3>
-          <span className="rounded-full bg-blue-50 px-3 py-1 text-sm font-semibold text-blue-700">
+          <span className="rounded-full px-3 py-1 text-sm font-semibold" style={{ background: 'rgba(59,130,246,0.12)', color: '#60a5fa' }}>
             الإجمالي: {formatPrice(supplier.totalSpent)} دج
           </span>
         </div>
@@ -74,34 +74,33 @@ export function SupplierDetailPanel({ supplier, onBack }: SupplierDetailPanelPro
             <p className="mt-1 text-xs text-text-muted">ستظهر هنا عند تسجيل وارد مرتبط بهذا المورد</p>
           </div>
         ) : (
-          <div className="overflow-hidden rounded-xl border border-border bg-white">
-            <table className="w-full text-right">
-              <thead className="border-b border-border bg-base/60">
-                <tr>
-                  <th className="px-4 py-3 text-sm font-medium text-text-muted">الصنف</th>
-                  <th className="px-4 py-3 text-sm font-medium text-text-muted">الكمية</th>
-                  <th className="px-4 py-3 text-sm font-medium text-text-muted">سعر الوحدة</th>
-                  <th className="px-4 py-3 text-sm font-medium text-text-muted">الإجمالي</th>
-                  <th className="px-4 py-3 text-sm font-medium text-text-muted">التاريخ</th>
-                </tr>
-              </thead>
-              <tbody>
-                {supplier.purchases.map((p) => (
-                  <tr key={p.transactionId} className="border-b border-border last:border-0">
-                    <td className="px-4 py-3 text-sm font-medium text-text-base">
-                      {p.stockItemName}
-                      {p.color && <span className="mr-2 rounded-full bg-base px-2 py-0.5 text-xs text-text-muted">{p.color}</span>}
-                    </td>
-                    <td className="px-4 py-3 text-sm text-text-base">
-                      {p.quantity} {p.unit}
-                    </td>
-                    <td className="px-4 py-3 text-sm text-text-base">{formatPrice(p.pricePerUnit)} دج</td>
-                    <td className="px-4 py-3 text-sm font-semibold text-text-base">{formatPrice(p.totalPricePaid)} دج</td>
-                    <td className="px-4 py-3 text-sm text-text-muted">{formatDate(p.transactionDate)}</td>
+          <div className="overflow-hidden rounded-2xl border" style={{ background: 'var(--card-bg)', borderColor: 'var(--card-border)', boxShadow: 'var(--card-shadow)' }}>
+            <div className="h-0.5 w-full" style={{ background: 'linear-gradient(90deg, transparent, #a78bfa, transparent)', opacity: 0.7 }} />
+            <div className="overflow-x-auto">
+              <table className="w-full text-right text-sm">
+                <thead className="sticky top-0 z-10 text-xs font-semibold" style={{ background: 'var(--table-head-bg)' }}>
+                  <tr>
+                    {['الصنف', 'الكمية', 'سعر الوحدة', 'الإجمالي', 'التاريخ'].map((h) => (
+                      <th key={h} className="px-4 py-3 text-right" style={{ color: 'var(--cell-faint)', borderBottom: '1px solid var(--table-head-border)' }}>{h}</th>
+                    ))}
                   </tr>
-                ))}
-              </tbody>
-            </table>
+                </thead>
+                <tbody className="divide-y divide-border/30">
+                  {supplier.purchases.map((p) => (
+                    <tr key={p.transactionId} className="odd:bg-surface even:bg-base/30 row-hover transition-colors">
+                      <td className="px-4 py-3 font-medium" style={{ color: 'var(--cell-text)' }}>
+                        {p.stockItemName}
+                        {p.color && <span className="mr-2 rounded-full px-2 py-0.5 text-xs" style={{ background: 'rgba(255,255,255,0.06)', color: 'var(--text-muted)' }}>{p.color}</span>}
+                      </td>
+                      <td className="px-4 py-3 tabular-nums" style={{ color: 'var(--text-muted)' }}>{p.quantity} {p.unit}</td>
+                      <td className="px-4 py-3 tabular-nums" style={{ color: 'var(--text-muted)' }}>{formatPrice(p.pricePerUnit)} دج</td>
+                      <td className="px-4 py-3 font-semibold tabular-nums" style={{ color: '#34d399' }}>{formatPrice(p.totalPricePaid)} دج</td>
+                      <td className="px-4 py-3 text-xs tabular-nums" style={{ color: 'var(--cell-dim)' }}>{formatDate(p.transactionDate)}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
           </div>
         )}
       </div>

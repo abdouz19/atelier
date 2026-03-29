@@ -17,7 +17,7 @@ interface OperationsSummaryCardProps {
 export function OperationsSummaryCard({ operationGroups }: OperationsSummaryCardProps) {
   if (operationGroups.length === 0) {
     return (
-      <div className="rounded-xl border border-border bg-white p-4">
+      <div className="rounded-xl border border-border bg-surface p-4">
         <h3 className="mb-2 text-sm font-semibold text-text-muted">ملخص العمليات</h3>
         <p className="text-sm text-text-muted">لا توجد عمليات بعد</p>
       </div>
@@ -25,7 +25,7 @@ export function OperationsSummaryCard({ operationGroups }: OperationsSummaryCard
   }
 
   return (
-    <div className="rounded-xl border border-border bg-white p-4">
+    <div className="rounded-xl border border-border bg-surface p-4">
       <h3 className="mb-3 text-sm font-semibold text-text-muted">ملخص العمليات</h3>
       <div className="space-y-2">
         {operationGroups.map((group) => (
@@ -34,7 +34,7 @@ export function OperationsSummaryCard({ operationGroups }: OperationsSummaryCard
               <p className="text-sm font-medium text-text-base">{TYPE_LABELS[group.type]}</p>
               <p className="text-xs text-text-muted">{group.count} عملية</p>
             </div>
-            <span className="text-sm font-semibold text-blue-700">
+            <span className="text-sm font-semibold" style={{ color: '#60a5fa' }}>
               {group.subtotal.toLocaleString('en-US')} دج
             </span>
           </div>

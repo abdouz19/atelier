@@ -1,7 +1,7 @@
 'use client';
 
 import { useMemo } from 'react';
-import { Search } from 'lucide-react';
+import { Search, ChevronDown } from 'lucide-react';
 import { StockTableRow } from './StockTableRow';
 import { EmptyState } from '@/components/shared/EmptyState';
 import type { StockItemSummary } from '@/features/stock/stock.types';
@@ -42,54 +42,71 @@ export function StockTable({
   }, [items, searchQuery, typeFilter]);
 
   return (
-    <div dir="rtl">
-      {/* Filters */}
-      <div className="mb-4 flex gap-3">
+    <div
+      className="overflow-hidden rounded-2xl border"
+      style={{
+        background: 'var(--card-bg)',
+        borderColor: 'var(--card-border)',
+        boxShadow: 'var(--card-shadow)',
+      }}
+      dir="rtl"
+    >
+      {/* orange accent bar */}
+      <div className="h-0.5 w-full" style={{ background: 'linear-gradient(90deg, transparent, #fb923c, transparent)', opacity: 0.7 }} />
+
+      {/* search + filter header */}
+      <div className="flex flex-wrap items-center gap-3 border-b px-4 py-3" style={{ borderColor: 'var(--divider)' }}>
         <div className="relative flex-1 max-w-xs">
-          <Search size={16} className="absolute right-3 top-1/2 -translate-y-1/2 text-text-muted" />
+          <Search size={14} className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none" style={{ color: 'var(--cell-dim)' }} />
           <input
             type="text"
             value={searchQuery}
             onChange={(e) => onSearchChange(e.target.value)}
             placeholder="ابحث باسم الصنف..."
-            className="w-full rounded-lg border border-border py-2 pr-9 pl-3 text-sm text-text-base outline-none focus:border-primary-500 focus:ring-2 focus:ring-primary-500/20"
+            className="w-full rounded-lg border py-1.5 pr-8 pl-3 text-sm outline-none transition-colors"
+            style={{ background: 'rgba(255,255,255,0.04)', borderColor: 'rgba(255,255,255,0.08)', color: '#e2e8f0' }}
+            dir="rtl"
           />
         </div>
-        <select
-          value={typeFilter}
-          onChange={(e) => onTypeFilterChange(e.target.value)}
-          className="rounded-lg border border-border px-3 py-2 text-sm text-text-base outline-none focus:border-primary-500"
-        >
-          <option value="">جميع الأنواع</option>
-          {types.map((t) => (
-            <option key={t} value={t}>
-              {t}
-            </option>
-          ))}
-        </select>
+        <div className="relative">
+          <select
+            value={typeFilter}
+            onChange={(e) => onTypeFilterChange(e.target.value)}
+            className="appearance-none rounded-lg border py-1.5 pl-7 pr-3 text-sm outline-none transition-colors"
+            style={{ background: 'rgba(255,255,255,0.04)', borderColor: 'rgba(255,255,255,0.08)', color: '#e2e8f0' }}
+          >
+            <option value="">جميع الأنواع</option>
+            {types.map((t) => (
+              <option key={t} value={t}>{t}</option>
+            ))}
+          </select>
+          <ChevronDown size={12} className="pointer-events-none absolute left-2 top-1/2 -translate-y-1/2" style={{ color: 'var(--cell-dim)' }} />
+        </div>
+        {items.length > 0 && (
+          <span className="ml-auto rounded-full px-2.5 py-0.5 text-xs font-semibold tabular-nums" style={{ background: 'rgba(251,146,60,0.12)', color: '#fb923c' }}>
+            {filtered.length}
+          </span>
+        )}
       </div>
 
-      {/* Table */}
       {filtered.length === 0 ? (
         <EmptyState
           message="لا توجد أصناف مطابقة للبحث"
           subMessage="أضف صنفاً جديداً أو عدّل معايير البحث"
         />
       ) : (
-        <div className="overflow-hidden rounded-xl border border-border bg-surface">
-          <table className="w-full text-right">
-            <thead className="sticky top-0 z-10 border-b border-border bg-base/60">
+        <div className="overflow-x-auto">
+          <table className="w-full text-right text-sm">
+            <thead className="sticky top-0 z-10 text-xs font-semibold" style={{ background: 'var(--table-head-bg)' }}>
               <tr>
-                <th className="px-4 py-3 text-sm font-semibold text-text-muted">الاسم</th>
-                <th className="px-4 py-3 text-sm font-semibold text-text-muted">النوع</th>
-                <th className="px-4 py-3 text-sm font-semibold text-text-muted">الكمية</th>
-                <th className="px-4 py-3 text-sm font-semibold text-text-muted">اللون</th>
-                <th className="px-4 py-3 text-sm font-semibold text-text-muted">الصورة</th>
-                <th className="px-4 py-3 text-sm font-semibold text-text-muted">الوصف</th>
-                <th className="px-4 py-3 text-sm font-semibold text-text-muted">إجراءات</th>
+                {['الاسم', 'النوع', 'الكمية', 'اللون', 'الصورة', 'الوصف', 'إجراءات'].map((h) => (
+                  <th key={h} className="px-4 py-3 text-right" style={{ color: 'var(--cell-faint)', borderBottom: '1px solid var(--table-head-border)' }}>
+                    {h}
+                  </th>
+                ))}
               </tr>
             </thead>
-            <tbody>
+            <tbody className="divide-y divide-border/30">
               {filtered.map((item) => (
                 <StockTableRow
                   key={item.id}

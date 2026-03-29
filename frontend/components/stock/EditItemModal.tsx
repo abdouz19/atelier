@@ -89,7 +89,7 @@ export function EditItemModal({ item, onClose, onSuccess }: EditItemModalProps) 
       footer={
         <>
           <button type="button" onClick={onClose} className="rounded-lg border border-border bg-surface px-4 py-2 text-sm font-medium text-text-base hover:bg-base">إلغاء</button>
-          <button type="submit" form="edit-item-form" disabled={submitting} className="rounded-lg bg-primary-500 px-4 py-2 text-sm font-medium text-white hover:bg-primary-600 disabled:opacity-60">
+          <button type="submit" form="edit-item-form" disabled={submitting} className="btn-tactile rounded-lg bg-primary-500 px-4 py-2 text-sm font-medium text-white hover:bg-primary-600 disabled:opacity-60">
             {submitting ? 'جاري الحفظ...' : 'حفظ'}
           </button>
         </>
@@ -99,20 +99,20 @@ export function EditItemModal({ item, onClose, onSuccess }: EditItemModalProps) 
 
       <form id="edit-item-form" onSubmit={handleSubmit(onSubmit)} className="space-y-4" noValidate>
         <FormField label="اسم الصنف" error={errors.name?.message} required>
-          <input {...register('name')} className="w-full rounded-lg border border-border px-3 py-2 text-sm outline-none focus:border-primary-500 focus:ring-2 focus:ring-primary-500/20" />
+          <input {...register('name')} className="w-full rounded-lg border border-border px-3 py-2 text-sm outline-none input-transition focus:border-primary-500 focus:ring-2 focus:ring-primary-500/20" />
         </FormField>
 
         <div className="grid grid-cols-2 gap-3">
           <FormField label="النوع" error={errors.type?.message} required>
-            <input {...register('type')} className="w-full rounded-lg border border-border px-3 py-2 text-sm outline-none focus:border-primary-500 focus:ring-2 focus:ring-primary-500/20" />
+            <input {...register('type')} className="w-full rounded-lg border border-border px-3 py-2 text-sm outline-none input-transition focus:border-primary-500 focus:ring-2 focus:ring-primary-500/20" />
           </FormField>
           <FormField label="الوحدة" error={errors.unit?.message} required>
-            <input {...register('unit')} className="w-full rounded-lg border border-border px-3 py-2 text-sm outline-none focus:border-primary-500 focus:ring-2 focus:ring-primary-500/20" />
+            <input {...register('unit')} className="w-full rounded-lg border border-border px-3 py-2 text-sm outline-none input-transition focus:border-primary-500 focus:ring-2 focus:ring-primary-500/20" />
           </FormField>
         </div>
 
         <FormField label="اللون (اختياري)">
-          <input {...register('color')} placeholder="مثال: أبيض" className="w-full rounded-lg border border-border px-3 py-2 text-sm outline-none focus:border-primary-500 focus:ring-2 focus:ring-primary-500/20" />
+          <input {...register('color')} placeholder="مثال: أبيض" className="w-full rounded-lg border border-border px-3 py-2 text-sm outline-none input-transition focus:border-primary-500 focus:ring-2 focus:ring-primary-500/20" />
         </FormField>
 
         <FormField label="الصورة">
@@ -130,11 +130,11 @@ export function EditItemModal({ item, onClose, onSuccess }: EditItemModalProps) 
         </FormField>
 
         <FormField label="الوصف (اختياري)">
-          <input {...register('description')} className="w-full rounded-lg border border-border px-3 py-2 text-sm outline-none focus:border-primary-500 focus:ring-2 focus:ring-primary-500/20" />
+          <input {...register('description')} className="w-full rounded-lg border border-border px-3 py-2 text-sm outline-none input-transition focus:border-primary-500 focus:ring-2 focus:ring-primary-500/20" />
         </FormField>
 
         <FormField label="ملاحظات (اختيارية)">
-          <textarea {...register('notes')} rows={2} className="w-full rounded-lg border border-border px-3 py-2 text-sm outline-none focus:border-primary-500 focus:ring-2 focus:ring-primary-500/20" />
+          <textarea {...register('notes')} rows={2} className="w-full rounded-lg border border-border px-3 py-2 text-sm outline-none input-transition focus:border-primary-500 focus:ring-2 focus:ring-primary-500/20" />
         </FormField>
       </form>
     </AppModal>

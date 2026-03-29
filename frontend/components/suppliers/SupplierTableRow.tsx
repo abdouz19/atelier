@@ -13,7 +13,7 @@ interface SupplierTableRowProps {
 export function SupplierTableRow({ supplier, onClick, onEdit, onDelete }: SupplierTableRowProps) {
   return (
     <tr
-      className="cursor-pointer odd:bg-surface even:bg-base/30 hover:bg-primary-50"
+      className="cursor-pointer odd:bg-surface even:bg-base/30 hover:bg-white/3 transition-colors"
       onClick={onClick}
     >
       <td className="px-4 py-3 text-sm font-medium text-text-base">{supplier.name}</td>
@@ -34,7 +34,7 @@ export function SupplierTableRow({ supplier, onClick, onEdit, onDelete }: Suppli
           </button>
           <button
             onClick={onDelete}
-            className="rounded-lg p-1.5 text-text-muted hover:bg-red-50 hover:text-red-600"
+            className="rounded-lg p-1.5 text-text-muted transition-colors hover:bg-red-500/10 hover:text-red-400"
             title="حذف"
           >
             <Trash2 size={14} />

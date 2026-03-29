@@ -12,7 +12,7 @@ export function Topbar() {
 
   return (
     <header
-      className="flex h-14 items-center justify-between border-b border-gray-200 bg-white px-6"
+      className="flex h-14 items-center justify-between border-b border-border bg-surface px-6"
       dir="rtl"
     >
       <div className="text-sm text-gray-500">أتيلييه</div>

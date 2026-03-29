@@ -53,8 +53,8 @@ export function CuttingStep2Form({ onSubmit, onBack, isSubmitting, submitError, 
       />
       {submitError && <p className="text-xs text-red-500">{submitError}</p>}
       <div className="flex justify-between pt-2">
-        <button type="button" onClick={onBack} className="rounded-lg border border-gray-200 px-4 py-2 text-sm hover:bg-gray-50">→ السابق</button>
-        <button type="button" onClick={handleSubmit} disabled={isSubmitting} className="rounded-lg bg-primary-500 px-4 py-2 text-sm font-medium text-white hover:bg-primary-600 disabled:opacity-60">
+        <button type="button" onClick={onBack} className="rounded-lg border border-border px-4 py-2 text-sm text-text-base hover:bg-base/60">→ السابق</button>
+        <button type="button" onClick={handleSubmit} disabled={isSubmitting} className="btn-tactile rounded-lg bg-primary-500 px-4 py-2 text-sm font-medium text-white hover:bg-primary-600 disabled:opacity-60">
           {isSubmitting ? 'جاري الحفظ...' : 'إنشاء الجلسة'}
         </button>
       </div>

@@ -17,7 +17,7 @@ export function StockTableRow({ item, onRowClick, onAddInbound, onArchive }: Sto
 
   return (
     <tr
-      className="odd:bg-surface even:bg-base/30 hover:bg-primary-50 transition-colors"
+      className="odd:bg-surface even:bg-base/30 hover:bg-white/3 transition-colors"
       onClick={() => onRowClick(item.id)}
     >
       {/* Name */}
@@ -31,16 +31,16 @@ export function StockTableRow({ item, onRowClick, onAddInbound, onArchive }: Sto
       {/* Quantity */}
       <td className="px-4 py-3">
         <div className="flex items-center gap-2">
-          <span className={`text-sm font-semibold ${isLow ? 'text-red-600' : 'text-text-base'}`}>
+          <span className={`text-sm font-semibold ${isLow ? 'text-red-400' : 'text-text-base'}`}>
             {item.totalQuantity} {item.unit}
           </span>
           {hasMultipleVariants && (
-            <span className="rounded-full bg-blue-100 px-2 py-0.5 text-xs text-blue-700">
+            <span className="rounded-full px-2 py-0.5 text-xs" style={{ background: 'rgba(59,130,246,0.12)', color: '#60a5fa' }}>
               {item.variantCount} ألوان
             </span>
           )}
           {isLow && (
-            <span className="rounded-full bg-red-100 px-2 py-0.5 text-xs text-red-600">
+            <span className="rounded-full px-2 py-0.5 text-xs" style={{ background: 'rgba(239,68,68,0.12)', color: '#f87171' }}>
               نفد
             </span>
           )}
@@ -50,7 +50,7 @@ export function StockTableRow({ item, onRowClick, onAddInbound, onArchive }: Sto
       {/* Color */}
       <td className="px-4 py-3 text-sm text-text-muted">
         {item.color ? (
-          <span className="rounded-full bg-gray-100 px-2 py-0.5 text-xs">{item.color}</span>
+          <span className="rounded-full bg-base px-2 py-0.5 text-xs text-text-muted">{item.color}</span>
         ) : null}
       </td>
 
@@ -66,7 +66,7 @@ export function StockTableRow({ item, onRowClick, onAddInbound, onArchive }: Sto
             unoptimized
           />
         ) : (
-          <div className="h-10 w-10 rounded bg-gray-100" />
+          <div className="h-10 w-10 rounded bg-base" />
         )}
       </td>
 
@@ -81,18 +81,18 @@ export function StockTableRow({ item, onRowClick, onAddInbound, onArchive }: Sto
           <button
             onClick={() => onAddInbound(item)}
             title="إضافة وارد"
-            className="rounded-lg p-1.5 text-gray-500 hover:bg-primary-50 hover:text-primary-600"
+            className="rounded-lg p-1.5 text-text-muted hover:bg-primary-500/10 hover:text-primary-500"
           >
             <Plus size={16} />
           </button>
           <button
             onClick={() => onArchive(item)}
             title="أرشفة"
-            className="rounded-lg p-1.5 text-gray-500 hover:bg-red-50 hover:text-red-600"
+            className="rounded-lg p-1.5 text-text-muted hover:bg-red-500/10 hover:text-red-400"
           >
             <Archive size={16} />
           </button>
-          <ChevronLeft size={16} className="text-gray-300" />
+          <ChevronLeft size={16} className="text-text-muted/40" />
         </div>
       </td>
     </tr>

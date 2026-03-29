@@ -2,7 +2,7 @@
 
 import { useState, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { Plus } from 'lucide-react';
+import { Plus, Users } from 'lucide-react';
 import { useEmployeeList } from '@/hooks/useEmployeeList';
 import { EmployeeTable } from '@/components/employees/EmployeeTable';
 import { AddEmployeeModal } from '@/components/employees/AddEmployeeModal';
@@ -66,6 +66,8 @@ function EmployeesPageContent() {
     <div dir="rtl">
       <PageHeader
         title="الموظفون"
+        subtitle="إدارة الموظفين والعمليات المالية"
+        icon={<Users size={17} />}
         actions={
           <button
             onClick={() => setShowAdd(true)}
@@ -80,13 +82,13 @@ function EmployeesPageContent() {
       {error && <div className="mb-4"><ErrorAlert message={error} /></div>}
 
       {loading ? (
-        <div className="overflow-hidden rounded-xl border border-gray-200 bg-white">
-          <div className="animate-pulse divide-y divide-gray-100">
+        <div className="overflow-hidden rounded-xl" style={{ border: '1px solid rgba(255,255,255,0.07)', background: 'rgba(255,255,255,0.02)' }}>
+          <div className="animate-pulse divide-y" style={{ borderColor: 'rgba(255,255,255,0.05)' }}>
             {Array.from({ length: 4 }).map((_, i) => (
               <div key={i} className="flex gap-4 px-4 py-4">
-                <div className="h-9 w-9 rounded-full bg-gray-200" />
-                <div className="h-4 w-32 rounded bg-gray-200" />
-                <div className="h-4 w-20 rounded bg-gray-200" />
+                <div className="h-9 w-9 rounded-full" style={{ background: 'rgba(255,255,255,0.06)' }} />
+                <div className="h-4 w-32 rounded" style={{ background: 'rgba(255,255,255,0.06)' }} />
+                <div className="h-4 w-20 rounded" style={{ background: 'rgba(255,255,255,0.06)' }} />
               </div>
             ))}
           </div>
@@ -152,7 +154,7 @@ function EmployeesPageContent() {
 
 export default function EmployeesPage() {
   return (
-    <Suspense fallback={<div className="p-6 text-gray-400">جاري التحميل...</div>}>
+    <Suspense fallback={<div className="p-6" style={{ color: '#475569' }}>جاري التحميل...</div>}>
       <EmployeesPageContent />
     </Suspense>
   );

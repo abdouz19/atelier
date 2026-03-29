@@ -94,7 +94,7 @@ export function AddQcRecordModal({ onClose, onSuccess }: AddQcRecordModalProps) 
         <>
           <button type="button" onClick={onClose} className="rounded-lg border border-border bg-surface px-4 py-2 text-sm font-medium text-text-base hover:bg-base">إلغاء</button>
           <button type="submit" form="add-qc-form" disabled={submitting || !selectedBatch}
-            className="rounded-lg bg-primary-500 px-4 py-2 text-sm font-medium text-white hover:bg-primary-600 disabled:opacity-60">
+            className="btn-tactile rounded-lg bg-primary-500 px-4 py-2 text-sm font-medium text-white hover:bg-primary-600 disabled:opacity-60">
             {submitting ? 'جاري الحفظ...' : 'حفظ السجل'}
           </button>
         </>
@@ -112,7 +112,7 @@ export function AddQcRecordModal({ onClose, onSuccess }: AddQcRecordModalProps) 
               <div className="space-y-2 max-h-48 overflow-y-auto">
                 {batches.map(b => (
                   <button key={b.returnId} type="button" onClick={() => { setSelectedBatch(b); setQuantityReviewed(String(b.quantityAvailable)); }}
-                    className="w-full rounded-lg border border-border px-3 py-2 text-right text-sm hover:border-primary-500 hover:bg-primary-50">
+                    className="w-full rounded-lg border border-border px-3 py-2 text-right text-sm hover:border-primary-500 hover:bg-primary-500/10">
                     <span className="font-medium">{b.tailorName}</span> — {b.modelName} / {b.sizeLabel} / {b.color} — متاح للمراجعة: <strong>{b.quantityAvailable}</strong>
                   </button>
                 ))}
@@ -120,8 +120,8 @@ export function AddQcRecordModal({ onClose, onSuccess }: AddQcRecordModalProps) 
             )}
           </div>
         ) : (
-          <div className="rounded-lg bg-primary-50 px-3 py-2 text-sm text-gray-800">
-            <button type="button" onClick={() => setSelectedBatch(null)} className="text-primary-600 hover:underline text-xs ml-2">تغيير</button>
+          <div className="rounded-lg border border-primary-500/20 px-3 py-2 text-sm text-text-base" style={{ background: 'rgba(96,165,250,0.08)' }}>
+            <button type="button" onClick={() => setSelectedBatch(null)} className="text-primary-500 hover:underline text-xs ml-2">تغيير</button>
             <strong>{selectedBatch.tailorName}</strong> — {selectedBatch.modelName} / {selectedBatch.sizeLabel} / {selectedBatch.color} — متاح: {selectedBatch.quantityAvailable}
           </div>
         )}
@@ -131,7 +131,7 @@ export function AddQcRecordModal({ onClose, onSuccess }: AddQcRecordModalProps) 
             <div>
               <label className="mb-1 block text-sm font-medium text-text-base">الموظف المسؤول *</label>
               <select value={employeeId} onChange={e => setEmployeeId(e.target.value)}
-                className="w-full rounded-lg border border-border px-3 py-2 text-sm outline-none focus:border-primary-500 focus:ring-2 focus:ring-primary-500/20">
+                className="w-full rounded-lg border border-border px-3 py-2 text-sm outline-none input-transition focus:border-primary-500 focus:ring-2 focus:ring-primary-500/20">
                 <option value="">اختر الموظف</option>
                 {employees.map(e => <option key={e.id} value={e.id}>{e.name}</option>)}
               </select>
@@ -141,23 +141,23 @@ export function AddQcRecordModal({ onClose, onSuccess }: AddQcRecordModalProps) 
               <label className="mb-1 block text-sm font-medium text-text-base">الكمية المراجعة *</label>
               <input type="number" min={1} max={selectedBatch.quantityAvailable} value={quantityReviewed}
                 onChange={e => setQuantityReviewed(e.target.value)}
-                className="w-full rounded-lg border border-border px-3 py-2 text-sm outline-none focus:border-primary-500 focus:ring-2 focus:ring-primary-500/20" />
+                className="w-full rounded-lg border border-border px-3 py-2 text-sm outline-none input-transition focus:border-primary-500 focus:ring-2 focus:ring-primary-500/20" />
             </div>
 
             {reviewed > 0 && (
               <div className="rounded-lg border border-border bg-base p-3 space-y-3">
-                <p className="text-xs font-medium text-text-muted">توزيع الفئات (معلق: <span className={pending < 0 ? 'text-red-600' : 'text-text-base'}>{pending}</span>)</p>
+                <p className="text-xs font-medium text-text-muted">توزيع الفئات (معلق: <span className={pending < 0 ? 'text-red-400' : 'text-text-base'}>{pending}</span>)</p>
                 {[
-                  { label: 'تالف', value: qtyDamaged, set: setQtyDamaged, color: 'text-red-600' },
-                  { label: 'مقبول', value: qtyAcceptable, set: setQtyAcceptable, color: 'text-yellow-600' },
-                  { label: 'جيد', value: qtyGood, set: setQtyGood, color: 'text-blue-600' },
-                  { label: 'جيد جداً', value: qtyVeryGood, set: setQtyVeryGood, color: 'text-green-600' },
+                  { label: 'تالف', value: qtyDamaged, set: setQtyDamaged, color: 'text-red-400' },
+                  { label: 'مقبول', value: qtyAcceptable, set: setQtyAcceptable, color: 'text-amber-400' },
+                  { label: 'جيد', value: qtyGood, set: setQtyGood, color: 'text-blue-400' },
+                  { label: 'جيد جداً', value: qtyVeryGood, set: setQtyVeryGood, color: 'text-emerald-400' },
                 ].map(({ label, value, set, color }) => (
                   <div key={label} className="flex items-center gap-3">
                     <label className={`w-20 text-sm font-medium ${color}`}>{label}</label>
                     <input type="number" min={0} max={reviewed} value={value}
                       onChange={e => set(e.target.value)}
-                      className="w-28 rounded-lg border border-border px-3 py-1.5 text-sm outline-none focus:border-primary-500 focus:ring-2 focus:ring-primary-500/20" />
+                      className="w-28 rounded-lg border border-border px-3 py-1.5 text-sm outline-none input-transition focus:border-primary-500 focus:ring-2 focus:ring-primary-500/20" />
                   </div>
                 ))}
               </div>
@@ -166,7 +166,7 @@ export function AddQcRecordModal({ onClose, onSuccess }: AddQcRecordModalProps) 
             <div>
               <label className="mb-1 block text-sm font-medium text-text-base">سعر القطعة (دج) *</label>
               <input type="number" min={0} step="any" value={pricePerPiece} onChange={e => setPricePerPiece(e.target.value)}
-                className="w-full rounded-lg border border-border px-3 py-2 text-sm outline-none focus:border-primary-500 focus:ring-2 focus:ring-primary-500/20" />
+                className="w-full rounded-lg border border-border px-3 py-2 text-sm outline-none input-transition focus:border-primary-500 focus:ring-2 focus:ring-primary-500/20" />
             </div>
 
             {Number(pricePerPiece) > 0 && reviewed > 0 && (
@@ -176,7 +176,7 @@ export function AddQcRecordModal({ onClose, onSuccess }: AddQcRecordModalProps) 
             <div>
               <label className="mb-1 block text-sm font-medium text-text-base">التاريخ *</label>
               <input type="date" value={reviewDate} onChange={e => setReviewDate(e.target.value)}
-                className="w-full rounded-lg border border-border px-3 py-2 text-sm outline-none focus:border-primary-500 focus:ring-2 focus:ring-primary-500/20" />
+                className="w-full rounded-lg border border-border px-3 py-2 text-sm outline-none input-transition focus:border-primary-500 focus:ring-2 focus:ring-primary-500/20" />
             </div>
 
             <ConsumedMaterialsEditor

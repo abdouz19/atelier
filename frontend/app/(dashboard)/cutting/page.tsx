@@ -43,6 +43,8 @@ function CuttingPageContent() {
     <div dir="rtl">
       <PageHeader
         title="القص"
+        subtitle="جلسات القص وجرد القطع"
+        icon={<Scissors size={17} />}
         actions={
           <button onClick={() => setShowCreate(true)} className="flex items-center gap-2 rounded-lg bg-primary-500 px-4 py-2 text-sm font-medium text-white hover:bg-primary-600">
             <Scissors size={16} />جلسة قص جديدة
@@ -52,8 +54,8 @@ function CuttingPageContent() {
       {error && <div className="mb-4"><ErrorAlert message={error} /></div>}
       {loading ? (
         <div className="space-y-4">
-          <div className="grid grid-cols-5 gap-3">{Array.from({ length: 5 }).map((_, i) => <div key={i} className="h-20 animate-pulse rounded-xl bg-gray-200" />)}</div>
-          <div className="h-48 animate-pulse rounded-xl bg-gray-200" />
+          <div className="grid grid-cols-5 gap-3">{Array.from({ length: 5 }).map((_, i) => <div key={i} className="h-20 animate-pulse rounded-xl" style={{ background: 'rgba(255,255,255,0.04)' }} />)}</div>
+          <div className="h-48 animate-pulse rounded-xl" style={{ background: 'rgba(255,255,255,0.04)' }} />
         </div>
       ) : (
         <div className="space-y-6">
@@ -83,7 +85,7 @@ function CuttingPageContent() {
 
 export default function CuttingPage() {
   return (
-    <Suspense fallback={<div className="p-6 text-gray-400">جاري التحميل...</div>}>
+    <Suspense fallback={<div className="p-6" style={{ color: '#475569' }}>جاري التحميل...</div>}>
       <CuttingPageContent />
     </Suspense>
   );

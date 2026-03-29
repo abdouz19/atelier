@@ -79,7 +79,7 @@ export function ItemDetailPanel({ item, suppliers, onBack, onRefetch, onArchived
           </button>
           <button
             onClick={() => setShowArchiveConfirm(true)}
-            className="rounded-lg border border-border p-2 text-text-muted hover:bg-red-50 hover:text-red-600"
+            className="rounded-lg border border-border p-2 text-text-muted transition-colors hover:bg-red-500/10 hover:text-red-400"
             title="أرشفة"
           >
             <Archive size={16} />
@@ -88,7 +88,7 @@ export function ItemDetailPanel({ item, suppliers, onBack, onRefetch, onArchived
       </div>
 
       {/* Meta info */}
-      <div className="mb-6 grid grid-cols-1 gap-4 rounded-xl border border-border bg-white p-6 sm:grid-cols-2">
+      <div className="mb-6 grid grid-cols-1 gap-4 rounded-xl border border-border bg-surface p-6 sm:grid-cols-2">
         {item.imagePath && (
           <div className="flex justify-center sm:col-span-2">
             <Image

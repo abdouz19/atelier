@@ -41,7 +41,10 @@ export function PaymentsHistory({ payments, employeeId, onPaymentMutated }: Paym
         <h3 className="font-semibold text-text-base">سجل الدفعات</h3>
         <button
           onClick={() => setShowAdd(true)}
-          className="flex items-center gap-1.5 rounded-lg bg-green-50 px-3 py-1.5 text-sm font-medium text-green-700 hover:bg-green-100"
+          className="flex items-center gap-1.5 rounded-lg border px-3 py-1.5 text-sm font-medium transition-colors"
+          style={{ borderColor: 'rgba(52,211,153,0.25)', background: 'rgba(16,185,129,0.08)', color: '#34d399' }}
+          onMouseEnter={e => { (e.currentTarget as HTMLElement).style.background = 'rgba(16,185,129,0.14)'; }}
+          onMouseLeave={e => { (e.currentTarget as HTMLElement).style.background = 'rgba(16,185,129,0.08)'; }}
         >
           <Plus size={15} />
           تسجيل دفعة
@@ -51,7 +54,7 @@ export function PaymentsHistory({ payments, employeeId, onPaymentMutated }: Paym
       {payments.length === 0 ? (
         <EmptyState message="لا توجد دفعات بعد" />
       ) : (
-        <div className="overflow-hidden rounded-xl border border-border bg-white">
+        <div className="overflow-hidden rounded-xl border border-border bg-surface">
           <table className="w-full text-sm">
             <thead className="bg-base/60 text-xs font-medium text-text-muted">
               <tr>
@@ -76,7 +79,7 @@ export function PaymentsHistory({ payments, employeeId, onPaymentMutated }: Paym
                       <button onClick={() => setEditTarget(payment)} className="rounded p-1 text-text-muted hover:bg-base hover:text-text-base" title="تعديل">
                         <Pencil size={14} />
                       </button>
-                      <button onClick={() => setDeleteTarget(payment)} className="rounded p-1 text-text-muted hover:bg-red-50 hover:text-red-600" title="حذف">
+                      <button onClick={() => setDeleteTarget(payment)} className="rounded p-1 text-text-muted transition-colors hover:bg-red-500/10 hover:text-red-400" title="حذف">
                         <Trash2 size={14} />
                       </button>
                     </div>

@@ -1,10 +1,13 @@
 import { Sidebar } from './Sidebar';
+import { PageTransition } from './PageTransition';
+import { ThemeInitializer } from './ThemeInitializer';
 
 export function AppLayout({ children }: { children: React.ReactNode }) {
   return (
     <div className="flex h-screen overflow-hidden bg-base" dir="rtl">
+      <ThemeInitializer />
       <Sidebar />
-      <main className="flex-1 overflow-auto p-6">{children}</main>
+      <PageTransition>{children}</PageTransition>
     </div>
   );
 }

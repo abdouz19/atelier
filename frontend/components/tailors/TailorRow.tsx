@@ -13,18 +13,19 @@ interface TailorRowProps {
 export function TailorRow({ tailor, onClick, onEdit, onSetStatus }: TailorRowProps) {
   return (
     <tr
-      className="cursor-pointer odd:bg-surface even:bg-base/30 hover:bg-primary-50 transition-colors"
+      className="cursor-pointer odd:bg-surface even:bg-base/30 hover:bg-white/3 transition-colors"
       dir="rtl"
       onClick={onClick}
     >
       <td className="px-4 py-3 font-medium text-text-base">{tailor.name}</td>
       <td className="px-4 py-3 text-text-muted">{tailor.phone ?? '—'}</td>
       <td className="px-4 py-3">
-        <span className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ${
-          tailor.status === 'active'
-            ? 'bg-green-100 text-green-700'
-            : 'bg-gray-100 text-gray-500'
-        }`}>
+        <span
+          className="inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium"
+          style={tailor.status === 'active'
+            ? { background: 'rgba(16,185,129,0.15)', color: '#34d399' }
+            : { background: 'rgba(100,116,139,0.15)', color: '#94a3b8' }}
+        >
           {tailor.status === 'active' ? 'نشط' : 'غير نشط'}
         </span>
       </td>

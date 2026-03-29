@@ -43,21 +43,24 @@ export function TailorDetail({ id, onBack }: TailorDetailProps) {
       <div className="flex items-center gap-3">
         <button onClick={onBack} className="rounded-lg p-1.5 hover:bg-base"><ArrowRight size={18} /></button>
         <h2 className="text-xl font-bold text-text-base">{detail.name}</h2>
-        <span className={`rounded-full px-2.5 py-0.5 text-xs font-medium ${detail.status === 'active' ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-500'}`}>
+        <span
+          className="rounded-full px-2.5 py-0.5 text-xs font-medium"
+          style={detail.status === 'active' ? { background: 'rgba(16,185,129,0.15)', color: '#34d399' } : { background: 'rgba(100,116,139,0.15)', color: '#94a3b8' }}
+        >
           {detail.status === 'active' ? 'نشط' : 'غير نشط'}
         </span>
       </div>
 
       <div className="grid grid-cols-3 gap-4">
         {[{ label: 'إجمالي المكتسب', value: detail.totalEarned }, { label: 'إجمالي المدفوع', value: detail.totalPaid }, { label: 'الرصيد المستحق', value: detail.balanceDue }].map(c => (
-          <div key={c.label} className="rounded-xl border border-border bg-white p-4 text-center">
+          <div key={c.label} className="rounded-xl border border-border bg-surface p-4 text-center">
             <p className="text-xs text-text-muted mb-1">{c.label}</p>
             <p className="text-lg font-bold text-text-base">{c.value.toFixed(2)}</p>
           </div>
         ))}
       </div>
 
-      <div className="rounded-xl border border-border bg-white overflow-hidden">
+      <div className="rounded-xl border border-border bg-surface overflow-hidden">
         <div className="px-4 py-3 border-b border-border font-medium text-sm">سجل الخياطة</div>
         {detail.sewingTransactions.length === 0 ? (
           <p className="px-4 py-6 text-center text-sm text-text-muted">لا توجد عمليات توزيع بعد</p>
@@ -77,7 +80,7 @@ export function TailorDetail({ id, onBack }: TailorDetailProps) {
         )}
       </div>
 
-      <div className="rounded-xl border border-border bg-white overflow-hidden">
+      <div className="rounded-xl border border-border bg-surface overflow-hidden">
         <div className="px-4 py-3 border-b border-border flex items-center justify-between">
           <span className="font-medium text-sm">الدفعات</span>
           <button onClick={() => setPaymentTarget(null)} className="flex items-center gap-1 rounded-lg bg-primary-500 px-3 py-1.5 text-xs font-medium text-white hover:bg-primary-600"><Plus size={12} />إضافة دفعة</button>
@@ -89,7 +92,7 @@ export function TailorDetail({ id, onBack }: TailorDetailProps) {
             <div key={p.id} className="flex items-center justify-between px-4 py-3">
               <div><p className="font-medium text-sm">{p.amount.toFixed(2)} دج</p><p className="text-xs text-text-muted">{new Date(p.paymentDate).toLocaleDateString('en-GB')}{p.notes ? ` — ${p.notes}` : ''}</p></div>
               <div className="flex gap-2">
-                <button onClick={() => setPaymentTarget(p)} className="text-xs text-primary-600 hover:underline">تعديل</button>
+                <button onClick={() => setPaymentTarget(p)} className="text-xs text-primary-500 hover:underline">تعديل</button>
                 <button onClick={() => setDeleteTarget(p.id)} className="text-xs text-red-500 hover:underline">حذف</button>
               </div>
             </div>

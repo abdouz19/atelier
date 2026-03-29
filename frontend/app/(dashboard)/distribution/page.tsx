@@ -2,6 +2,7 @@
 
 import { useState, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
+import { GitBranch } from 'lucide-react';
 import { useDistributionList } from '@/hooks/useDistributionList';
 import { DistributionKpiCards } from '@/components/distribution/DistributionKpiCards';
 import { DistributionSummaryTable } from '@/components/distribution/DistributionSummaryTable';
@@ -62,28 +63,36 @@ function DistributionPageContent() {
     <div dir="rtl" className="space-y-6">
       <PageHeader
         title="التوزيع"
+        subtitle="توزيع القطع على الخياطين وتتبع الارتجاعات"
+        icon={<GitBranch size={17} />}
         actions={activeTab === 'distribution' ? (
           <div className="flex gap-3">
             <button onClick={() => setShowDistribute(true)} className="rounded-lg bg-primary-500 px-4 py-2 text-sm font-medium text-white hover:bg-primary-600">
               توزيع
             </button>
-            <button onClick={() => setShowReturn(true)} className="rounded-lg border border-border bg-surface px-4 py-2 text-sm font-medium text-text-base hover:bg-base">
+            <button onClick={() => setShowReturn(true)} className="rounded-lg px-4 py-2 text-sm font-medium transition-all" style={{ border: '1px solid rgba(255,255,255,0.1)', background: 'rgba(255,255,255,0.04)', color: '#94a3b8' }}>
               ارتجاع
             </button>
           </div>
         ) : undefined}
       />
 
-      <div className="flex gap-1 border-b border-gray-200">
+      <div className="flex gap-1" style={{ borderBottom: '1px solid rgba(255,255,255,0.07)' }}>
         <button
           onClick={() => switchTab('distribution')}
-          className={`px-4 py-2 text-sm font-medium transition-colors ${activeTab === 'distribution' ? 'border-b-2 border-blue-600 text-blue-600' : 'text-gray-500 hover:text-gray-700'}`}
+          className="px-4 py-2 text-sm font-medium transition-colors"
+          style={activeTab === 'distribution'
+            ? { borderBottom: '2px solid var(--primary-500)', color: 'var(--primary-500)' }
+            : { color: '#475569' }}
         >
           التوزيع
         </button>
         <button
           onClick={() => switchTab('availability')}
-          className={`px-4 py-2 text-sm font-medium transition-colors ${activeTab === 'availability' ? 'border-b-2 border-blue-600 text-blue-600' : 'text-gray-500 hover:text-gray-700'}`}
+          className="px-4 py-2 text-sm font-medium transition-colors"
+          style={activeTab === 'availability'
+            ? { borderBottom: '2px solid var(--primary-500)', color: 'var(--primary-500)' }
+            : { color: '#475569' }}
         >
           توافر القطع
         </button>
@@ -112,7 +121,7 @@ function DistributionPageContent() {
 
 export default function DistributionPage() {
   return (
-    <Suspense fallback={<div className="p-6 text-gray-400">جاري التحميل...</div>}>
+    <Suspense fallback={<div className="p-6" style={{ color: '#475569' }}>جاري التحميل...</div>}>
       <DistributionPageContent />
     </Suspense>
   );

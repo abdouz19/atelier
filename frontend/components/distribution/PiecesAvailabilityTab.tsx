@@ -10,7 +10,7 @@ export function PiecesAvailabilityTab() {
     return (
       <div className="space-y-3">
         {[...Array(5)].map((_, i) => (
-          <div key={i} className="h-10 animate-pulse rounded-lg bg-gray-100" />
+          <div key={i} className="h-10 animate-pulse rounded-xl" style={{ background: 'rgba(255,255,255,0.04)' }} />
         ))}
       </div>
     );
@@ -18,7 +18,7 @@ export function PiecesAvailabilityTab() {
 
   if (error) {
     return (
-      <div className="rounded-lg border border-red-200 bg-red-50 p-4 text-sm text-red-700">
+      <div className="rounded-xl border p-4 text-sm" style={{ borderColor: 'rgba(239,68,68,0.3)', background: 'rgba(239,68,68,0.08)', color: '#f87171' }}>
         حدث خطأ: {error}
       </div>
     );

@@ -41,7 +41,7 @@ export function EmployeeDetailPanel({ detail, onBack, onDetailUpdate }: Employee
       </button>
 
       {/* Profile section */}
-      <div className="flex items-start gap-4 rounded-xl border border-border bg-white p-5">
+      <div className="flex items-start gap-4 rounded-xl border border-border bg-surface p-5">
         {detail.photoPath ? (
           <img src={detail.photoPath} alt={detail.name} className="h-16 w-16 rounded-full object-cover" />
         ) : (
@@ -52,7 +52,10 @@ export function EmployeeDetailPanel({ detail, onBack, onDetailUpdate }: Employee
         <div className="flex-1">
           <div className="flex items-center gap-2">
             <h1 className="text-xl font-bold text-text-base">{detail.name}</h1>
-            <span className={`rounded-full px-2.5 py-0.5 text-xs font-medium ${isActive ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-600'}`}>
+            <span
+              className="rounded-full px-2.5 py-0.5 text-xs font-medium"
+              style={isActive ? { background: 'rgba(16,185,129,0.15)', color: '#34d399' } : { background: 'rgba(100,116,139,0.15)', color: '#94a3b8' }}
+            >
               {isActive ? 'نشط' : 'غير نشط'}
             </span>
           </div>

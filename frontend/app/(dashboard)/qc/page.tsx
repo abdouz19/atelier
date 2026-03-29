@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import { ShieldCheck } from 'lucide-react';
 import { useQcData } from '@/hooks/useQcData';
 import { useFinitionData } from '@/hooks/useFinitionData';
 import { QcKpiCards } from '@/components/qc/QcKpiCards';
@@ -53,6 +54,8 @@ export default function QcPage() {
     <div dir="rtl" className="space-y-6">
       <PageHeader
         title="مراقبة الجودة والتشطيب"
+        subtitle="مراجعة الجودة وإضافة مراحل التشطيب"
+        icon={<ShieldCheck size={17} />}
         actions={
           <>
             {activeTab === 'qc' && (
@@ -72,15 +75,16 @@ export default function QcPage() {
       {kpis && !qcLoading && <QcKpiCards kpis={kpis} />}
 
       {/* Tabs */}
-      <div className="border-b border-gray-200">
+      <div style={{ borderBottom: '1px solid rgba(255,255,255,0.07)' }}>
         <nav className="flex gap-6">
           {([['qc', 'مراقبة الجودة'], ['finition', 'التشطيب']] as [Tab, string][]).map(([tab, label]) => (
             <button
               key={tab}
               onClick={() => setActiveTab(tab)}
-              className={`pb-3 text-sm font-medium border-b-2 transition-colors ${
-                activeTab === tab ? 'border-blue-600 text-blue-600' : 'border-transparent text-gray-500 hover:text-gray-700'
-              }`}
+              className="pb-3 text-sm font-medium border-b-2 transition-colors"
+              style={activeTab === tab
+                ? { borderColor: 'var(--primary-500)', color: 'var(--primary-500)' }
+                : { borderColor: 'transparent', color: '#475569' }}
             >
               {label}
             </button>
@@ -90,7 +94,7 @@ export default function QcPage() {
 
       {activeTab === 'qc' && (
         <>
-          {qcLoading && <p className="text-sm text-gray-400">جاري التحميل...</p>}
+          {qcLoading && <p className="text-sm" style={{ color: '#475569' }}>جاري التحميل...</p>}
           {qcError && <p className="text-sm text-red-500">{qcError}</p>}
           {!qcLoading && <QcTable records={qcRecords} />}
         </>
@@ -98,7 +102,7 @@ export default function QcPage() {
 
       {activeTab === 'finition' && (
         <>
-          {finitionLoading && <p className="text-sm text-gray-400">جاري التحميل...</p>}
+          {finitionLoading && <p className="text-sm" style={{ color: '#475569' }}>جاري التحميل...</p>}
           {finitionError && <p className="text-sm text-red-500">{finitionError}</p>}
           {!finitionLoading && <FinitionTable records={finitionRecords} />}
         </>

@@ -1,11 +1,85 @@
 @import "tailwindcss";
 
-/* ─── Light mode base (default) ─────────────────────────────────────────── */
+/* ─── Dark mode base (default) ──────────────────────────────────────────── */
 :root {
+  --background: #080c16;
+  --foreground: #f1f5f9;
+
+  --bg-base:      #080c16;
+  --bg-surface:   #0d1422;
+  --border-color: rgba(255,255,255,0.07);
+  --text-base:    #f1f5f9;
+  --text-muted:   #94a3b8;
+  --shadow-sm:    0 1px 3px rgba(0,0,0,0.4), 0 1px 2px rgba(0,0,0,0.3);
+  --shadow-md:    0 4px 6px rgba(0,0,0,0.5), 0 2px 4px rgba(0,0,0,0.4);
+
+  /* Default primary: blue (dark-adjusted, brighter for readability) */
+  --primary-50:  #eff6ff;
+  --primary-100: #dbeafe;
+  --primary-500: #60a5fa;
+  --primary-600: #3b82f6;
+  --primary-700: #1d4ed8;
+
+  /* ─── Mica / glass surface tokens ──────────────────────────────────────── */
+  --app-bg:        var(--bg-base);
+  --sidebar-bg:    rgba(10, 15, 30, 0.97);
+  --glass-surface: rgba(255, 255, 255, 0.04);
+  --glass-border:  rgba(255, 255, 255, 0.07);
+
+  /* ─── Component theme tokens (dark defaults) ─────────────────────────── */
+  --card-bg:            #0d1422;
+  --card-border:        rgba(255,255,255,0.07);
+  --card-shadow:        0 1px 3px rgba(0,0,0,0.4), 0 0 0 1px rgba(255,255,255,0.03);
+  --table-head-bg:      rgba(8,12,22,0.85);
+  --table-head-border:  rgba(255,255,255,0.05);
+  --cell-text:          #e2e8f0;
+  --cell-muted:         #64748b;
+  --cell-dim:           #475569;
+  --cell-faint:         #334155;
+  --divider:            rgba(255,255,255,0.05);
+  --sidebar-divider:    rgba(255,255,255,0.06);
+  --row-hover:          rgba(255,255,255,0.03);
+  --accent-bar-bg:      rgba(255,255,255,0.04);
+}
+
+/* ─── Explicit dark mode (same as :root defaults, for applyToDocument) ─── */
+[data-theme="dark"] {
+  --background: #080c16;
+  --foreground: #f1f5f9;
+
+  --bg-base:      #080c16;
+  --bg-surface:   #0d1422;
+  --border-color: rgba(255,255,255,0.07);
+  --text-base:    #f1f5f9;
+  --text-muted:   #94a3b8;
+  --shadow-sm:    0 1px 3px rgba(0,0,0,0.4), 0 1px 2px rgba(0,0,0,0.3);
+  --shadow-md:    0 4px 6px rgba(0,0,0,0.5), 0 2px 4px rgba(0,0,0,0.4);
+
+  --sidebar-bg:    rgba(10, 15, 30, 0.97);
+  --glass-surface: rgba(255, 255, 255, 0.04);
+  --glass-border:  rgba(255, 255, 255, 0.07);
+
+  --card-bg:            #0d1422;
+  --card-border:        rgba(255,255,255,0.07);
+  --card-shadow:        0 1px 3px rgba(0,0,0,0.4), 0 0 0 1px rgba(255,255,255,0.03);
+  --table-head-bg:      rgba(8,12,22,0.85);
+  --table-head-border:  rgba(255,255,255,0.05);
+  --cell-text:          #e2e8f0;
+  --cell-muted:         #64748b;
+  --cell-dim:           #475569;
+  --cell-faint:         #334155;
+  --divider:            rgba(255,255,255,0.05);
+  --sidebar-divider:    rgba(255,255,255,0.06);
+  --row-hover:          rgba(255,255,255,0.03);
+  --accent-bar-bg:      rgba(255,255,255,0.04);
+}
+
+/* ─── Light mode overrides ───────────────────────────────────────────────── */
+[data-theme="light"] {
   --background: #ffffff;
   --foreground: #171717;
 
-  --bg-base:      #f8fafc;
+  --bg-base:      #f1f5f9;
   --bg-surface:   #ffffff;
   --border-color: #e2e8f0;
   --text-base:    #0f172a;
@@ -13,96 +87,93 @@
   --shadow-sm:    0 1px 3px rgba(0,0,0,0.08), 0 1px 2px rgba(0,0,0,0.06);
   --shadow-md:    0 4px 6px rgba(0,0,0,0.07), 0 2px 4px rgba(0,0,0,0.06);
 
-  /* Default primary: blue */
-  --primary-50:  #eff6ff;
-  --primary-100: #dbeafe;
-  --primary-500: #3b82f6;
-  --primary-600: #2563eb;
-  --primary-700: #1d4ed8;
+  --sidebar-bg:    rgba(255,255,255,0.97);
+  --glass-surface: rgba(255, 255, 255, 0.70);
+  --glass-border:  rgba(0, 0, 0, 0.08);
+
+  --card-bg:            #ffffff;
+  --card-border:        #e2e8f0;
+  --card-shadow:        0 1px 3px rgba(0,0,0,0.06), 0 0 0 1px rgba(0,0,0,0.02);
+  --table-head-bg:      rgba(248,250,252,0.97);
+  --table-head-border:  rgba(0,0,0,0.06);
+  --cell-text:          #0f172a;
+  --cell-muted:         #475569;
+  --cell-dim:           #64748b;
+  --cell-faint:         #94a3b8;
+  --divider:            rgba(0,0,0,0.05);
+  --sidebar-divider:    rgba(0,0,0,0.07);
+  --row-hover:          rgba(0,0,0,0.025);
+  --accent-bar-bg:      rgba(0,0,0,0.025);
 }
 
-/* ─── Dark mode overrides ────────────────────────────────────────────────── */
-[data-theme="dark"] {
-  --background: #0f172a;
-  --foreground: #f1f5f9;
-
-  --bg-base:      #0f172a;
-  --bg-surface:   #1e293b;
-  --border-color: #334155;
-  --text-base:    #f1f5f9;
-  --text-muted:   #94a3b8;
-  --shadow-sm:    0 1px 3px rgba(0,0,0,0.3), 0 1px 2px rgba(0,0,0,0.2);
-  --shadow-md:    0 4px 6px rgba(0,0,0,0.4), 0 2px 4px rgba(0,0,0,0.3);
-}
-
-/* ─── Primary color palettes ─────────────────────────────────────────────── */
+/* ─── Primary color palettes (dark-adjusted brighter values as default) ─── */
 [data-primary="blue"] {
   --primary-50:  #eff6ff;
   --primary-100: #dbeafe;
-  --primary-500: #3b82f6;
-  --primary-600: #2563eb;
+  --primary-500: #60a5fa;
+  --primary-600: #3b82f6;
   --primary-700: #1d4ed8;
 }
 [data-primary="indigo"] {
   --primary-50:  #eef2ff;
   --primary-100: #e0e7ff;
-  --primary-500: #6366f1;
-  --primary-600: #4f46e5;
+  --primary-500: #818cf8;
+  --primary-600: #6366f1;
   --primary-700: #4338ca;
 }
 [data-primary="emerald"] {
   --primary-50:  #ecfdf5;
   --primary-100: #d1fae5;
-  --primary-500: #10b981;
-  --primary-600: #059669;
+  --primary-500: #34d399;
+  --primary-600: #10b981;
   --primary-700: #047857;
 }
 [data-primary="rose"] {
   --primary-50:  #fff1f2;
   --primary-100: #ffe4e6;
-  --primary-500: #f43f5e;
-  --primary-600: #e11d48;
+  --primary-500: #fb7185;
+  --primary-600: #f43f5e;
   --primary-700: #be123c;
 }
 [data-primary="amber"] {
   --primary-50:  #fffbeb;
   --primary-100: #fef3c7;
-  --primary-500: #f59e0b;
-  --primary-600: #d97706;
+  --primary-500: #fbbf24;
+  --primary-600: #f59e0b;
   --primary-700: #b45309;
 }
 [data-primary="slate"] {
   --primary-50:  #f8fafc;
   --primary-100: #f1f5f9;
-  --primary-500: #64748b;
-  --primary-600: #475569;
+  --primary-500: #94a3b8;
+  --primary-600: #64748b;
   --primary-700: #334155;
 }
 
-/* ─── Dark mode primary adjustments (lighter shades for readability) ──────── */
-[data-theme="dark"][data-primary="blue"] {
-  --primary-500: #60a5fa;
-  --primary-600: #3b82f6;
+/* ─── Light mode primary color overrides (original darker saturation) ───── */
+[data-theme="light"][data-primary="blue"] {
+  --primary-500: #3b82f6;
+  --primary-600: #2563eb;
 }
-[data-theme="dark"][data-primary="indigo"] {
-  --primary-500: #818cf8;
-  --primary-600: #6366f1;
+[data-theme="light"][data-primary="indigo"] {
+  --primary-500: #6366f1;
+  --primary-600: #4f46e5;
 }
-[data-theme="dark"][data-primary="emerald"] {
-  --primary-500: #34d399;
-  --primary-600: #10b981;
+[data-theme="light"][data-primary="emerald"] {
+  --primary-500: #10b981;
+  --primary-600: #059669;
 }
-[data-theme="dark"][data-primary="rose"] {
-  --primary-500: #fb7185;
-  --primary-600: #f43f5e;
+[data-theme="light"][data-primary="rose"] {
+  --primary-500: #f43f5e;
+  --primary-600: #e11d48;
 }
-[data-theme="dark"][data-primary="amber"] {
-  --primary-500: #fbbf24;
-  --primary-600: #f59e0b;
+[data-theme="light"][data-primary="amber"] {
+  --primary-500: #f59e0b;
+  --primary-600: #d97706;
 }
-[data-theme="dark"][data-primary="slate"] {
-  --primary-500: #94a3b8;
-  --primary-600: #64748b;
+[data-theme="light"][data-primary="slate"] {
+  --primary-500: #64748b;
+  --primary-600: #475569;
 }
 
 /* ─── Tailwind @theme inline mapping ─────────────────────────────────────── */
@@ -127,4 +198,52 @@ body {
   background: var(--bg-base);
   color: var(--text-base);
   font-family: Arial, Helvetica, sans-serif;
+}
+
+/* ─── Desktop scrollbar (Chromium / Electron) ────────────────────────────── */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: var(--border-color);
+  border-radius: 3px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: var(--text-muted);
+}
+
+/* ─── Tactile button utilities ───────────────────────────────────────────── */
+.btn-tactile {
+  transition: background-color 150ms ease, box-shadow 150ms ease, transform 100ms ease;
+}
+.btn-tactile:active {
+  transform: translateY(1px);
+  box-shadow: var(--shadow-sm);
+}
+
+/* ─── Input focus-ring transition utility ────────────────────────────────── */
+.input-transition {
+  transition: border-color 150ms ease, box-shadow 150ms ease;
+}
+
+/* ─── Input base styling (theme-aware) ───────────────────────────────────── */
+input, select, textarea {
+  background-color: var(--bg-surface);
+  color: var(--text-base);
+}
+input::placeholder, textarea::placeholder {
+  color: var(--text-muted);
+}
+select option {
+  background-color: var(--bg-base);
+  color: var(--text-base);
+}
+
+/* ─── Table row hover utility (theme-aware) ─────────────────────────────── */
+.row-hover:hover {
+  background-color: var(--row-hover);
 }

@@ -2,7 +2,7 @@
 
 import { useState, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { Plus } from 'lucide-react';
+import { Plus, Package } from 'lucide-react';
 import { useStockList } from '@/hooks/useStockList';
 import { useStockItem } from '@/hooks/useStockItem';
 import { useSupplierList } from '@/hooks/useSupplierList';
@@ -33,17 +33,17 @@ function StockDetailView({ id, onBack, onRefetch: refetchList, suppliers }: {
   if (loading) {
     return (
       <div className="animate-pulse space-y-4" dir="rtl">
-        <div className="h-8 w-48 rounded bg-gray-200" />
-        <div className="h-4 w-32 rounded bg-gray-200" />
+        <div className="h-8 w-48 rounded" style={{ background: 'rgba(255,255,255,0.06)' }} />
+        <div className="h-4 w-32 rounded" style={{ background: 'rgba(255,255,255,0.06)' }} />
         <div className="mt-6 grid grid-cols-2 gap-3">
-          {[1, 2].map((i) => <div key={i} className="h-24 rounded-xl bg-gray-200" />)}
+          {[1, 2].map((i) => <div key={i} className="h-24 rounded-xl" style={{ background: 'rgba(255,255,255,0.06)' }} />)}
         </div>
       </div>
     );
   }
 
   if (error) return <div dir="rtl"><ErrorAlert message={error} /></div>;
-  if (!item) return <div dir="rtl" className="text-gray-400">الصنف غير موجود</div>;
+  if (!item) return <div dir="rtl" style={{ color: '#475569' }}>الصنف غير موجود</div>;
 
   async function handleRefetch() {
     await refetch();
@@ -127,6 +127,8 @@ function StockPageContent() {
     <div dir="rtl">
       <PageHeader
         title="المخزون"
+        subtitle="إدارة أصناف القماش والمواد"
+        icon={<Package size={17} />}
         actions={
           <button
             onClick={() => setShowAddItem(true)}
@@ -139,14 +141,15 @@ function StockPageContent() {
       />
 
       {/* Tabs */}
-      <div className="mb-5 flex gap-1 rounded-lg bg-gray-100 p-1 w-fit">
+      <div className="mb-5 flex gap-1 rounded-xl p-1 w-fit" style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.07)' }}>
         {(['active', 'archived'] as const).map((t) => (
           <button
             key={t}
             onClick={() => setParam('tab', t === 'active' ? '' : t)}
-            className={`rounded-md px-4 py-1.5 text-sm font-medium transition-colors ${
-              tab === t ? 'bg-white text-gray-900 shadow-sm' : 'text-gray-500 hover:text-gray-700'
-            }`}
+            className="rounded-lg px-4 py-1.5 text-sm font-medium transition-all duration-150"
+            style={tab === t
+              ? { background: 'rgba(255,255,255,0.08)', color: '#f1f5f9', boxShadow: '0 1px 3px rgba(0,0,0,0.3)' }
+              : { color: '#475569' }}
           >
             {t === 'active' ? 'نشط' : 'مؤرشف'}
           </button>
@@ -158,13 +161,13 @@ function StockPageContent() {
 
       {/* Loading skeleton */}
       {loading ? (
-        <div className="overflow-hidden rounded-xl border border-gray-200 bg-white">
-          <div className="animate-pulse divide-y divide-gray-100">
+        <div className="overflow-hidden rounded-xl" style={{ border: '1px solid rgba(255,255,255,0.07)', background: 'rgba(255,255,255,0.02)' }}>
+          <div className="animate-pulse divide-y" style={{ borderColor: 'rgba(255,255,255,0.05)' }}>
             {skeletonRows.map((_, i) => (
               <div key={i} className="flex gap-4 px-4 py-4">
-                <div className="h-4 w-40 rounded bg-gray-200" />
-                <div className="h-4 w-20 rounded bg-gray-200" />
-                <div className="h-4 w-16 rounded bg-gray-200" />
+                <div className="h-4 w-40 rounded" style={{ background: 'rgba(255,255,255,0.06)' }} />
+                <div className="h-4 w-20 rounded" style={{ background: 'rgba(255,255,255,0.06)' }} />
+                <div className="h-4 w-16 rounded" style={{ background: 'rgba(255,255,255,0.06)' }} />
               </div>
             ))}
           </div>
@@ -234,7 +237,7 @@ function StockPageContent() {
 
 export default function StockPage() {
   return (
-    <Suspense fallback={<div className="p-6 text-gray-400">جاري التحميل...</div>}>
+    <Suspense fallback={<div className="p-6" style={{ color: '#475569' }}>جاري التحميل...</div>}>
       <StockPageContent />
     </Suspense>
   );

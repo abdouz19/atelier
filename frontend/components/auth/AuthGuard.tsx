@@ -50,8 +50,8 @@ export function AuthGuard({ children }: { children: React.ReactNode }) {
 
   if (isChecking) {
     return (
-      <div className="flex h-screen items-center justify-center bg-gray-50">
-        <div className="h-8 w-8 animate-spin rounded-full border-4 border-blue-600 border-t-transparent" />
+      <div className="flex h-screen items-center justify-center bg-[#0b0f1a]">
+        <div className="h-8 w-8 animate-spin rounded-full border-[3px] border-indigo-400/20 border-t-indigo-400" />
       </div>
     );
   }

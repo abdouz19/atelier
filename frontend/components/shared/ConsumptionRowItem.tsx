@@ -32,7 +32,7 @@ export function ConsumptionRowItem({ row, nonFabricItems, disabled, onUpdate, on
         value={row.stockItemId}
         disabled={disabled}
         onChange={e => onUpdate({ stockItemId: e.target.value, color: null, quantity: 0 })}
-        className="rounded-lg border border-border px-3 py-1.5 text-sm focus:border-primary-500 focus:outline-none"
+        className="rounded-lg border border-border px-3 py-1.5 text-sm input-transition focus:border-primary-500 focus:outline-none"
       >
         <option value="">اختر المادة</option>
         {nonFabricItems.map(it => (
@@ -47,7 +47,7 @@ export function ConsumptionRowItem({ row, nonFabricItems, disabled, onUpdate, on
           value={row.color ?? ''}
           disabled={disabled}
           onChange={e => onUpdate({ color: e.target.value || null, quantity: 0 })}
-          className="rounded-lg border border-border px-3 py-1.5 text-sm focus:border-primary-500 focus:outline-none"
+          className="rounded-lg border border-border px-3 py-1.5 text-sm input-transition focus:border-primary-500 focus:outline-none"
         >
           <option value="">اللون</option>
           {item.colors.map(c => (
@@ -67,7 +67,7 @@ export function ConsumptionRowItem({ row, nonFabricItems, disabled, onUpdate, on
           disabled={disabled}
           onChange={e => onUpdate({ quantity: Number(e.target.value) })}
           placeholder={item ? `متاح: ${available}` : 'الكمية'}
-          className={`w-32 rounded-lg border px-3 py-1.5 text-sm focus:outline-none ${
+          className={`input-transition w-32 rounded-lg border px-3 py-1.5 text-sm focus:outline-none ${
             exceeded ? 'border-red-400 focus:border-red-400' : 'border-border focus:border-primary-500'
           }`}
         />

@@ -1,6 +1,7 @@
 'use client';
 
 import { Suspense } from 'react';
+import { PackageCheck } from 'lucide-react';
 import { useFinalStockList } from '@/hooks/useFinalStockList';
 import { useLookups } from '@/hooks/useLookups';
 import { FinalStockKpiCards } from '@/components/final-stock/FinalStockKpiCards';
@@ -29,7 +30,11 @@ function FinalStockPageContent() {
 
   return (
     <div dir="rtl">
-      <PageHeader title="المخزون النهائي" />
+      <PageHeader
+        title="المخزون النهائي"
+        subtitle="عرض وتتبع القطع الجاهزة للتسليم"
+        icon={<PackageCheck size={17} />}
+      />
 
       {error && (
         <div className="mb-4">
@@ -41,10 +46,10 @@ function FinalStockPageContent() {
         <div className="space-y-4">
           <div className="grid grid-cols-3 gap-3">
             {Array.from({ length: 3 }).map((_, i) => (
-              <div key={i} className="h-20 animate-pulse rounded-xl bg-gray-200" />
+              <div key={i} className="h-20 animate-pulse rounded-xl" style={{ background: 'rgba(255,255,255,0.04)' }} />
             ))}
           </div>
-          <div className="h-64 animate-pulse rounded-xl bg-gray-200" />
+          <div className="h-64 animate-pulse rounded-xl" style={{ background: 'rgba(255,255,255,0.04)' }} />
         </div>
       ) : (
         <div className="space-y-6">
@@ -75,7 +80,7 @@ function FinalStockPageContent() {
 
 export default function FinalStockPage() {
   return (
-    <Suspense fallback={<div className="p-6 text-gray-400">جاري التحميل...</div>}>
+    <Suspense fallback={<div className="p-6" style={{ color: '#475569' }}>جاري التحميل...</div>}>
       <FinalStockPageContent />
     </Suspense>
   );

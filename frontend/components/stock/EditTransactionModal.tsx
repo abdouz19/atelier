@@ -96,7 +96,7 @@ export function EditTransactionModal({ transaction, suppliers, onClose, onSucces
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40" dir="rtl">
-      <div className="w-full max-w-sm rounded-xl bg-white p-6 shadow-xl max-h-[90vh] overflow-y-auto">
+      <div className="w-full max-w-sm rounded-xl bg-surface p-6 shadow-xl max-h-[90vh] overflow-y-auto">
         <div className="mb-5 flex items-center justify-between">
           <h2 className="text-lg font-semibold text-text-base">تعديل معاملة واردة</h2>
           <button onClick={onClose} className="rounded-lg p-1 text-text-muted hover:text-text-muted"><X size={20} /></button>
@@ -107,19 +107,19 @@ export function EditTransactionModal({ transaction, suppliers, onClose, onSucces
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-4" noValidate>
           <div>
             <label className="mb-1 block text-sm font-medium text-text-base">الكمية <span className="text-red-500">*</span></label>
-            <input {...register('quantity')} type="number" min="0" step="any" className="w-full rounded-lg border border-border px-3 py-2 text-sm text-text-base outline-none focus:border-primary-500" />
+            <input {...register('quantity')} type="number" min="0" step="any" className="w-full rounded-lg border border-border px-3 py-2 text-sm text-text-base input-transition outline-none focus:border-primary-500" />
             {errors.quantity && <p className="mt-1 text-xs text-red-600">{errors.quantity.message}</p>}
           </div>
 
           <div>
             <label className="mb-1 block text-sm font-medium text-text-base">التاريخ <span className="text-red-500">*</span></label>
-            <input {...register('transactionDate')} type="date" max={todayStr()} className="w-full rounded-lg border border-border px-3 py-2 text-sm text-text-base outline-none focus:border-primary-500" />
+            <input {...register('transactionDate')} type="date" max={todayStr()} className="w-full rounded-lg border border-border px-3 py-2 text-sm text-text-base input-transition outline-none focus:border-primary-500" />
             {errors.transactionDate && <p className="mt-1 text-xs text-red-600">{errors.transactionDate.message}</p>}
           </div>
 
           <div>
             <label className="mb-1 block text-sm font-medium text-text-base">المورد (اختياري)</label>
-            <select {...register('supplierId')} className="w-full rounded-lg border border-border px-3 py-2 text-sm text-text-base outline-none focus:border-primary-500">
+            <select {...register('supplierId')} className="w-full rounded-lg border border-border px-3 py-2 text-sm text-text-base input-transition outline-none focus:border-primary-500">
               <option value="">-- بدون مورد --</option>
               {suppliers.map((s) => <option key={s.id} value={s.id}>{s.name}</option>)}
             </select>
@@ -138,7 +138,7 @@ export function EditTransactionModal({ transaction, suppliers, onClose, onSucces
                     totalOverridden.current = false;
                     register('pricePerUnit').onChange(e);
                   }}
-                  className="w-full rounded-lg border border-border px-3 py-2 text-sm text-text-base outline-none focus:border-primary-500"
+                  className="w-full rounded-lg border border-border px-3 py-2 text-sm text-text-base input-transition outline-none focus:border-primary-500"
                 />
                 {errors.pricePerUnit && <p className="mt-1 text-xs text-red-600">{errors.pricePerUnit.message}</p>}
               </div>
@@ -154,7 +154,7 @@ export function EditTransactionModal({ transaction, suppliers, onClose, onSucces
                     totalOverridden.current = true;
                     register('totalPricePaid').onChange(e);
                   }}
-                  className="w-full rounded-lg border border-border px-3 py-2 text-sm text-text-base outline-none focus:border-primary-500"
+                  className="w-full rounded-lg border border-border px-3 py-2 text-sm text-text-base input-transition outline-none focus:border-primary-500"
                 />
               </div>
             </>
@@ -162,7 +162,7 @@ export function EditTransactionModal({ transaction, suppliers, onClose, onSucces
 
           <div className="flex justify-end gap-3 pt-2">
             <button type="button" onClick={onClose} className="rounded-lg border border-border px-4 py-2 text-sm font-medium text-text-base hover:bg-base/60">إلغاء</button>
-            <button type="submit" disabled={submitting} className="rounded-lg bg-primary-500 px-4 py-2 text-sm font-medium text-white hover:bg-primary-600 disabled:opacity-60">
+            <button type="submit" disabled={submitting} className="btn-tactile rounded-lg bg-primary-500 px-4 py-2 text-sm font-medium text-white hover:bg-primary-600 disabled:opacity-60">
               {submitting ? 'جاري الحفظ...' : 'حفظ'}
             </button>
           </div>

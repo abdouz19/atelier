@@ -14,7 +14,7 @@ export function FinancialSummaryCard({ totalEarned, totalPaid, balanceDue }: Fin
   const isNegative = balanceDue < 0;
 
   return (
-    <div className="rounded-xl border border-border bg-white p-4">
+    <div className="rounded-xl border border-border bg-surface p-4">
       <h3 className="mb-3 text-sm font-semibold text-text-muted">الملخص المالي</h3>
       <div className="space-y-2">
         <div className="flex items-center justify-between">
@@ -27,7 +27,7 @@ export function FinancialSummaryCard({ totalEarned, totalPaid, balanceDue }: Fin
         </div>
         <div className="mt-2 border-t border-border pt-2 flex items-center justify-between">
           <span className="text-sm font-semibold text-text-base">الرصيد المستحق</span>
-          <span className={`text-lg font-bold ${isNegative ? 'text-red-600' : 'text-blue-600'}`}>
+          <span className="text-lg font-bold" style={{ color: isNegative ? '#f87171' : '#60a5fa' }}>
             {isNegative ? '−' : ''}{fmt(Math.abs(balanceDue))} دج
           </span>
         </div>
