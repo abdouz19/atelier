@@ -85,5 +85,38 @@
     "addPart": "إضافة جزء",
     "totalCost": "التكلفة الإجمالية",
     "availableMeters": "متاح"
+  },
+  "batchSelector": {
+    "purchaseDate": "تاريخ الشراء",
+    "pricePerMeter": "السعر/م",
+    "pricePerUnit": "السعر/وحدة",
+    "available": "المتاح",
+    "quantityTaken": "الكمية المأخوذة",
+    "totalMetersTaken": "إجمالي الأمتار",
+    "fabricCostTotal": "تكلفة القماش",
+    "noBatchesAvailable": "لا توجد دفعات شراء متاحة",
+    "exhausted": "نفدت الكمية",
+    "exceedsAvailable": "الكمية تتجاوز المتاح"
+  },
+  "employeeCost": {
+    "total": "تكلفة العمال"
+  },
+  "sessionCostPreview": {
+    "title": "ملخص تكلفة الجلسة",
+    "fabricCost": "تكلفة القماش",
+    "employeeCost": "تكلفة العمال",
+    "materialsCost": "تكلفة المواد",
+    "totalCost": "التكلفة الإجمالية للجلسة"
+  },
+  "costDistribution": {
+    "title": "توزيع التكلفة على الأجزاء",
+    "unitCost": "التكلفة/قطعة",
+    "rowTotal": "الإجمالي",
+    "grandTotal": "مجموع الأجزاء",
+    "target": "المطلوب",
+    "autoBadge": "تلقائي",
+    "lockedBadge": "محدد",
+    "mismatchError": "مجموع التكاليف المحددة لا يساوي تكلفة الجلسة. يرجى تعديل التكاليف أو تحرير بعض الصفوف.",
+    "targetMet": "التكلفة موزعة بشكل صحيح"
   }
 }

@@ -103,6 +103,8 @@ declare global {
         getAvailableSizesForModel: (payload: { modelName: string }) => Promise<unknown>;
         getAvailableColorsForModelSize: (payload: { modelName: string; sizeLabel: string }) => Promise<unknown>;
         create: (payload: unknown) => Promise<unknown>;
+        getFabricBatches: (payload: { stockItemId: string; color: string }) => Promise<unknown>;
+        getMaterialBatches: (payload: { stockItemId: string; color?: string | null }) => Promise<unknown>;
       };
       tailors: {
         getAll: () => Promise<unknown>;

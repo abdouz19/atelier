@@ -62,8 +62,7 @@ export function Sidebar() {
   return (
     <aside
       className="relative flex h-screen w-[220px] flex-col overflow-hidden border-l"
-      style={{ borderColor: 'var(--sidebar-divider)' }}
-      style={{ background: 'var(--sidebar-bg)', backdropFilter: 'blur(12px)' }}
+      style={{ borderColor: 'var(--sidebar-divider)', background: 'var(--sidebar-bg)', backdropFilter: 'blur(12px)' }}
       dir="rtl"
     >
       {/* Ambient glow top */}

@@ -77,6 +77,8 @@ import type {
   NonFabricItem,
   CreateCuttingSessionPayload,
   PartsInventoryRow,
+  FabricBatch,
+  MaterialBatch,
 } from '@/features/cutting/cutting.types';
 
 function getBridge() {
@@ -165,6 +167,8 @@ export const ipcClient = {
     getAvailableSizesForModel: (payload: { modelName: string }) => getBridge().cutting.getAvailableSizesForModel(payload) as Promise<{ success: true; data: string[] } | { success: false; error: string }>,
     getAvailableColorsForModelSize: (payload: { modelName: string; sizeLabel: string }) => getBridge().cutting.getAvailableColorsForModelSize(payload) as Promise<{ success: true; data: string[] } | { success: false; error: string }>,
     create: (payload: CreateCuttingSessionPayload) => getBridge().cutting.create(payload) as Promise<{ success: true; data: CuttingSessionSummary } | { success: false; error: string }>,
+    getFabricBatches: (payload: { stockItemId: string; color: string }) => getBridge().cutting.getFabricBatches(payload) as Promise<{ success: true; data: FabricBatch[] } | { success: false; error: string }>,
+    getMaterialBatches: (payload: { stockItemId: string; color?: string | null }) => getBridge().cutting.getMaterialBatches(payload) as Promise<{ success: true; data: MaterialBatch[] } | { success: false; error: string }>,
   },
   tailors: {
     getAll: () => getBridge().tailors.getAll() as Promise<{ success: true; data: TailorSummary[] } | { success: false; error: string }>,

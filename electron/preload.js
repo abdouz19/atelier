@@ -52,6 +52,8 @@ contextBridge.exposeInMainWorld('ipcBridge', {
     getAvailableSizesForModel: (payload) => ipcRenderer.invoke('cutting:getAvailableSizesForModel', payload),
     getAvailableColorsForModelSize: (payload) => ipcRenderer.invoke('cutting:getAvailableColorsForModelSize', payload),
     create: (payload) => ipcRenderer.invoke('cutting:create', payload),
+    getFabricBatches: (payload) => ipcRenderer.invoke('cutting:getFabricBatches', payload),
+    getMaterialBatches: (payload) => ipcRenderer.invoke('cutting:getMaterialBatches', payload),
   },
   tailors: {
     getAll: () => ipcRenderer.invoke('tailors:getAll'),

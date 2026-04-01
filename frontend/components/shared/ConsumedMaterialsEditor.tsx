@@ -3,27 +3,45 @@
 import { useState } from 'react';
 import { ChevronDown, ChevronUp, Plus } from 'lucide-react';
 import { ConsumptionRowItem, type LocalRow } from './ConsumptionRowItem';
-import type { NonFabricItem, ConsumptionRow } from '@/features/cutting/cutting.types';
+import { MaterialBatchSubTable } from './MaterialBatchSubTable';
+import type { NonFabricItem, ConsumptionRow, MaterialBatchEntry, MaterialBatchConsumption } from '@/features/cutting/cutting.types';
 
 interface ConsumedMaterialsEditorProps {
   nonFabricItems: NonFabricItem[];
   value: ConsumptionRow[];
   onChange: (rows: ConsumptionRow[]) => void;
+  onBatchChange?: (consumptions: MaterialBatchConsumption[]) => void;
   disabled?: boolean;
+}
+
+interface LocalBatchState {
+  [rowIndex: number]: MaterialBatchEntry[];
 }
 
 function emitFiltered(rows: LocalRow[], onChange: (r: ConsumptionRow[]) => void) {
   onChange(rows.filter(r => r.stockItemId !== '') as ConsumptionRow[]);
 }
 
+function buildBatchConsumptions(rows: LocalRow[], batchState: LocalBatchState): MaterialBatchConsumption[] {
+  return rows
+    .map((row, idx) => ({
+      stockItemId: row.stockItemId,
+      color: row.color,
+      batches: (batchState[idx] ?? []).filter(e => e.quantity > 0),
+    }))
+    .filter(c => c.stockItemId !== '' && c.batches.length > 0);
+}
+
 export function ConsumedMaterialsEditor({
   nonFabricItems,
   value,
   onChange,
+  onBatchChange,
   disabled = false,
 }: ConsumedMaterialsEditorProps) {
   const [expanded, setExpanded] = useState(false);
   const [rows, setRows] = useState<LocalRow[]>(value);
+  const [batchState, setBatchState] = useState<LocalBatchState>({});
 
   function addRow() {
     setRows(prev => [...prev, { stockItemId: '', color: null, quantity: 0 }]);
@@ -31,14 +49,38 @@ export function ConsumedMaterialsEditor({
 
   function removeRow(i: number) {
     const updated = rows.filter((_, idx) => idx !== i);
+    const updatedBatches = Object.fromEntries(
+      Object.entries(batchState)
+        .filter(([k]) => Number(k) !== i)
+        .map(([k, v]) => [Number(k) > i ? Number(k) - 1 : Number(k), v])
+    );
     setRows(updated);
+    setBatchState(updatedBatches);
     emitFiltered(updated, onChange);
+    onBatchChange?.(buildBatchConsumptions(updated, updatedBatches));
   }
 
   function updateRow(i: number, patch: Partial<LocalRow>) {
+    const resetBatches = ('stockItemId' in patch || 'color' in patch)
+      ? { ...batchState, [i]: [] }
+      : batchState;
     const updated = rows.map((r, idx) => (idx === i ? { ...r, ...patch } : r));
     setRows(updated);
+    setBatchState(resetBatches);
     emitFiltered(updated, onChange);
+    onBatchChange?.(buildBatchConsumptions(updated, resetBatches));
+  }
+
+  function updateBatchEntries(rowIndex: number, entries: MaterialBatchEntry[]) {
+    const updatedBatches = { ...batchState, [rowIndex]: entries };
+    setBatchState(updatedBatches);
+    const batchTotal = entries.reduce((s, e) => s + (e.quantity || 0), 0);
+    const updatedRows = rows.map((r, idx) =>
+      idx === rowIndex ? { ...r, quantity: batchTotal } : r
+    );
+    setRows(updatedRows);
+    emitFiltered(updatedRows, onChange);
+    onBatchChange?.(buildBatchConsumptions(updatedRows, updatedBatches));
   }
 
   const completedCount = rows.filter(r => r.stockItemId !== '').length;
@@ -63,16 +105,26 @@ export function ConsumedMaterialsEditor({
       </button>
 
       {expanded && (
-        <div className="border-t border-border px-4 pb-3 pt-3">
+        <div className="border-t border-border px-4 pb-3 pt-3 space-y-3">
           {rows.map((row, i) => (
-            <ConsumptionRowItem
-              key={i}
-              row={row}
-              nonFabricItems={nonFabricItems}
-              disabled={disabled}
-              onUpdate={patch => updateRow(i, patch)}
-              onRemove={() => removeRow(i)}
-            />
+            <div key={i}>
+              <ConsumptionRowItem
+                row={row}
+                nonFabricItems={nonFabricItems}
+                disabled={disabled}
+                onUpdate={patch => updateRow(i, patch)}
+                onRemove={() => removeRow(i)}
+              />
+              {row.stockItemId && (
+                <MaterialBatchSubTable
+                  stockItemId={row.stockItemId}
+                  color={row.color}
+                  entries={batchState[i] ?? []}
+                  onChange={entries => updateBatchEntries(i, entries)}
+                  disabled={disabled}
+                />
+              )}
+            </div>
           ))}
           <button
             type="button"

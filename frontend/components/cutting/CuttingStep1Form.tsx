@@ -1,12 +1,14 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { ipcClient } from '@/lib/ipc-client';
 import { ManagedDropdown } from '@/components/shared/ManagedDropdown';
-import type { FabricItem, FabricColorOption } from '@/features/cutting/cutting.types';
+import { BatchConsumptionTable } from './BatchConsumptionTable';
+import { useFabricBatches } from '@/hooks/useFabricBatches';
+import type { FabricItem, FabricColorOption, FabricBatchEntry } from '@/features/cutting/cutting.types';
 import type { EmployeeSummary } from '@/features/employees/employees.types';
 import type { LookupEntry } from '@/features/lookups/lookups.types';
 
@@ -14,7 +16,6 @@ const schema = z.object({
   fabricItemId: z.string().min(1, 'اختر القماش'),
   fabricColor: z.string().min(1, 'اختر اللون'),
   modelName: z.string().min(1, 'الموديل مطلوب'),
-  metersUsed: z.coerce.number().positive('يجب أن تكون الأمتار أكبر من صفر'),
   employeeIds: z.array(z.string()).min(1, 'اختر موظفاً واحداً على الأقل'),
   layers: z.coerce.number().int().positive('عدد الطبقات مطلوب'),
   pricePerLayer: z.coerce.number().positive('سعر الطبقة مطلوب'),
@@ -25,28 +26,63 @@ const schema = z.object({
 type FormInput = z.input<typeof schema>;
 type FormValues = z.output<typeof schema>;
 
-export interface Step1Values extends FormValues { availableMeters: number }
+export interface Step1Values extends FormValues {
+  availableMeters: number;
+  metersUsed: number;
+  fabricBatchEntries: FabricBatchEntry[];
+  fabricCost: number;
+  employeeCost: number;
+}
 
-interface CuttingStep1FormProps { onNext: (values: Step1Values) => void; onClose: () => void }
+interface CuttingStep1FormProps {
+  onNext: (values: Step1Values) => void;
+  onClose: () => void;
+  consumedMaterialsCost?: number;
+}
 
-export function CuttingStep1Form({ onNext, onClose }: CuttingStep1FormProps) {
+export function CuttingStep1Form({ onNext, onClose, consumedMaterialsCost = 0 }: CuttingStep1FormProps) {
   const [fabrics, setFabrics] = useState<FabricItem[]>([]);
   const [fabricColors, setFabricColors] = useState<FabricColorOption[]>([]);
   const [managedColors, setManagedColors] = useState<LookupEntry[]>([]);
   const [models, setModels] = useState<LookupEntry[]>([]);
   const [employees, setEmployees] = useState<EmployeeSummary[]>([]);
-  const { register, handleSubmit, watch, setValue, setError, formState: { errors } } = useForm<FormInput, unknown, FormValues>({ resolver: zodResolver(schema), defaultValues: { sessionDate: new Date().toISOString().split('T')[0], employeeIds: [] } });
+  const [fabricBatchEntries, setFabricBatchEntries] = useState<FabricBatchEntry[]>([]);
+  const [batchError, setBatchError] = useState<string | null>(null);
+
+  const { register, handleSubmit, watch, setValue, formState: { errors } } = useForm<FormInput, unknown, FormValues>({
+    resolver: zodResolver(schema),
+    defaultValues: { sessionDate: new Date().toISOString().split('T')[0], employeeIds: [] },
+  });
+
   const fabricId = watch('fabricItemId');
   const fabricColor = watch('fabricColor');
   const layers = watch('layers');
   const price = watch('pricePerLayer');
-  const totalCost = (Number(layers) || 0) * (Number(price) || 0);
+  const employeeIds = watch('employeeIds');
+
+  const { batches: fabricBatches, isLoading: batchesLoading } = useFabricBatches(
+    fabricId || null,
+    fabricColor || null,
+  );
+
   const availableMeters = fabricColors.find(c => c.color === fabricColor)?.available ?? 0;
 
-  // Intersection: managed colors that also have available stock for selected fabric
   const intersectedColors: LookupEntry[] = managedColors.filter(mc =>
     fabricColors.some(fc => fc.color === mc.name)
   );
+
+  const fabricCost = useMemo(
+    () => fabricBatchEntries.reduce((s, e) => s + (e.quantity || 0) * e.pricePerUnit, 0),
+    [fabricBatchEntries],
+  );
+
+  const employeeCount = Array.isArray(employeeIds) ? employeeIds.length : 0;
+  const employeeCost = useMemo(
+    () => (Number(layers) || 0) * (Number(price) || 0) * employeeCount,
+    [layers, price, employeeCount],
+  );
+
+  const totalSessionCost = fabricCost + employeeCost + consumedMaterialsCost;
 
   useEffect(() => {
     ipcClient.cutting.getFabrics().then(r => { if (r.success) setFabrics(r.data); });
@@ -62,28 +98,37 @@ export function CuttingStep1Form({ onNext, onClose }: CuttingStep1FormProps) {
     });
   }, [fabricId, setValue]);
 
+  useEffect(() => {
+    setFabricBatchEntries([]);
+    setBatchError(null);
+  }, [fabricId, fabricColor]);
+
   async function handleAddColor(name: string) {
     const res = await ipcClient.lookups.createColor({ name });
-    if (res.success) {
-      ipcClient.lookups.getColors().then(r => { if (r.success) setManagedColors(r.data); });
-    }
+    if (res.success) ipcClient.lookups.getColors().then(r => { if (r.success) setManagedColors(r.data); });
     return res;
   }
 
   async function handleAddModel(name: string) {
     const res = await ipcClient.lookups.createModel({ name });
-    if (res.success) {
-      ipcClient.lookups.getModels().then(r => { if (r.success) setModels(r.data); });
-    }
+    if (res.success) ipcClient.lookups.getModels().then(r => { if (r.success) setModels(r.data); });
     return res;
   }
 
   function onSubmit(values: FormValues) {
-    if (values.metersUsed > availableMeters) {
-      setError('metersUsed', { message: 'الكمية المطلوبة تتجاوز المتاح' });
+    const activeBatchEntries = fabricBatchEntries.filter(e => e.quantity > 0);
+    if (activeBatchEntries.length === 0) {
+      setBatchError('اختر كمية من دفعة شراء واحدة على الأقل');
       return;
     }
-    onNext({ ...values, availableMeters });
+    const overdraw = activeBatchEntries.find(e => e.quantity > e.availableQuantity);
+    if (overdraw) {
+      setBatchError('الكمية المدخلة في إحدى الدفعات تتجاوز الكمية المتاحة');
+      return;
+    }
+    setBatchError(null);
+    const metersUsed = activeBatchEntries.reduce((s, e) => s + e.quantity, 0);
+    onNext({ ...values, availableMeters, metersUsed, fabricBatchEntries: activeBatchEntries, fabricCost, employeeCost });
   }
 
   return (
@@ -111,6 +156,23 @@ export function CuttingStep1Form({ onNext, onClose }: CuttingStep1FormProps) {
           />
         </div>
       </div>
+
+      {fabricId && fabricColor && (
+        <div>
+          <label className="mb-1 block text-sm font-medium">
+            دفعات الشراء المتاحة
+            {availableMeters > 0 && <span className="text-text-muted text-xs mr-2">(إجمالي متاح: {availableMeters} م)</span>}
+          </label>
+          <BatchConsumptionTable
+            batches={fabricBatches}
+            isLoading={batchesLoading}
+            entries={fabricBatchEntries}
+            onChange={setFabricBatchEntries}
+          />
+          {batchError && <p className="mt-1 text-xs text-red-500">{batchError}</p>}
+        </div>
+      )}
+
       <div>
         <label className="mb-1 block text-sm font-medium">الموديل *</label>
         <ManagedDropdown
@@ -123,11 +185,7 @@ export function CuttingStep1Form({ onNext, onClose }: CuttingStep1FormProps) {
           error={errors.modelName?.message}
         />
       </div>
-      <div>
-        <label className="mb-1 block text-sm font-medium">الأمتار المستخدمة * {fabricColor && <span className="text-text-muted">(متاح: {availableMeters} م)</span>}</label>
-        <input type="number" step="any" {...register('metersUsed')} className="w-full rounded-lg border border-border px-3 py-2 text-sm input-transition focus:border-primary-500 focus:outline-none" />
-        {errors.metersUsed && <p className="mt-1 text-xs text-red-500">{errors.metersUsed.message}</p>}
-      </div>
+
       <div>
         <label className="mb-1 block text-sm font-medium">الموظفون *</label>
         <div className="max-h-28 overflow-y-auto rounded-lg border border-border p-2">
@@ -139,6 +197,7 @@ export function CuttingStep1Form({ onNext, onClose }: CuttingStep1FormProps) {
         </div>
         {errors.employeeIds && <p className="mt-1 text-xs text-red-500">{errors.employeeIds.message}</p>}
       </div>
+
       <div className="grid grid-cols-2 gap-3">
         <div>
           <label className="mb-1 block text-sm font-medium">عدد الطبقات *</label>
@@ -151,11 +210,13 @@ export function CuttingStep1Form({ onNext, onClose }: CuttingStep1FormProps) {
           {errors.pricePerLayer && <p className="mt-1 text-xs text-red-500">{errors.pricePerLayer.message}</p>}
         </div>
       </div>
-      {totalCost > 0 && (
+
+      {employeeCost > 0 && (
         <div className="rounded-lg border px-3 py-2 text-sm" style={{ background: 'rgba(96,165,250,0.08)', borderColor: 'rgba(96,165,250,0.2)', color: '#94a3b8' }}>
-          التكلفة لكل موظف: <strong style={{ color: '#60a5fa' }}>{totalCost.toLocaleString('en-US')} دج</strong>
+          تكلفة العمال: <strong style={{ color: '#60a5fa' }}>{(Number(layers) || 0)} طبقة × {(Number(price) || 0).toFixed(2)} دج × {employeeCount} عامل = {employeeCost.toFixed(2)} دج</strong>
         </div>
       )}
+
       <div className="grid grid-cols-2 gap-3">
         <div>
           <label className="mb-1 block text-sm font-medium">التاريخ *</label>
@@ -166,6 +227,27 @@ export function CuttingStep1Form({ onNext, onClose }: CuttingStep1FormProps) {
           <input {...register('notes')} className="w-full rounded-lg border border-border px-3 py-2 text-sm input-transition focus:border-primary-500 focus:outline-none" />
         </div>
       </div>
+
+      <div className="rounded-lg border border-border p-3 text-sm space-y-1" dir="rtl">
+        <p className="font-medium text-text-base mb-1">ملخص تكلفة الجلسة</p>
+        <div className="flex justify-between text-text-muted">
+          <span>تكلفة القماش</span>
+          <span>{fabricCost.toFixed(2)} دج</span>
+        </div>
+        <div className="flex justify-between text-text-muted">
+          <span>تكلفة العمال</span>
+          <span>{employeeCost.toFixed(2)} دج</span>
+        </div>
+        <div className="flex justify-between text-text-muted">
+          <span>تكلفة المواد</span>
+          <span>{consumedMaterialsCost.toFixed(2)} دج</span>
+        </div>
+        <div className="flex justify-between font-semibold border-t border-border pt-1 mt-1">
+          <span>التكلفة الإجمالية للجلسة</span>
+          <span className="text-primary-600">{totalSessionCost.toFixed(2)} دج</span>
+        </div>
+      </div>
+
       <div className="flex justify-end gap-2 pt-2">
         <button type="button" onClick={onClose} className="rounded-lg border border-border px-4 py-2 text-sm hover:bg-base/60">إلغاء</button>
         <button type="submit" className="btn-tactile rounded-lg bg-primary-500 px-4 py-2 text-sm font-medium text-white hover:bg-primary-600">التالي ←</button>

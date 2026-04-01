@@ -515,6 +515,46 @@ function initDB() {
     db.exec(`ALTER TABLE cutting_session_parts ADD COLUMN size_label TEXT NOT NULL DEFAULT ''`)
   }
 
+  // 018: Session cost fields on cutting_sessions
+  try { db.prepare(`SELECT fabric_cost FROM cutting_sessions LIMIT 1`).get() } catch (_) {
+    db.exec(`ALTER TABLE cutting_sessions ADD COLUMN fabric_cost REAL`)
+  }
+  try { db.prepare(`SELECT employee_cost FROM cutting_sessions LIMIT 1`).get() } catch (_) {
+    db.exec(`ALTER TABLE cutting_sessions ADD COLUMN employee_cost REAL`)
+  }
+  try { db.prepare(`SELECT consumed_materials_cost FROM cutting_sessions LIMIT 1`).get() } catch (_) {
+    db.exec(`ALTER TABLE cutting_sessions ADD COLUMN consumed_materials_cost REAL`)
+  }
+  try { db.prepare(`SELECT total_session_cost FROM cutting_sessions LIMIT 1`).get() } catch (_) {
+    db.exec(`ALTER TABLE cutting_sessions ADD COLUMN total_session_cost REAL`)
+  }
+
+  // 018: Unit cost on cutting_session_parts
+  try { db.prepare(`SELECT unit_cost FROM cutting_session_parts LIMIT 1`).get() } catch (_) {
+    db.exec(`ALTER TABLE cutting_session_parts ADD COLUMN unit_cost REAL`)
+  }
+
+  // 018: Unit cost on cutting_pieces
+  try { db.prepare(`SELECT unit_cost FROM cutting_pieces LIMIT 1`).get() } catch (_) {
+    db.exec(`ALTER TABLE cutting_pieces ADD COLUMN unit_cost REAL`)
+  }
+
+  // 018: Per-batch consumption linkage table
+  db.exec(`
+    CREATE TABLE IF NOT EXISTS cutting_batch_consumptions (
+      id                   TEXT    PRIMARY KEY,
+      session_id           TEXT    NOT NULL,
+      stock_transaction_id TEXT    NOT NULL,
+      stock_item_id        TEXT    NOT NULL,
+      color                TEXT,
+      quantity             REAL    NOT NULL,
+      price_per_unit       REAL    NOT NULL,
+      is_fabric            INTEGER NOT NULL DEFAULT 0,
+      created_at           INTEGER NOT NULL,
+      updated_at           INTEGER NOT NULL
+    )
+  `)
+
   // 015: distribution_consumption_entries
   db.exec(`
     CREATE TABLE IF NOT EXISTS distribution_consumption_entries (
@@ -2000,6 +2040,10 @@ function registerIpcHandlers() {
         pricePerLayer: s.price_per_layer,
         notes: s.notes ?? null,
         totalCost,
+        fabricCost: s.fabric_cost ?? null,
+        employeeCost: s.employee_cost ?? null,
+        consumedMaterialsCost: s.consumed_materials_cost ?? null,
+        totalSessionCost: s.total_session_cost ?? null,
         employees: employees.map(e => ({ id: e.id, name: e.name, earnings: e.earnings })),
         parts: parts.map(p => ({ partName: p.part_name, count: p.count })),
         consumptionEntries: consumption.map(c => ({
@@ -2155,10 +2199,106 @@ function registerIpcHandlers() {
     } catch (err) { return { success: false, error: err.message ?? 'حدث خطأ' }; }
   })
 
+  // cutting:getFabricBatches (018-session-cost-distribution)
+  ipcMain.handle('cutting:getFabricBatches', (_event, { stockItemId, color }) => {
+    try {
+      const rows = db.prepare(`
+        SELECT
+          st.id                                                                    AS transaction_id,
+          st.transaction_date,
+          COALESCE(st.price_per_unit, 0)                                          AS price_per_meter,
+          st.quantity                                                              AS original_quantity,
+          st.supplier_name,
+          (st.quantity - COALESCE((
+            SELECT SUM(cbc.quantity)
+            FROM cutting_batch_consumptions cbc
+            WHERE cbc.stock_transaction_id = st.id
+          ), 0))                                                                   AS available_quantity
+        FROM stock_transactions st
+        WHERE st.stock_item_id = ? AND st.color = ? AND st.type = 'inbound'
+        ORDER BY st.transaction_date DESC
+      `).all(stockItemId, color);
+      return {
+        success: true,
+        data: rows.map(r => ({
+          transactionId: r.transaction_id,
+          transactionDate: r.transaction_date,
+          pricePerMeter: r.price_per_meter,
+          originalQuantity: r.original_quantity,
+          availableQuantity: Math.max(0, r.available_quantity),
+          supplierName: r.supplier_name ?? null,
+        })),
+      };
+    } catch (err) { return { success: false, error: err.message ?? 'حدث خطأ' }; }
+  })
+
+  // cutting:getMaterialBatches (018-session-cost-distribution)
+  ipcMain.handle('cutting:getMaterialBatches', (_event, { stockItemId, color }) => {
+    try {
+      const hasColor = color !== null && color !== undefined && color !== '';
+      const rows = hasColor
+        ? db.prepare(`
+            SELECT
+              st.id                                                                    AS transaction_id,
+              st.transaction_date,
+              COALESCE(st.price_per_unit, 0)                                          AS price_per_unit,
+              si.unit,
+              st.quantity                                                              AS original_quantity,
+              st.supplier_name,
+              (st.quantity - COALESCE((
+                SELECT SUM(cbc.quantity)
+                FROM cutting_batch_consumptions cbc
+                WHERE cbc.stock_transaction_id = st.id
+              ), 0))                                                                   AS available_quantity
+            FROM stock_transactions st
+            JOIN stock_items si ON si.id = st.stock_item_id
+            WHERE st.stock_item_id = ? AND st.color = ? AND st.type = 'inbound'
+            ORDER BY st.transaction_date DESC
+          `).all(stockItemId, color)
+        : db.prepare(`
+            SELECT
+              st.id                                                                    AS transaction_id,
+              st.transaction_date,
+              COALESCE(st.price_per_unit, 0)                                          AS price_per_unit,
+              si.unit,
+              st.quantity                                                              AS original_quantity,
+              st.supplier_name,
+              (st.quantity - COALESCE((
+                SELECT SUM(cbc.quantity)
+                FROM cutting_batch_consumptions cbc
+                WHERE cbc.stock_transaction_id = st.id
+              ), 0))                                                                   AS available_quantity
+            FROM stock_transactions st
+            JOIN stock_items si ON si.id = st.stock_item_id
+            WHERE st.stock_item_id = ? AND st.type = 'inbound'
+            ORDER BY st.transaction_date DESC
+          `).all(stockItemId);
+      return {
+        success: true,
+        data: rows.map(r => ({
+          transactionId: r.transaction_id,
+          transactionDate: r.transaction_date,
+          pricePerUnit: r.price_per_unit,
+          unit: r.unit ?? '',
+          originalQuantity: r.original_quantity,
+          availableQuantity: Math.max(0, r.available_quantity),
+          supplierName: r.supplier_name ?? null,
+        })),
+      };
+    } catch (err) { return { success: false, error: err.message ?? 'حدث خطأ' }; }
+  })
+
   // cutting:create
   ipcMain.handle('cutting:create', (_event, payload) => {
     try {
-      const { fabricItemId, fabricColor, modelName, metersUsed, employeeIds, layers, pricePerLayer, sessionDate, notes, parts: partRows, consumptionRows } = payload;
+      const {
+        fabricItemId, fabricColor, modelName, metersUsed, employeeIds, layers, pricePerLayer,
+        sessionDate, notes, parts: partRows, consumptionRows,
+        // 018-session-cost-distribution
+        fabricBatchConsumptions, materialBatchConsumptions,
+        fabricCost, employeeCost, consumedMaterialsCost, totalSessionCost, partCosts,
+      } = payload;
+
       if (!partRows || partRows.length === 0) return { success: false, error: 'يجب إضافة جزء واحد على الأقل' };
       if (partRows.some((r) => !r.partName || !r.sizeLabel || r.count < 1)) return { success: false, error: 'كل جزء يجب أن يحتوي على اسم ومقاس وعدد صحيح أكبر من صفر' };
 
@@ -2174,6 +2314,18 @@ function registerIpcHandlers() {
           throw new Error(`الكمية المتاحة من القماش (${fabricAvail?.available ?? 0} م) أقل من المطلوب (${metersUsed} م)`);
         }
 
+        // Validate fabric batch quantities (server-side re-check)
+        for (const fb of (fabricBatchConsumptions || [])) {
+          if (!fb.transactionId || !fb.quantity) continue;
+          const batchRow = db.prepare(`
+            SELECT st.quantity - COALESCE((SELECT SUM(cbc.quantity) FROM cutting_batch_consumptions cbc WHERE cbc.stock_transaction_id = st.id), 0) AS available
+            FROM stock_transactions st WHERE st.id = ?
+          `).get(fb.transactionId);
+          if (!batchRow || batchRow.available < fb.quantity) {
+            throw new Error(`الكمية المطلوبة من إحدى دفعات القماش تتجاوز المتاح`);
+          }
+        }
+
         // Validate each consumption entry
         for (const row of (consumptionRows || [])) {
           const avail = row.color
@@ -2185,6 +2337,20 @@ function registerIpcHandlers() {
           }
         }
 
+        // Validate material batch quantities (server-side re-check)
+        for (const mc of (materialBatchConsumptions || [])) {
+          for (const mb of (mc.batches || [])) {
+            if (!mb.transactionId || !mb.quantity) continue;
+            const batchRow = db.prepare(`
+              SELECT st.quantity - COALESCE((SELECT SUM(cbc.quantity) FROM cutting_batch_consumptions cbc WHERE cbc.stock_transaction_id = st.id), 0) AS available
+              FROM stock_transactions st WHERE st.id = ?
+            `).get(mb.transactionId);
+            if (!batchRow || batchRow.available < mb.quantity) {
+              throw new Error(`الكمية المطلوبة من إحدى دفعات المواد المستهلكة تتجاوز المتاح`);
+            }
+          }
+        }
+
         // Validate employees
         for (const empId of employeeIds) {
           const emp = db.prepare('SELECT id FROM employees WHERE id = ? AND status = ?').get(empId, 'active');
@@ -2193,17 +2359,29 @@ function registerIpcHandlers() {
 
         const sessionId = crypto.randomUUID();
 
-        // 1. Insert cutting_sessions (size_label kept as '' — deprecated, moved to per-part-row)
-        db.prepare(`INSERT INTO cutting_sessions (id, fabric_item_id, fabric_color, model_name, size_label, meters_used, layers, price_per_layer, session_date, notes, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
-        ).run(sessionId, fabricItemId, fabricColor, modelName, '', metersUsed, layers, pricePerLayer, sessionDate, notes ?? null, now, now);
+        // 1. Insert cutting_sessions with cost fields
+        db.prepare(`
+          INSERT INTO cutting_sessions (id, fabric_item_id, fabric_color, model_name, size_label, meters_used, layers, price_per_layer, session_date, notes, fabric_cost, employee_cost, consumed_materials_cost, total_session_cost, created_at, updated_at)
+          VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        `).run(
+          sessionId, fabricItemId, fabricColor, modelName, '', metersUsed, layers, pricePerLayer,
+          sessionDate, notes ?? null,
+          fabricCost ?? null, employeeCost ?? null, consumedMaterialsCost ?? null, totalSessionCost ?? null,
+          now, now
+        );
 
-        // 2a. Insert per-session log into cutting_session_parts (with size_label per row)
-        const insertSessionPart = db.prepare(`INSERT INTO cutting_session_parts (id, session_id, part_name, size_label, count, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?)`);
+        // 2a. Insert per-session log into cutting_session_parts (with unit_cost per row)
+        const insertSessionPart = db.prepare(`INSERT INTO cutting_session_parts (id, session_id, part_name, size_label, count, unit_cost, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?)`);
+        const partCostMap = {};
+        for (const pc of (partCosts || [])) {
+          partCostMap[`${pc.partName}||${pc.sizeLabel}`] = pc.unitCost;
+        }
         for (const row of partRows) {
-          insertSessionPart.run(crypto.randomUUID(), sessionId, row.partName, row.sizeLabel, row.count, now, now);
+          const unitCost = partCostMap[`${row.partName}||${row.sizeLabel}`] ?? null;
+          insertSessionPart.run(crypto.randomUUID(), sessionId, row.partName, row.sizeLabel, row.count, unitCost, now, now);
         }
 
-        // 2b. Upsert into cutting_parts aggregate — size_label now comes from each part row
+        // 2b. Upsert into cutting_parts aggregate
         const upsertPart = db.prepare(`
           INSERT INTO cutting_parts (id, model_name, size_label, color, part_name, count, created_at, updated_at)
           VALUES (?, ?, ?, ?, ?, ?, ?, ?)
@@ -2214,9 +2392,22 @@ function registerIpcHandlers() {
           upsertPart.run(crypto.randomUUID(), modelName, row.sizeLabel, fabricColor, row.partName, row.count, now, now);
         }
 
-        // 3. Fabric deduction (stock_transactions consumed, with model_name context)
+        // 3. Fabric deduction (stock_transactions consumed, total meters)
         db.prepare(`INSERT INTO stock_transactions (id, stock_item_id, type, quantity, color, transaction_date, source_module, source_reference_id, model_name, created_at, updated_at) VALUES (?, ?, 'consumed', ?, ?, ?, 'cutting', ?, ?, ?, ?)`
         ).run(crypto.randomUUID(), fabricItemId, metersUsed, fabricColor, sessionDate, sessionId, modelName, now, now);
+
+        // 3b. Insert cutting_batch_consumptions for fabric batches
+        const insertBatchConsumption = db.prepare(`
+          INSERT INTO cutting_batch_consumptions (id, session_id, stock_transaction_id, stock_item_id, color, quantity, price_per_unit, is_fabric, created_at, updated_at)
+          VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        `);
+        for (const fb of (fabricBatchConsumptions || [])) {
+          if (!fb.transactionId || !fb.quantity) continue;
+          insertBatchConsumption.run(
+            crypto.randomUUID(), sessionId, fb.transactionId, fabricItemId, fabricColor,
+            fb.quantity, fb.pricePerUnit ?? 0, 1, now, now
+          );
+        }
 
         // 4. Non-fabric consumption entries + stock_transactions
         for (const row of (consumptionRows || [])) {
@@ -2226,7 +2417,18 @@ function registerIpcHandlers() {
           ).run(crypto.randomUUID(), row.stockItemId, row.quantity, row.color ?? null, sessionDate, sessionId, modelName, now, now);
         }
 
-        // 5. Employee operations (one per employee, with model_name and color context)
+        // 4b. Insert cutting_batch_consumptions for material batches
+        for (const mc of (materialBatchConsumptions || [])) {
+          for (const mb of (mc.batches || [])) {
+            if (!mb.transactionId || !mb.quantity) continue;
+            insertBatchConsumption.run(
+              crypto.randomUUID(), sessionId, mb.transactionId, mc.stockItemId, mc.color ?? null,
+              mb.quantity, mb.pricePerUnit ?? 0, 0, now, now
+            );
+          }
+        }
+
+        // 5. Employee operations
         const earnings = layers * pricePerLayer;
         for (const empId of employeeIds) {
           db.prepare(`INSERT INTO employee_operations (id, employee_id, operation_type, source_module, source_reference_id, operation_date, quantity, price_per_unit, total_amount, model_name, color, notes, created_at, updated_at) VALUES (?, ?, 'cutting', 'cutting', ?, ?, ?, ?, ?, ?, ?, NULL, ?, ?)`
@@ -2247,7 +2449,7 @@ function registerIpcHandlers() {
           metersUsed,
           totalPieces,
           employeeNames: empNames,
-          totalCost: earnings * employeeIds.length,
+          totalCost: totalSessionCost ?? (earnings * employeeIds.length),
         };
       });
 
@@ -2514,6 +2716,7 @@ function registerIpcHandlers() {
         const paid = db.prepare(`SELECT COALESCE(SUM(amount), 0) AS total FROM tailor_payments WHERE tailor_id = ?`).get(p.tailorId)
         const tailorRow = db.prepare('SELECT name FROM tailors WHERE id = ?').get(p.tailorId)
         return {
+          
           tailorId: p.tailorId, tailorName: tailorRow.name,
           piecesInDistribution: 0, piecesReturned: 0, piecesNotYetReturned: 0,
           totalEarned: agg.total_earned, settledAmount: paid.total, remainingBalance: agg.total_earned - paid.total,

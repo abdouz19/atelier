@@ -138,6 +138,34 @@ function DetailView({ detail }: { detail: DetailType }) {
         )}
       </SectionCard>
 
+      {/* Session cost breakdown */}
+      {detail.totalSessionCost !== null && (
+        <motion.div variants={itemVariant} className="relative overflow-hidden rounded-2xl border" style={cardStyle}>
+          <div className="absolute inset-x-0 top-0 h-0.5" style={{ background: 'linear-gradient(90deg, transparent, #34d399, transparent)', opacity: 0.7 }} />
+          <div className="relative flex items-center gap-3 border-b px-5 py-4" style={{ borderColor: 'var(--divider)' }}>
+            <span className="font-semibold text-sm" style={{ color: 'var(--cell-text)' }}>تفاصيل التكلفة</span>
+          </div>
+          <div className="relative grid grid-cols-2 gap-x-6 gap-y-3 px-5 py-4 text-sm sm:grid-cols-4">
+            <div>
+              <span className="block text-[10px] font-medium uppercase tracking-wider mb-1" style={{ color: 'var(--cell-faint)' }}>تكلفة القماش</span>
+              <span className="font-semibold tabular-nums" style={{ color: '#60a5fa' }}>{(detail.fabricCost ?? 0).toFixed(2)} دج</span>
+            </div>
+            <div>
+              <span className="block text-[10px] font-medium uppercase tracking-wider mb-1" style={{ color: 'var(--cell-faint)' }}>تكلفة الموظفين</span>
+              <span className="font-semibold tabular-nums" style={{ color: '#a78bfa' }}>{(detail.employeeCost ?? 0).toFixed(2)} دج</span>
+            </div>
+            <div>
+              <span className="block text-[10px] font-medium uppercase tracking-wider mb-1" style={{ color: 'var(--cell-faint)' }}>تكلفة المواد</span>
+              <span className="font-semibold tabular-nums" style={{ color: '#fb923c' }}>{(detail.consumedMaterialsCost ?? 0).toFixed(2)} دج</span>
+            </div>
+            <div>
+              <span className="block text-[10px] font-medium uppercase tracking-wider mb-1" style={{ color: 'var(--cell-faint)' }}>التكلفة الإجمالية</span>
+              <span className="font-bold tabular-nums" style={{ color: '#34d399' }}>{detail.totalSessionCost.toFixed(2)} دج</span>
+            </div>
+          </div>
+        </motion.div>
+      )}
+
       {/* Consumed materials */}
       {detail.consumptionEntries.length > 0 && (
         <SectionCard icon={Beaker} title="المواد المستهلكة" accent="#fb923c">

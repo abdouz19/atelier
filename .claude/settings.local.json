@@ -3,7 +3,19 @@
     "allow": [
       "Bash(while read:*)",
       "Bash(do sed:*)",
-      "Bash(npx tsc:*)"
+      "Bash(npx tsc:*)",
+      "Bash(npm install:*)",
+      "Bash(npm run:*)",
+      "Bash(.specify/scripts/bash/create-new-feature.sh \"Session Cost Calculation & Part Cost Distribution\" --json --short-name \"session-cost-distribution\" 2>&1)",
+      "Bash(.specify/scripts/bash/create-new-feature.sh \"Session Cost Calculation & Part Cost Distribution\" --short-name \"session-cost-distribution\" 2>&1)",
+      "Bash(.specify/scripts/bash/setup-plan.sh --json 2>&1)",
+      "Bash(find /Users/macbook/Documents/development/atelier -type f -name *cutting*)",
+      "Bash(find /Users/macbook/Documents/development/atelier/electron -type f \\\\\\(-name *handler.ts -o -name *service.ts -o -name *queries.ts \\\\\\))",
+      "Bash(find /Users/macbook/Documents/development/atelier/frontend/features -type f -name *.ts)",
+      "Bash(.specify/scripts/bash/update-agent-context.sh claude:*)",
+      "Bash(.specify/scripts/bash/check-prerequisites.sh --json 2>&1)",
+      "Bash(.specify/scripts/bash/check-prerequisites.sh --json --require-tasks --include-tasks 2>&1)",
+      "Bash(cd:*)"
     ]
   }
 }

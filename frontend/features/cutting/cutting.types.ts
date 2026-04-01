@@ -38,6 +38,10 @@ export interface CuttingSessionDetail {
   pricePerLayer: number;
   notes: string | null;
   totalCost: number;
+  fabricCost: number | null;
+  employeeCost: number | null;
+  consumedMaterialsCost: number | null;
+  totalSessionCost: number | null;
   employees: Array<{ id: string; name: string; earnings: number }>;
   parts: PartRow[];
   consumptionEntries: Array<{
@@ -83,6 +87,63 @@ export interface ConsumptionRow {
   quantity: number;
 }
 
+// ─── Batch cost types (018-session-cost-distribution) ─────────────────────────
+
+export interface FabricBatch {
+  transactionId: string;
+  transactionDate: number;
+  pricePerMeter: number;
+  originalQuantity: number;
+  availableQuantity: number;
+  supplierName: string | null;
+}
+
+export interface MaterialBatch {
+  transactionId: string;
+  transactionDate: number;
+  pricePerUnit: number;
+  unit: string;
+  originalQuantity: number;
+  availableQuantity: number;
+  supplierName: string | null;
+}
+
+export interface FabricBatchEntry {
+  transactionId: string;
+  quantity: number;
+  pricePerUnit: number;
+  availableQuantity: number;
+}
+
+export interface MaterialBatchEntry {
+  transactionId: string;
+  quantity: number;
+  pricePerUnit: number;
+  availableQuantity: number;
+}
+
+export interface MaterialBatchConsumption {
+  stockItemId: string;
+  color: string | null;
+  batches: MaterialBatchEntry[];
+}
+
+export interface PartCost {
+  partName: string;
+  sizeLabel: string;
+  unitCost: number;
+}
+
+export type CostDistributionLockState = 'auto' | 'locked';
+
+export interface CostDistributionRow {
+  partName: string;
+  sizeLabel: string;
+  count: number;
+  unitCost: number;
+  lockState: CostDistributionLockState;
+}
+
 export interface CreateCuttingSessionPayload {
   fabricItemId: string;
   fabricColor: string;
@@ -95,4 +156,12 @@ export interface CreateCuttingSessionPayload {
   notes?: string;
   parts: PartRow[];
   consumptionRows: ConsumptionRow[];
+  // Cost fields (018-session-cost-distribution)
+  fabricBatchConsumptions: FabricBatchEntry[];
+  materialBatchConsumptions: MaterialBatchConsumption[];
+  fabricCost: number;
+  employeeCost: number;
+  consumedMaterialsCost: number;
+  totalSessionCost: number;
+  partCosts: PartCost[];
 }
