@@ -33,7 +33,11 @@ function getRows(db, filters) {
       size_label,
       color,
       SUM(quantity) AS current_quantity,
-      MAX(entry_date) AS last_updated_date
+      MAX(entry_date) AS last_updated_date,
+      CASE WHEN SUM(quantity) > 0
+        THEN SUM(COALESCE(final_cost_per_piece, 0) * quantity) / SUM(quantity)
+        ELSE NULL
+      END AS avg_final_cost_per_piece
     FROM final_stock_entries
     WHERE (? IS NULL OR model_name = ?)
       AND (? IS NULL OR size_label = ?)
@@ -53,6 +57,7 @@ function getRows(db, filters) {
     color: r.color,
     currentQuantity: r.current_quantity,
     lastUpdatedDate: r.last_updated_date,
+    finalCostPerPiece: r.avg_final_cost_per_piece != null ? Math.round(r.avg_final_cost_per_piece * 100) / 100 : null,
   }))
 }
 
@@ -65,7 +70,7 @@ function getHistory(db, key) {
   const { modelName, partName, sizeLabel, color } = key
 
   const rows = db.prepare(`
-    SELECT id, source_type, source_id, quantity, entry_date
+    SELECT id, source_type, source_id, quantity, final_cost_per_piece, entry_date
     FROM final_stock_entries
     WHERE model_name = ?
       AND part_name IS ?
@@ -79,6 +84,7 @@ function getHistory(db, key) {
     sourceType: r.source_type,
     sourceId: r.source_id,
     quantityAdded: r.quantity,
+    finalCostPerPiece: r.final_cost_per_piece ?? null,
     entryDate: r.entry_date,
   }))
 }

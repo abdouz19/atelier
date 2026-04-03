@@ -6,7 +6,7 @@ import { AppModal } from '@/components/shared/AppModal';
 import { AddToStockModal } from './AddToStockModal';
 import { ipcClient } from '@/lib/ipc-client';
 import type { QcRecordForFinition, AddToFinalStockPayload } from '@/features/finition/finition.types';
-import type { NonFabricItem, ConsumptionRow } from '@/features/cutting/cutting.types';
+import type { NonFabricItem, ConsumptionRow, MaterialBatchConsumption } from '@/features/cutting/cutting.types';
 
 interface ActiveEmployee { id: string; name: string }
 
@@ -16,6 +16,7 @@ export interface FinitionNotReadyInfo {
   sizeLabel: string;
   color: string;
   quantity: number;
+  finalCostPerPiece: number | null;
 }
 
 interface AddFinitionRecordModalProps {
@@ -26,8 +27,8 @@ interface AddFinitionRecordModalProps {
 
 type Step =
   | { type: 'form' }
-  | { type: 'ready_prompt'; finitionId: string; modelName: string; sizeLabel: string; color: string; quantity: number; finitionDate: number }
-  | { type: 'add_to_stock'; finitionId: string; modelName: string; sizeLabel: string; color: string; quantity: number; finitionDate: number };
+  | { type: 'ready_prompt'; finitionId: string; modelName: string; sizeLabel: string; color: string; quantity: number; finitionDate: number; finalCostPerPiece: number }
+  | { type: 'add_to_stock'; finitionId: string; modelName: string; sizeLabel: string; color: string; quantity: number; finitionDate: number; finalCostPerPiece: number };
 
 export function AddFinitionRecordModal({ onClose, onSuccess, onNotReady }: AddFinitionRecordModalProps) {
   const [qcRecords, setQcRecords] = useState<QcRecordForFinition[]>([]);
@@ -40,6 +41,7 @@ export function AddFinitionRecordModal({ onClose, onSuccess, onNotReady }: AddFi
   const [pricePerPiece, setPricePerPiece] = useState('');
   const [finitionDate, setFinitionDate] = useState(new Date().toISOString().split('T')[0]);
   const [consumptionRows, setConsumptionRows] = useState<ConsumptionRow[]>([]);
+  const [materialBatchConsumptions, setMaterialBatchConsumptions] = useState<MaterialBatchConsumption[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
 
@@ -61,6 +63,11 @@ export function AddFinitionRecordModal({ onClose, onSuccess, onNotReady }: AddFi
   const qty = Number(quantity) || 0;
   const totalCost = qty * (Number(pricePerPiece) || 0);
 
+  const materialsCost = materialBatchConsumptions.reduce((sum, mc) =>
+    sum + mc.batches.reduce((s, b) => s + b.quantity * b.pricePerUnit, 0), 0);
+  const materialsCostPerPiece = qty > 0 ? materialsCost / qty : 0;
+  const finalCostPerPiece = (selectedQc?.costPerPieceAfterQc ?? 0) + (Number(pricePerPiece) || 0) + materialsCostPerPiece;
+
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     setError(null);
@@ -80,6 +87,7 @@ export function AddFinitionRecordModal({ onClose, onSuccess, onNotReady }: AddFi
         pricePerPiece: Number(pricePerPiece) || 0,
         finitionDate: new Date(finitionDate).getTime(),
         consumptionEntries: consumptionRows.map(r => ({ stockItemId: r.stockItemId, color: r.color ?? undefined, quantity: r.quantity })),
+        materialBatchConsumptions,
       });
       if (res.success) {
         setStep({
@@ -90,6 +98,7 @@ export function AddFinitionRecordModal({ onClose, onSuccess, onNotReady }: AddFi
           color: selectedQc.color,
           quantity: qty,
           finitionDate: new Date(finitionDate).getTime(),
+          finalCostPerPiece,
         });
       } else { setError(res.error); }
     } finally { setSubmitting(false); }
@@ -114,7 +123,7 @@ export function AddFinitionRecordModal({ onClose, onSuccess, onNotReady }: AddFi
           <p className="text-base font-semibold text-text-base mb-6">هل المنتج جاهز للمخزون النهائي؟</p>
           <div className="flex gap-3 justify-center">
             <button
-              onClick={() => setStep({ type: 'add_to_stock', finitionId: step.finitionId, modelName: step.modelName, sizeLabel: step.sizeLabel, color: step.color, quantity: step.quantity, finitionDate: step.finitionDate })}
+              onClick={() => setStep({ type: 'add_to_stock', finitionId: step.finitionId, modelName: step.modelName, sizeLabel: step.sizeLabel, color: step.color, quantity: step.quantity, finitionDate: step.finitionDate, finalCostPerPiece: step.finalCostPerPiece })}
               className="rounded-lg bg-green-600 px-5 py-2 text-sm font-medium text-white hover:bg-green-700"
             >
               نعم
@@ -122,7 +131,7 @@ export function AddFinitionRecordModal({ onClose, onSuccess, onNotReady }: AddFi
             <button
               onClick={() => {
                 if (onNotReady) {
-                  onNotReady({ finitionId: step.finitionId, modelName: step.modelName, sizeLabel: step.sizeLabel, color: step.color, quantity: step.quantity });
+                  onNotReady({ finitionId: step.finitionId, modelName: step.modelName, sizeLabel: step.sizeLabel, color: step.color, quantity: step.quantity, finalCostPerPiece: step.finalCostPerPiece });
                 } else {
                   onSuccess();
                 }
@@ -149,7 +158,7 @@ export function AddFinitionRecordModal({ onClose, onSuccess, onNotReady }: AddFi
         quantity={step.quantity}
         entryDate={step.finitionDate}
         onConfirm={handleAddToStock}
-        onCancel={() => setStep({ type: 'ready_prompt', finitionId: step.finitionId, modelName: step.modelName, sizeLabel: step.sizeLabel, color: step.color, quantity: step.quantity, finitionDate: step.finitionDate })}
+        onCancel={() => setStep({ type: 'ready_prompt', finitionId: step.finitionId, modelName: step.modelName, sizeLabel: step.sizeLabel, color: step.color, quantity: step.quantity, finitionDate: step.finitionDate, finalCostPerPiece: step.finalCostPerPiece })}
       />
     );
   }
@@ -234,8 +243,30 @@ export function AddFinitionRecordModal({ onClose, onSuccess, onNotReady }: AddFi
               nonFabricItems={nonFabricItems}
               value={consumptionRows}
               onChange={setConsumptionRows}
+              onBatchChange={setMaterialBatchConsumptions}
               disabled={submitting}
             />
+
+            {qty > 0 && (
+              <div className="rounded-lg border px-3 py-2.5 text-sm space-y-1" style={{ borderColor: 'rgba(251,191,36,0.25)', background: 'rgba(251,191,36,0.06)' }}>
+                <div className="flex justify-between text-xs" style={{ color: 'var(--cell-muted)' }}>
+                  <span>تكلفة القطعة بعد المراقبة</span>
+                  <span>{(selectedQc?.costPerPieceAfterQc ?? 0).toFixed(2)} دج</span>
+                </div>
+                <div className="flex justify-between text-xs" style={{ color: 'var(--cell-muted)' }}>
+                  <span>تكلفة التشطيب للقطعة</span>
+                  <span>{(Number(pricePerPiece) || 0).toFixed(2)} دج</span>
+                </div>
+                <div className="flex justify-between text-xs" style={{ color: 'var(--cell-muted)' }}>
+                  <span>تكلفة المواد للقطعة</span>
+                  <span>{materialsCostPerPiece.toFixed(2)} دج</span>
+                </div>
+                <div className="flex justify-between border-t pt-1 font-semibold" style={{ borderColor: 'rgba(251,191,36,0.2)', color: '#fbbf24' }}>
+                  <span>التكلفة النهائية للقطعة</span>
+                  <span>{finalCostPerPiece.toFixed(2)} دج</span>
+                </div>
+              </div>
+            )}
           </>
         )}
 

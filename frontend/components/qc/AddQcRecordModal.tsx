@@ -5,7 +5,7 @@ import { ConsumedMaterialsEditor } from '@/components/shared/ConsumedMaterialsEd
 import { AppModal } from '@/components/shared/AppModal';
 import { ipcClient } from '@/lib/ipc-client';
 import type { ReturnBatchForQc } from '@/features/qc/qc.types';
-import type { NonFabricItem, ConsumptionRow } from '@/features/cutting/cutting.types';
+import type { NonFabricItem, ConsumptionRow, MaterialBatchConsumption } from '@/features/cutting/cutting.types';
 
 interface ActiveEmployee { id: string; name: string }
 
@@ -29,6 +29,7 @@ export function AddQcRecordModal({ onClose, onSuccess }: AddQcRecordModalProps) 
   const [pricePerPiece, setPricePerPiece] = useState('');
   const [reviewDate, setReviewDate] = useState(new Date().toISOString().split('T')[0]);
   const [consumptionRows, setConsumptionRows] = useState<ConsumptionRow[]>([]);
+  const [materialBatchConsumptions, setMaterialBatchConsumptions] = useState<MaterialBatchConsumption[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
 
@@ -49,6 +50,11 @@ export function AddQcRecordModal({ onClose, onSuccess }: AddQcRecordModalProps) 
   const gradeSum = (Number(qtyDamaged) || 0) + (Number(qtyAcceptable) || 0) + (Number(qtyGood) || 0) + (Number(qtyVeryGood) || 0);
   const pending = reviewed - gradeSum;
   const totalCost = reviewed * (Number(pricePerPiece) || 0);
+
+  const materialsCost = materialBatchConsumptions.reduce((sum, mc) =>
+    sum + mc.batches.reduce((s, b) => s + b.quantity * b.pricePerUnit, 0), 0);
+  const materialsCostPerPiece = reviewed > 0 ? materialsCost / reviewed : 0;
+  const costPerPieceAfterQc = (selectedBatch?.costPerFinalItem ?? 0) + (Number(pricePerPiece) || 0) + materialsCostPerPiece;
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -78,6 +84,7 @@ export function AddQcRecordModal({ onClose, onSuccess }: AddQcRecordModalProps) 
         pricePerPiece: Number(pricePerPiece) || 0,
         reviewDate: new Date(reviewDate).getTime(),
         consumptionEntries: consumptionRows.map(r => ({ stockItemId: r.stockItemId, color: r.color ?? undefined, quantity: r.quantity })),
+        materialBatchConsumptions,
       });
       if (res.success) { onSuccess(); }
       else { setError(res.error); }
@@ -183,8 +190,30 @@ export function AddQcRecordModal({ onClose, onSuccess }: AddQcRecordModalProps) 
               nonFabricItems={nonFabricItems}
               value={consumptionRows}
               onChange={setConsumptionRows}
+              onBatchChange={setMaterialBatchConsumptions}
               disabled={submitting}
             />
+
+            {reviewed > 0 && (
+              <div className="rounded-lg border px-3 py-2.5 text-sm space-y-1" style={{ borderColor: 'rgba(251,191,36,0.25)', background: 'rgba(251,191,36,0.06)' }}>
+                <div className="flex justify-between text-xs" style={{ color: 'var(--cell-muted)' }}>
+                  <span>تكلفة القطعة من التوزيع</span>
+                  <span>{(selectedBatch?.costPerFinalItem ?? 0).toFixed(2)} دج</span>
+                </div>
+                <div className="flex justify-between text-xs" style={{ color: 'var(--cell-muted)' }}>
+                  <span>تكلفة المراقبة للقطعة</span>
+                  <span>{(Number(pricePerPiece) || 0).toFixed(2)} دج</span>
+                </div>
+                <div className="flex justify-between text-xs" style={{ color: 'var(--cell-muted)' }}>
+                  <span>تكلفة المواد للقطعة</span>
+                  <span>{materialsCostPerPiece.toFixed(2)} دج</span>
+                </div>
+                <div className="flex justify-between border-t pt-1 font-semibold" style={{ borderColor: 'rgba(251,191,36,0.2)', color: '#fbbf24' }}>
+                  <span>تكلفة القطعة بعد المراقبة</span>
+                  <span>{costPerPieceAfterQc.toFixed(2)} دج</span>
+                </div>
+              </div>
+            )}
           </>
         )}
 

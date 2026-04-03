@@ -2,15 +2,16 @@
 
 import { useState, useEffect } from 'react';
 import { AppModal } from '@/components/shared/AppModal';
-import { QcConsumptionEditor, type NonFabricStockItem } from '@/components/qc/QcConsumptionEditor';
+import { ConsumedMaterialsEditor } from '@/components/shared/ConsumedMaterialsEditor';
 import { AddToStockModal } from './AddToStockModal';
 import { ipcClient } from '@/lib/ipc-client';
 import type { AddToFinalStockPayload } from '@/features/finition/finition.types';
-import type { ConsumptionEntryInput } from '@/features/qc/qc.types';
+import type { NonFabricItem, ConsumptionRow, MaterialBatchConsumption } from '@/features/cutting/cutting.types';
 
 interface ActiveEmployee { id: string; name: string }
 
 interface AddStepModalProps {
+  incomingCostPerPiece?: number | null;
   finitionId: string;
   modelName: string;
   sizeLabel: string;
@@ -26,16 +27,17 @@ type Step =
   | { type: 'ready_prompt'; stepId: string; quantity: number; stepDate: number }
   | { type: 'add_to_stock'; stepId: string; quantity: number; stepDate: number };
 
-export function AddStepModal({ finitionId, modelName, sizeLabel, color, maxQuantity, onClose, onSuccess, onNotReady }: AddStepModalProps) {
+export function AddStepModal({ finitionId, modelName, sizeLabel, color, maxQuantity, incomingCostPerPiece, onClose, onSuccess, onNotReady }: AddStepModalProps) {
   const [employees, setEmployees] = useState<ActiveEmployee[]>([]);
-  const [nonFabricItems, setNonFabricItems] = useState<NonFabricStockItem[]>([]);
+  const [nonFabricItems, setNonFabricItems] = useState<NonFabricItem[]>([]);
 
   const [stepName, setStepName] = useState('');
   const [quantity, setQuantity] = useState(String(maxQuantity));
   const [employeeId, setEmployeeId] = useState('');
   const [pricePerPiece, setPricePerPiece] = useState('');
   const [stepDate, setStepDate] = useState(new Date().toISOString().split('T')[0]);
-  const [consumptionRows, setConsumptionRows] = useState<ConsumptionEntryInput[]>([]);
+  const [consumptionRows, setConsumptionRows] = useState<ConsumptionRow[]>([]);
+  const [materialBatchConsumptions, setMaterialBatchConsumptions] = useState<MaterialBatchConsumption[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
 
@@ -49,12 +51,17 @@ export function AddStepModal({ finitionId, modelName, sizeLabel, color, maxQuant
       }
     });
     ipcClient.cutting.getNonFabricItems().then(res => {
-      if (res.success) setNonFabricItems(res.data as NonFabricStockItem[]);
+      if (res.success) setNonFabricItems(res.data);
     });
   }, []);
 
   const qty = Number(quantity) || 0;
   const totalCost = qty * (Number(pricePerPiece) || 0);
+
+  const materialsCost = materialBatchConsumptions.reduce((sum, mc) =>
+    sum + mc.batches.reduce((s, b) => s + b.quantity * b.pricePerUnit, 0), 0);
+  const materialsCostPerPiece = qty > 0 ? materialsCost / qty : 0;
+  const costAfterStep = (incomingCostPerPiece ?? 0) + (Number(pricePerPiece) || 0) + materialsCostPerPiece;
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -71,7 +78,8 @@ export function AddStepModal({ finitionId, modelName, sizeLabel, color, maxQuant
         employeeId: employeeId || undefined,
         pricePerPiece: pricePerPiece ? Number(pricePerPiece) : undefined,
         stepDate: new Date(stepDate).getTime(),
-        consumptionEntries: consumptionRows.filter(r => r.stockItemId && r.quantity > 0),
+        consumptionEntries: consumptionRows.filter(r => r.stockItemId && r.quantity > 0).map(r => ({ stockItemId: r.stockItemId, color: r.color ?? undefined, quantity: r.quantity })),
+        materialBatchConsumptions,
       });
       if (res.success) {
         setStep({ type: 'ready_prompt', stepId: res.data.id, quantity: qty, stepDate: new Date(stepDate).getTime() });
@@ -180,7 +188,34 @@ export function AddStepModal({ finitionId, modelName, sizeLabel, color, maxQuant
             className="w-full rounded-lg border border-border px-3 py-2 text-sm outline-none input-transition focus:border-primary-500 focus:ring-2 focus:ring-primary-500/20" />
         </div>
 
-        <QcConsumptionEditor rows={consumptionRows} onChange={setConsumptionRows} items={nonFabricItems} />
+        <ConsumedMaterialsEditor
+          nonFabricItems={nonFabricItems}
+          value={consumptionRows}
+          onChange={setConsumptionRows}
+          onBatchChange={setMaterialBatchConsumptions}
+          disabled={submitting}
+        />
+
+        {qty > 0 && (
+          <div className="rounded-lg border px-3 py-2.5 text-sm space-y-1" style={{ borderColor: 'rgba(251,191,36,0.25)', background: 'rgba(251,191,36,0.06)' }}>
+            <div className="flex justify-between text-xs" style={{ color: 'var(--cell-muted)' }}>
+              <span>التكلفة الواردة للقطعة</span>
+              <span>{(incomingCostPerPiece ?? 0).toFixed(2)} دج</span>
+            </div>
+            <div className="flex justify-between text-xs" style={{ color: 'var(--cell-muted)' }}>
+              <span>تكلفة هذه الخطوة للقطعة</span>
+              <span>{(Number(pricePerPiece) || 0).toFixed(2)} دج</span>
+            </div>
+            <div className="flex justify-between text-xs" style={{ color: 'var(--cell-muted)' }}>
+              <span>تكلفة المواد للقطعة</span>
+              <span>{materialsCostPerPiece.toFixed(2)} دج</span>
+            </div>
+            <div className="flex justify-between border-t pt-1 font-semibold" style={{ borderColor: 'rgba(251,191,36,0.2)', color: '#fbbf24' }}>
+              <span>التكلفة بعد هذه الخطوة</span>
+              <span>{costAfterStep.toFixed(2)} دج</span>
+            </div>
+          </div>
+        )}
 
         {error && <p className="text-xs text-red-500">{error}</p>}
       </form>

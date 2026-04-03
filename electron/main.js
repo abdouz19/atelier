@@ -587,6 +587,34 @@ function initDB() {
   try { db.prepare('SELECT avg_unit_cost FROM distribution_batch_parts LIMIT 1').get() }
   catch (_) { db.exec(`ALTER TABLE distribution_batch_parts ADD COLUMN avg_unit_cost REAL`) }
 
+  // 021: Cost chain fields — qc_records
+  try { db.prepare('SELECT materials_cost FROM qc_records LIMIT 1').get() }
+  catch (_) { db.exec('ALTER TABLE qc_records ADD COLUMN materials_cost REAL') }
+  try { db.prepare('SELECT materials_cost_per_piece FROM qc_records LIMIT 1').get() }
+  catch (_) { db.exec('ALTER TABLE qc_records ADD COLUMN materials_cost_per_piece REAL') }
+  try { db.prepare('SELECT cost_per_piece_after_qc FROM qc_records LIMIT 1').get() }
+  catch (_) { db.exec('ALTER TABLE qc_records ADD COLUMN cost_per_piece_after_qc REAL') }
+
+  // 021: Cost chain fields — finition_records
+  try { db.prepare('SELECT materials_cost FROM finition_records LIMIT 1').get() }
+  catch (_) { db.exec('ALTER TABLE finition_records ADD COLUMN materials_cost REAL') }
+  try { db.prepare('SELECT materials_cost_per_piece FROM finition_records LIMIT 1').get() }
+  catch (_) { db.exec('ALTER TABLE finition_records ADD COLUMN materials_cost_per_piece REAL') }
+  try { db.prepare('SELECT final_cost_per_piece FROM finition_records LIMIT 1').get() }
+  catch (_) { db.exec('ALTER TABLE finition_records ADD COLUMN final_cost_per_piece REAL') }
+
+  // 021: Cost chain fields — finition_steps
+  try { db.prepare('SELECT materials_cost FROM finition_steps LIMIT 1').get() }
+  catch (_) { db.exec('ALTER TABLE finition_steps ADD COLUMN materials_cost REAL') }
+  try { db.prepare('SELECT materials_cost_per_piece FROM finition_steps LIMIT 1').get() }
+  catch (_) { db.exec('ALTER TABLE finition_steps ADD COLUMN materials_cost_per_piece REAL') }
+  try { db.prepare('SELECT cost_after_step FROM finition_steps LIMIT 1').get() }
+  catch (_) { db.exec('ALTER TABLE finition_steps ADD COLUMN cost_after_step REAL') }
+
+  // 021: Cost field — final_stock_entries
+  try { db.prepare('SELECT final_cost_per_piece FROM final_stock_entries LIMIT 1').get() }
+  catch (_) { db.exec('ALTER TABLE final_stock_entries ADD COLUMN final_cost_per_piece REAL') }
+
   // 018: Per-batch consumption linkage table
   db.exec(`
     CREATE TABLE IF NOT EXISTS cutting_batch_consumptions (

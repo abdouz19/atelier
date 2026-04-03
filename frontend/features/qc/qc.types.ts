@@ -20,6 +20,7 @@ export interface ReturnBatchForQc {
   quantityReviewed: number;
   quantityAvailable: number;
   returnDate: number;
+  costPerFinalItem: number | null;
 }
 
 export interface QcRecordSummary {
@@ -58,4 +59,5 @@ export interface CreateQcPayload {
   pricePerPiece: number;
   reviewDate: number;
   consumptionEntries?: ConsumptionEntryInput[];
+  materialBatchConsumptions?: import('@/features/cutting/cutting.types').MaterialBatchConsumption[];
 }

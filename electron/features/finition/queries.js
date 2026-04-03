@@ -9,6 +9,7 @@ function getQcRecordsForFinition(db) {
       db2.size_label AS sizeLabel,
       db2.color,
       qr.review_date AS reviewDate,
+      qr.cost_per_piece_after_qc AS costPerPieceAfterQc,
       (qr.quantity_reviewed - qr.qty_damaged) AS finitionableTotal,
       COALESCE((SELECT SUM(fr.quantity) FROM finition_records fr WHERE fr.qc_id = qr.id), 0) AS finitionedSoFar
     FROM qc_records qr

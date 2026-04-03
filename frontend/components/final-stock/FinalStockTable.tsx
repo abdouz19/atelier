@@ -80,7 +80,7 @@ export function FinalStockTable({
           <table className="w-full text-sm" dir="rtl">
             <thead className="sticky top-0 z-10 text-xs font-semibold" style={{ background: 'var(--table-head-bg)' }}>
               <tr>
-                {['الموديل', 'القطعة', 'المقاس', 'اللون', 'الكمية', 'آخر تحديث'].map((h) => (
+                {['الموديل', 'القطعة', 'المقاس', 'اللون', 'الكمية', 'تكلفة القطعة', 'آخر تحديث'].map((h) => (
                   <th key={h} className="px-4 py-3 text-right" style={{ color: 'var(--cell-faint)', borderBottom: '1px solid var(--table-head-border)' }}>
                     {h}
                   </th>
@@ -110,6 +110,9 @@ export function FinalStockTable({
                       >
                         {row.currentQuantity}
                       </span>
+                    </td>
+                    <td className="px-4 py-3 text-xs tabular-nums" style={{ color: row.finalCostPerPiece != null ? '#fbbf24' : 'var(--cell-dim)' }}>
+                      {row.finalCostPerPiece != null ? `${row.finalCostPerPiece.toFixed(2)} دج` : '—'}
                     </td>
                     <td className="px-4 py-3 text-xs tabular-nums" style={{ color: 'var(--cell-dim)' }}>{formatDate(row.lastUpdatedDate)}</td>
                   </tr>

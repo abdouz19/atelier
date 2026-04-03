@@ -76,6 +76,11 @@ export function FinalStockHistoryPanel({
                     {sourceTypeLabel(entry.sourceType)}
                   </span>
                   <span className="text-text-muted">{formatDate(entry.entryDate)}</span>
+                  {entry.finalCostPerPiece != null && (
+                    <span className="text-xs tabular-nums" style={{ color: '#fbbf24' }}>
+                      {entry.finalCostPerPiece.toFixed(2)} دج/قطعة
+                    </span>
+                  )}
                 </div>
                 <span className="font-semibold text-emerald-400">+{entry.quantityAdded}</span>
               </button>

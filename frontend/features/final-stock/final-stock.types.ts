@@ -11,6 +11,7 @@ export interface FinalStockRow {
   color: string;
   currentQuantity: number;
   lastUpdatedDate: number;
+  finalCostPerPiece: number | null;
 }
 
 export interface FinalStockHistoryEntry {
@@ -18,6 +19,7 @@ export interface FinalStockHistoryEntry {
   sourceType: 'finition' | 'finition_step';
   sourceId: string;
   quantityAdded: number;
+  finalCostPerPiece: number | null;
   entryDate: number;
 }
 

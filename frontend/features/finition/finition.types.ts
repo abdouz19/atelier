@@ -8,6 +8,7 @@ export interface QcRecordForFinition {
   sizeLabel: string;
   color: string;
   reviewDate: number;
+  costPerPieceAfterQc: number | null;
   finitionableTotal: number;
   finitionedSoFar: number;
   finitionableRemaining: number;
@@ -45,6 +46,7 @@ export interface CreateFinitionPayload {
   pricePerPiece: number;
   finitionDate: number;
   consumptionEntries?: ConsumptionEntryInput[];
+  materialBatchConsumptions?: import('@/features/cutting/cutting.types').MaterialBatchConsumption[];
 }
 
 export interface CreateStepPayload {
@@ -55,6 +57,7 @@ export interface CreateStepPayload {
   pricePerPiece?: number;
   stepDate: number;
   consumptionEntries?: ConsumptionEntryInput[];
+  materialBatchConsumptions?: import('@/features/cutting/cutting.types').MaterialBatchConsumption[];
 }
 
 export interface AddToFinalStockPayload {

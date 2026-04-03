@@ -123,6 +123,7 @@ export default function QcPage() {
           sizeLabel={pendingStep.sizeLabel}
           color={pendingStep.color}
           maxQuantity={pendingStep.quantity}
+          incomingCostPerPiece={pendingStep.finalCostPerPiece}
           onClose={() => setPendingStep(null)}
           onSuccess={handleFinitionSuccess}
           onNotReady={handleStepNotReady}

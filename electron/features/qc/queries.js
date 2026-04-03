@@ -11,7 +11,8 @@ function getReturnBatchesForQc(db) {
       rr.quantity_returned AS quantityReturned,
       COALESCE((SELECT SUM(qr.quantity_reviewed) FROM qc_records qr WHERE qr.return_id = rr.id), 0) AS quantityReviewed,
       rr.quantity_returned - COALESCE((SELECT SUM(qr.quantity_reviewed) FROM qc_records qr WHERE qr.return_id = rr.id), 0) AS quantityAvailable,
-      rr.return_date AS returnDate
+      rr.return_date AS returnDate,
+      db2.cost_per_final_item AS costPerFinalItem
     FROM return_records rr
     JOIN distribution_batches db2 ON db2.id = rr.batch_id
     JOIN tailors t ON t.id = db2.tailor_id
