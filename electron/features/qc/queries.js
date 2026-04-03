@@ -74,11 +74,11 @@ function getKpis(db) {
   // finitionPending: sum of finitionable per QC record minus already finitioned
   const finitionPendingRow = db.prepare(`
     SELECT COALESCE(SUM(
-      (qr.qty_acceptable + qr.qty_good + qr.qty_very_good) -
+      (qr.quantity_reviewed - qr.qty_damaged) -
       COALESCE((SELECT SUM(fr.quantity) FROM finition_records fr WHERE fr.qc_id = qr.id), 0)
     ), 0) AS finitionPending
     FROM qc_records qr
-    WHERE (qr.qty_acceptable + qr.qty_good + qr.qty_very_good) -
+    WHERE (qr.quantity_reviewed - qr.qty_damaged) -
       COALESCE((SELECT SUM(fr.quantity) FROM finition_records fr WHERE fr.qc_id = qr.id), 0) > 0
   `).get()
 

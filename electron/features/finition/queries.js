@@ -9,13 +9,13 @@ function getQcRecordsForFinition(db) {
       db2.size_label AS sizeLabel,
       db2.color,
       qr.review_date AS reviewDate,
-      (qr.qty_acceptable + qr.qty_good + qr.qty_very_good) AS finitionableTotal,
+      (qr.quantity_reviewed - qr.qty_damaged) AS finitionableTotal,
       COALESCE((SELECT SUM(fr.quantity) FROM finition_records fr WHERE fr.qc_id = qr.id), 0) AS finitionedSoFar
     FROM qc_records qr
     JOIN return_records rr ON rr.id = qr.return_id
     JOIN distribution_batches db2 ON db2.id = rr.batch_id
     JOIN tailors t ON t.id = db2.tailor_id
-    WHERE (qr.qty_acceptable + qr.qty_good + qr.qty_very_good) -
+    WHERE (qr.quantity_reviewed - qr.qty_damaged) -
       COALESCE((SELECT SUM(fr.quantity) FROM finition_records fr WHERE fr.qc_id = qr.id), 0) > 0
     ORDER BY qr.review_date DESC
   `).all()

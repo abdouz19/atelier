@@ -1,7 +1,7 @@
 'use client';
 
 import { motion } from 'framer-motion';
-import { GitBranch, RotateCcw, Clock, Users, CreditCard, AlertCircle } from 'lucide-react';
+import { RotateCcw, Clock, Users, CreditCard, AlertCircle } from 'lucide-react';
 import type { DistributionKpis } from '@/features/distribution/distribution.types';
 
 type C = { value: string; iconText: string; iconBg: string; glow: string; accent: string };
@@ -46,8 +46,8 @@ interface DistributionKpiCardsProps { kpis: DistributionKpis | null; loading: bo
 export function DistributionKpiCards({ kpis, loading }: DistributionKpiCardsProps) {
   if (loading || !kpis) {
     return (
-      <div className="grid grid-cols-3 gap-4" dir="rtl">
-        {Array.from({ length: 6 }).map((_, i) => (
+      <div className="grid grid-cols-5 gap-4" dir="rtl">
+        {Array.from({ length: 5 }).map((_, i) => (
           <div key={i} className="h-24 animate-pulse rounded-2xl" style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.07)' }} />
         ))}
       </div>
@@ -55,9 +55,8 @@ export function DistributionKpiCards({ kpis, loading }: DistributionKpiCardsProp
   }
 
   const cards: Card[] = [
-    { label: 'القطع في التوزيع',        value: kpis.piecesInDistribution,    icon: GitBranch,   color: 'orange'  },
-    { label: 'القطع المرتجعة',          value: kpis.piecesReturned,          icon: RotateCcw,   color: 'blue'    },
     { label: 'القطع غير المرتجعة',      value: kpis.piecesNotYetReturned,    icon: Clock,       color: 'amber'   },
+    { label: 'القطع المرتجعة',          value: kpis.piecesReturned,          icon: RotateCcw,   color: 'blue'    },
     { label: 'خياطون نشطون',            value: kpis.tailorsWithActiveDist,   icon: Users,       color: 'violet'  },
     { label: 'إجمالي تكلفة الخياطة',   value: kpis.totalSewingCost,         icon: CreditCard,  color: 'emerald' },
     { label: 'التكلفة غير المسددة',     value: kpis.totalUnsettledCost,      icon: AlertCircle, color: 'red'     },
@@ -67,7 +66,7 @@ export function DistributionKpiCards({ kpis, loading }: DistributionKpiCardsProp
     <motion.div
       variants={{ hidden: {}, visible: { transition: { staggerChildren: 0.04 } } }}
       initial="hidden" animate="visible"
-      className="grid grid-cols-3 gap-4"
+      className="grid grid-cols-5 gap-4"
       dir="rtl"
     >
       {cards.map((c) => (

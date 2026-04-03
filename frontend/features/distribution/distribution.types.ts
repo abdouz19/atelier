@@ -1,5 +1,4 @@
 export interface DistributionKpis {
-  piecesInDistribution: number;
   piecesReturned: number;
   piecesNotYetReturned: number;
   tailorsWithActiveDist: number;
@@ -81,19 +80,64 @@ export interface AvailablePartForModel {
   availableCount: number;
 }
 
+export interface AvailablePartWithCost {
+  partName: string;
+  availableCount: number;
+  avgUnitCost: number;
+}
+
+export interface PartGivenRow {
+  partName: string;
+  quantity: number;
+  avgUnitCost: number;
+  availableCount: number;
+}
+
+export interface DistributePartRow {
+  partName: string;
+  quantity: number;
+  avgUnitCost: number;
+}
+
+export interface DistributionConsumptionRow {
+  stockTransactionId: string;
+  quantity: number;
+  pricePerUnit: number;
+}
+
+export interface Step1Values {
+  tailorId: string;
+  tailorName: string;
+  modelName: string;
+  sizeLabel: string;
+  color: string;
+  expectedFinalQuantity: number;
+  sewingPricePerPiece: number;
+  distributionDate: string;
+  partRows: PartGivenRow[];
+  consumedMaterialsCost: number;
+  materialBatchConsumptions: import('@/features/cutting/cutting.types').MaterialBatchConsumption[];
+  piecesCost: number;
+  sewingCost: number;
+  totalCost: number;
+  costPerFinalItem: number;
+}
+
 export interface DistributePayload {
   tailorId: string;
   modelName: string;
   sizeLabel: string;
   color: string;
-  expectedPiecesCount: number;
+  expectedFinalQuantity: number;
   sewingPricePerPiece: number;
   distributionDate: number;
-  parts: Array<{
-    partName: string;
-    quantity: number;
-  }>;
+  parts: DistributePartRow[];
   consumptionRows: ReturnConsumptionRowPayload[];
+  piecesCost: number;
+  sewingCost: number;
+  materialsCost: number;
+  totalCost: number;
+  costPerFinalItem: number;
 }
 
 export interface ReturnConsumptionRowPayload {

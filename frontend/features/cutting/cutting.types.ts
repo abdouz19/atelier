@@ -23,6 +23,7 @@ export interface PartRow {
   partName: string;
   sizeLabel: string;
   count: number;
+  unitCost?: number | null;
 }
 
 export interface CuttingSessionDetail {
@@ -144,14 +145,20 @@ export interface CostDistributionRow {
   lockState: CostDistributionLockState;
 }
 
+export interface EmployeeEntry {
+  employeeId: string;
+  layers: number;
+  pricePerLayer: number;
+}
+
 export interface CreateCuttingSessionPayload {
   fabricItemId: string;
   fabricColor: string;
   modelName: string;
   metersUsed: number;
-  employeeIds: string[];
-  layers: number;
-  pricePerLayer: number;
+  // Per-employee entries (019-cutting-session-stepper)
+  employeeEntries: EmployeeEntry[];
+  employeeCost: number;
   sessionDate: number;
   notes?: string;
   parts: PartRow[];
@@ -160,7 +167,6 @@ export interface CreateCuttingSessionPayload {
   fabricBatchConsumptions: FabricBatchEntry[];
   materialBatchConsumptions: MaterialBatchConsumption[];
   fabricCost: number;
-  employeeCost: number;
   consumedMaterialsCost: number;
   totalSessionCost: number;
   partCosts: PartCost[];

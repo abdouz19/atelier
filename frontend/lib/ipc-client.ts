@@ -41,6 +41,7 @@ import type {
   DistributePayload,
   ReturnPayload,
   AvailablePartForModel,
+  AvailablePartWithCost,
 } from '@/features/distribution/distribution.types';
 import type {
   QcKpis,
@@ -189,6 +190,10 @@ export const ipcClient = {
     getModelSuggestions: () => getBridge().distribution.getModelSuggestions() as Promise<{ success: true; data: string[] } | { success: false; error: string }>,
     getBatchesForTailor: (payload: { tailorId: string }) => getBridge().distribution.getBatchesForTailor(payload) as Promise<{ success: true; data: DistributionBatchOption[] } | { success: false; error: string }>,
     getAvailabilityForModel: (payload: { modelName: string }) => getBridge().distribution.getAvailabilityForModel(payload) as Promise<{ success: true; data: AvailabilityCombination[] } | { success: false; error: string }>,
+    getModelsWithPieces: () => getBridge().distribution.getModelsWithPieces() as Promise<{ success: true; data: string[] } | { success: false; error: string }>,
+    getSizesForModel: (payload: { modelName: string }) => getBridge().distribution.getSizesForModel(payload) as Promise<{ success: true; data: string[] } | { success: false; error: string }>,
+    getColorsForModelSize: (payload: { modelName: string; sizeLabel: string }) => getBridge().distribution.getColorsForModelSize(payload) as Promise<{ success: true; data: string[] } | { success: false; error: string }>,
+    getPartsWithCostForModelSizeColor: (payload: { modelName: string; sizeLabel: string; color: string }) => getBridge().distribution.getPartsWithCostForModelSizeColor(payload) as Promise<{ success: true; data: AvailablePartWithCost[] } | { success: false; error: string }>,
     distribute: (payload: DistributePayload) => getBridge().distribution.distribute(payload) as Promise<{ success: true; data: DistributionTailorSummary } | { success: false; error: string }>,
     return: (payload: ReturnPayload) => getBridge().distribution.return(payload) as Promise<{ success: true; data: DistributionTailorSummary } | { success: false; error: string }>,
   },

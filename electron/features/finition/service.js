@@ -15,7 +15,7 @@ function createFinitionRecord(db, payload) {
   const { qcId, employeeId, quantity, pricePerPiece, finitionDate, consumptionEntries = [] } = payload
 
   const availableRow = db.prepare(`
-    SELECT (qr.qty_acceptable + qr.qty_good + qr.qty_very_good) -
+    SELECT (qr.quantity_reviewed - qr.qty_damaged) -
       COALESCE((SELECT SUM(fr.quantity) FROM finition_records fr WHERE fr.qc_id = qr.id), 0) AS available
     FROM qc_records qr
     WHERE qr.id = ?

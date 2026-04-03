@@ -120,17 +120,21 @@ function DetailView({ detail }: { detail: DetailType }) {
           <p className="text-sm" style={{ color: 'var(--cell-dim)' }}>لا توجد أجزاء مسجلة (جلسة قديمة)</p>
         ) : (
           <div className="divide-y divide-border/50">
-            <div className="grid grid-cols-2 pb-2">
+            <div className="grid grid-cols-3 pb-2">
               <span className="text-[10px] font-medium uppercase tracking-wider" style={{ color: 'var(--cell-faint)' }}>الجزء</span>
-              <span className="text-[10px] font-medium uppercase tracking-wider text-left" style={{ color: 'var(--cell-faint)' }}>العدد</span>
+              <span className="text-[10px] font-medium uppercase tracking-wider text-center" style={{ color: 'var(--cell-faint)' }}>العدد</span>
+              <span className="text-[10px] font-medium uppercase tracking-wider text-left" style={{ color: 'var(--cell-faint)' }}>التكلفة/قطعة</span>
             </div>
             {detail.parts.map((p) => (
-              <div key={p.partName} className="grid grid-cols-2 py-2.5">
+              <div key={p.partName} className="grid grid-cols-3 py-2.5">
                 <span className="text-sm" style={{ color: 'var(--cell-text)' }}>{p.partName}</span>
-                <span className="text-left">
+                <span className="text-center">
                   <span className="rounded-full px-2.5 py-0.5 text-xs font-semibold tabular-nums" style={{ background: 'rgba(139,92,246,0.12)', color: '#a78bfa' }}>
                     {p.count}
                   </span>
+                </span>
+                <span className="text-left text-sm tabular-nums" style={{ color: p.unitCost != null ? '#34d399' : 'var(--cell-faint)' }}>
+                  {p.unitCost != null ? `${p.unitCost.toFixed(2)} دج` : '—'}
                 </span>
               </div>
             ))}

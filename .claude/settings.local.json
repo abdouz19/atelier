@@ -15,7 +15,21 @@
       "Bash(.specify/scripts/bash/update-agent-context.sh claude:*)",
       "Bash(.specify/scripts/bash/check-prerequisites.sh --json 2>&1)",
       "Bash(.specify/scripts/bash/check-prerequisites.sh --json --require-tasks --include-tasks 2>&1)",
-      "Bash(cd:*)"
+      "Bash(cd:*)",
+      "Bash(git push:*)",
+      "Bash(.specify/scripts/bash/create-new-feature.sh \"Cutting Session Stepper Redesign & Cost Logic Fix\" --json --short-name \"cutting-session-stepper\")",
+      "Bash(ls:*)",
+      "Bash(.specify/scripts/bash/setup-plan.sh --json)",
+      "Bash(npx --no next build)",
+      "Bash(./node_modules/.bin/tsc --noEmit)",
+      "Bash(node_modules/.bin/tsc --noEmit)",
+      "Bash(sqlite3:*)",
+      "Bash(.specify/scripts/bash/create-new-feature.sh \"Distribution Modal Redesign & Cost Calculation\" --json --short-name \"distribution-modal-cost\")",
+      "Bash(sed -n '216,260p' /Users/macbook/Documents/development/atelier/electron/main.js)",
+      "Bash(sed -n '484,545p' /Users/macbook/Documents/development/atelier/electron/main.js)",
+      "Bash(sed -n '618,648p' /Users/macbook/Documents/development/atelier/electron/main.js)",
+      "Bash(sed -n '2830,2845p' /Users/macbook/Documents/development/atelier/electron/main.js)",
+      "Bash(sed -n '2900,2915p' /Users/macbook/Documents/development/atelier/electron/main.js)"
     ]
   }
 }

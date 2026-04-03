@@ -1,6 +1,6 @@
 # atelier Development Guidelines
 
-Auto-generated from all feature plans. Last updated: 2026-04-01
+Auto-generated from all feature plans. Last updated: 2026-04-03
 
 ## Active Technologies
 - TypeScript 5 (frontend) + Node.js / plain JavaScript (Electron main process) + Next.js 16 (App Router, `output: export`), Electron 41, better-sqlite3, react-hook-form, Zod, Tailwind CSS (003-suppliers-purchases)
@@ -29,6 +29,8 @@ Auto-generated from all feature plans. Last updated: 2026-04-01
 - TypeScript 5 strict (frontend renderer) + Node.js plain JS (Electron main process) + Next.js 14 App Router, Electron 41, better-sqlite3, react-hook-form + Zod, Tailwind CSS 4, Lucide React, shadcn/ui (015-consumed-materials-flows)
 - TypeScript 5 strict (frontend renderer) + Node.js plain JavaScript (Electron main process) + Next.js 16 App Router (static export), Electron 41, better-sqlite3, react-hook-form + Zod 4, Tailwind CSS 4, Lucide React, shadcn/ui (018-session-cost-distribution)
 - SQLite via better-sqlite3 plain prepared statements in `electron/main.js`; Drizzle ORM schemas in `electron/db/schema/` are reference-only (not executed at runtime) (018-session-cost-distribution)
+- TypeScript 5 (strict, frontend renderer) + Node.js plain JavaScript (Electron main process) + Next.js 16 App Router (static export), Electron 41, better-sqlite3, react-hook-form + Zod 4, Tailwind CSS 4, Lucide React, shadcn/ui (019-cutting-session-stepper)
+- SQLite via better-sqlite3 plain prepared statements in `electron/main.js`; no new tables required (019-cutting-session-stepper)
 
 - TypeScript 5 (strict mode) + Next.js 16 (App Router, static export), React 19, Electron 41, better-sqlite3 12, Drizzle ORM, Zod 4, react-hook-form 7, Zustand 5, Tailwind 4, Lucide Reac (002-stock-management)
 
@@ -63,9 +65,9 @@ npm run build:electron # Full Electron distribution build
 TypeScript 5 (strict mode): Follow standard conventions
 
 ## Recent Changes
+- 020-distribution-modal-cost: Added TypeScript 5 strict (frontend renderer) + Node.js plain JavaScript (Electron main process) + Next.js 16 App Router (static export), Electron 41, better-sqlite3, react-hook-form + Zod 4, Tailwind CSS 4, Lucide Reac
+- 019-cutting-session-stepper: Added TypeScript 5 (strict, frontend renderer) + Node.js plain JavaScript (Electron main process) + Next.js 16 App Router (static export), Electron 41, better-sqlite3, react-hook-form + Zod 4, Tailwind CSS 4, Lucide React, shadcn/ui
 - 018-session-cost-distribution: Added TypeScript 5 strict (frontend renderer) + Node.js plain JavaScript (Electron main process) + Next.js 16 App Router (static export), Electron 41, better-sqlite3, react-hook-form + Zod 4, Tailwind CSS 4, Lucide React, shadcn/ui
-- 016-ui-overhaul-customization: Global UI overhaul (design system: AppCard, KpiCard, DataTable, AppModal, PageHeader, FormField, SkeletonCard, StepIndicator) + CSS custom property theming (6 primary color swatches + dark/light/system via data-* attributes) + platform customization section in Settings (logo upload, theme toggle, primary color picker, live preview, SQLite persistence via app_settings)
-- 015-consumed-materials-flows: Added TypeScript 5 strict (frontend renderer) + Node.js plain JS (Electron main process) + Next.js 14 App Router, Electron 41, better-sqlite3, react-hook-form + Zod, Tailwind CSS 4, Lucide React, shadcn/ui
 
 
 <!-- MANUAL ADDITIONS START -->

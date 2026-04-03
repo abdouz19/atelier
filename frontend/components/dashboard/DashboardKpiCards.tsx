@@ -155,13 +155,6 @@ export function DashboardKpiCards({ snapshotKpis, periodKpis }: Props) {
           </motion.div>
         </div>
       )}
-      <div>
-        <SubLabel>حالة الإنتاج</SubLabel>
-        <motion.div variants={containerVariants} initial="hidden" animate="visible"
-          className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-7">
-          {productionCards.map(c => <motion.div key={c.label} variants={itemVariants}><KpiCard {...c} /></motion.div>)}
-        </motion.div>
-      </div>
       <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-5">
         <div className="lg:col-span-3">
           <SubLabel>تنبيهات المخزون</SubLabel>

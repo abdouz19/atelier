@@ -539,6 +539,54 @@ function initDB() {
     db.exec(`ALTER TABLE cutting_pieces ADD COLUMN unit_cost REAL`)
   }
 
+  // 020: distribution_batches — fix CHECK constraints + add cost columns
+  try { db.prepare('SELECT pieces_cost FROM distribution_batches LIMIT 1').get() }
+  catch (_) {
+    db.pragma('legacy_alter_table = ON')
+    db.pragma('foreign_keys = OFF')
+    try {
+      db.exec(`ALTER TABLE distribution_batches RENAME TO distribution_batches_old`)
+      db.exec(`
+        CREATE TABLE distribution_batches (
+          id                     TEXT    PRIMARY KEY,
+          tailor_id              TEXT    NOT NULL REFERENCES tailors(id),
+          model_name             TEXT    NOT NULL,
+          size_label             TEXT,
+          color                  TEXT,
+          part_name              TEXT,
+          quantity               INTEGER NOT NULL CHECK (quantity > 0),
+          expected_pieces_count  INTEGER NOT NULL DEFAULT 0,
+          sewing_price_per_piece REAL    NOT NULL CHECK (sewing_price_per_piece >= 0),
+          total_cost             REAL    NOT NULL CHECK (total_cost >= 0),
+          pieces_cost            REAL,
+          sewing_cost            REAL,
+          materials_cost         REAL,
+          cost_per_final_item    REAL,
+          distribution_date      INTEGER NOT NULL,
+          created_at             INTEGER NOT NULL,
+          updated_at             INTEGER NOT NULL
+        )
+      `)
+      db.exec(`
+        INSERT INTO distribution_batches
+          SELECT id, tailor_id, model_name, size_label, color, part_name,
+                 quantity, expected_pieces_count, sewing_price_per_piece, total_cost,
+                 NULL, NULL, NULL, NULL, distribution_date, created_at, updated_at
+          FROM distribution_batches_old
+      `)
+      db.exec(`DROP TABLE distribution_batches_old`)
+      db.exec(`CREATE INDEX IF NOT EXISTS idx_distribution_batches_tailor ON distribution_batches(tailor_id)`)
+      db.exec(`CREATE INDEX IF NOT EXISTS idx_distribution_batches_date ON distribution_batches(distribution_date)`)
+    } finally {
+      db.pragma('legacy_alter_table = OFF')
+      db.pragma('foreign_keys = ON')
+    }
+  }
+
+  // 020: avg_unit_cost on distribution_batch_parts
+  try { db.prepare('SELECT avg_unit_cost FROM distribution_batch_parts LIMIT 1').get() }
+  catch (_) { db.exec(`ALTER TABLE distribution_batch_parts ADD COLUMN avg_unit_cost REAL`) }
+
   // 018: Per-batch consumption linkage table
   db.exec(`
     CREATE TABLE IF NOT EXISTS cutting_batch_consumptions (
@@ -1954,7 +2002,11 @@ function registerIpcHandlers() {
           (SELECT COALESCE(SUM(count), 0) FROM cutting_parts) AS total_parts_produced,
           (SELECT COALESCE(SUM(quantity), 0) FROM distribution_batch_parts) AS total_distributed,
           (SELECT COALESCE(SUM(meters_used), 0) FROM cutting_sessions) AS total_meters,
-          (SELECT COALESCE(SUM(total_amount), 0) FROM employee_operations WHERE operation_type = 'cutting') AS total_cost
+          (SELECT COALESCE(SUM(
+            COALESCE(cs2.total_session_cost,
+              (SELECT COALESCE(SUM(eo.total_amount), 0) FROM employee_operations eo WHERE eo.source_module = 'cutting' AND eo.source_reference_id = cs2.id)
+            )
+          ), 0) FROM cutting_sessions cs2) AS total_cost
       `).get();
       return { success: true, data: {
         totalSessions: row.total_sessions,
@@ -1977,7 +2029,9 @@ function registerIpcHandlers() {
             (SELECT COUNT(*) FROM cutting_pieces WHERE session_id = cs.id),
             0
           ) AS total_pieces,
-          (SELECT COALESCE(SUM(total_amount), 0) FROM employee_operations WHERE source_module = 'cutting' AND source_reference_id = cs.id) AS total_cost
+          COALESCE(cs.total_session_cost,
+            (SELECT COALESCE(SUM(total_amount), 0) FROM employee_operations WHERE source_module = 'cutting' AND source_reference_id = cs.id)
+          ) AS total_cost
         FROM cutting_sessions cs
         JOIN stock_items si ON si.id = cs.fabric_item_id
         ORDER BY cs.session_date DESC
@@ -2019,7 +2073,7 @@ function registerIpcHandlers() {
         WHERE eo.source_module = 'cutting' AND eo.source_reference_id = ?
       `).all(id);
       const parts = db.prepare(`
-        SELECT part_name, count FROM cutting_session_parts WHERE session_id = ? ORDER BY part_name
+        SELECT part_name, size_label, count, unit_cost FROM cutting_session_parts WHERE session_id = ? ORDER BY part_name
       `).all(id);
       const consumption = db.prepare(`
         SELECT cce.stock_item_id, cce.color, cce.quantity, si.name AS stock_item_name
@@ -2045,7 +2099,7 @@ function registerIpcHandlers() {
         consumedMaterialsCost: s.consumed_materials_cost ?? null,
         totalSessionCost: s.total_session_cost ?? null,
         employees: employees.map(e => ({ id: e.id, name: e.name, earnings: e.earnings })),
-        parts: parts.map(p => ({ partName: p.part_name, count: p.count })),
+        parts: parts.map(p => ({ partName: p.part_name, sizeLabel: p.size_label ?? '', count: p.count, unitCost: p.unit_cost ?? null })),
         consumptionEntries: consumption.map(c => ({
           stockItemId: c.stock_item_id,
           stockItemName: c.stock_item_name,
@@ -2292,12 +2346,15 @@ function registerIpcHandlers() {
   ipcMain.handle('cutting:create', (_event, payload) => {
     try {
       const {
-        fabricItemId, fabricColor, modelName, metersUsed, employeeIds, layers, pricePerLayer,
+        fabricItemId, fabricColor, modelName, metersUsed,
+        // 019-cutting-session-stepper: per-employee entries replace flat employeeIds/layers/pricePerLayer
+        employeeEntries,
         sessionDate, notes, parts: partRows, consumptionRows,
         // 018-session-cost-distribution
         fabricBatchConsumptions, materialBatchConsumptions,
         fabricCost, employeeCost, consumedMaterialsCost, totalSessionCost, partCosts,
       } = payload;
+      const employeeIds = (employeeEntries || []).map(e => e.employeeId);
 
       if (!partRows || partRows.length === 0) return { success: false, error: 'يجب إضافة جزء واحد على الأقل' };
       if (partRows.some((r) => !r.partName || !r.sizeLabel || r.count < 1)) return { success: false, error: 'كل جزء يجب أن يحتوي على اسم ومقاس وعدد صحيح أكبر من صفر' };
@@ -2364,7 +2421,8 @@ function registerIpcHandlers() {
           INSERT INTO cutting_sessions (id, fabric_item_id, fabric_color, model_name, size_label, meters_used, layers, price_per_layer, session_date, notes, fabric_cost, employee_cost, consumed_materials_cost, total_session_cost, created_at, updated_at)
           VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
         `).run(
-          sessionId, fabricItemId, fabricColor, modelName, '', metersUsed, layers, pricePerLayer,
+          sessionId, fabricItemId, fabricColor, modelName, '', metersUsed,
+          employeeEntries?.[0]?.layers ?? 1, employeeEntries?.[0]?.pricePerLayer ?? 0,
           sessionDate, notes ?? null,
           fabricCost ?? null, employeeCost ?? null, consumedMaterialsCost ?? null, totalSessionCost ?? null,
           now, now
@@ -2428,11 +2486,11 @@ function registerIpcHandlers() {
           }
         }
 
-        // 5. Employee operations
-        const earnings = layers * pricePerLayer;
-        for (const empId of employeeIds) {
+        // 5. Employee operations — one record per employeeEntry with its own layers & price
+        for (const entry of (employeeEntries || [])) {
+          const entryEarnings = entry.layers * entry.pricePerLayer;
           db.prepare(`INSERT INTO employee_operations (id, employee_id, operation_type, source_module, source_reference_id, operation_date, quantity, price_per_unit, total_amount, model_name, color, notes, created_at, updated_at) VALUES (?, ?, 'cutting', 'cutting', ?, ?, ?, ?, ?, ?, ?, NULL, ?, ?)`
-          ).run(crypto.randomUUID(), empId, sessionId, sessionDate, layers, pricePerLayer, earnings, modelName, fabricColor, now, now);
+          ).run(crypto.randomUUID(), entry.employeeId, sessionId, sessionDate, entry.layers, entry.pricePerLayer, entryEarnings, modelName, fabricColor, now, now);
         }
 
         // Return summary
@@ -2449,7 +2507,7 @@ function registerIpcHandlers() {
           metersUsed,
           totalPieces,
           employeeNames: empNames,
-          totalCost: totalSessionCost ?? (earnings * employeeIds.length),
+          totalCost: totalSessionCost ?? employeeCost ?? 0,
         };
       });
 
@@ -2464,20 +2522,19 @@ function registerIpcHandlers() {
     try {
       const row = db.prepare(`
         SELECT
-          (SELECT COUNT(*) FROM cutting_pieces WHERE status = 'distributed') AS pieces_in_dist,
-          (SELECT COUNT(*) FROM cutting_pieces WHERE status = 'returned') AS pieces_returned,
+          (SELECT COALESCE(SUM(COALESCE(expected_pieces_count, quantity)), 0) FROM distribution_batches) AS total_distributed,
+          (SELECT COALESCE(SUM(quantity_returned), 0) FROM return_records) AS total_returned,
           (SELECT COUNT(DISTINCT db.tailor_id)
            FROM distribution_batches db
-           WHERE (db.quantity - COALESCE((SELECT SUM(rr.quantity_returned) FROM return_records rr WHERE rr.batch_id = db.id), 0)) > 0
+           WHERE (COALESCE(db.expected_pieces_count, db.quantity) - COALESCE((SELECT SUM(rr.quantity_returned) FROM return_records rr WHERE rr.batch_id = db.id), 0)) > 0
           ) AS tailors_active,
-          (SELECT COALESCE(SUM(total_cost), 0) FROM distribution_batches) AS total_cost,
-          (SELECT COALESCE(SUM(total_cost), 0) FROM distribution_batches)
+          (SELECT COALESCE(SUM(COALESCE(sewing_cost, total_cost)), 0) FROM distribution_batches) AS total_cost,
+          (SELECT COALESCE(SUM(COALESCE(sewing_cost, total_cost)), 0) FROM distribution_batches)
           - (SELECT COALESCE(SUM(amount), 0) FROM tailor_payments) AS unsettled_cost
       `).get()
       return { success: true, data: {
-        piecesInDistribution: row.pieces_in_dist,
-        piecesReturned: row.pieces_returned,
-        piecesNotYetReturned: row.pieces_in_dist,
+        piecesReturned: row.total_returned,
+        piecesNotYetReturned: row.total_distributed - row.total_returned,
         tailorsWithActiveDist: row.tailors_active,
         totalSewingCost: row.total_cost,
         totalUnsettledCost: row.unsettled_cost,
@@ -2505,7 +2562,7 @@ function registerIpcHandlers() {
           WHERE dbatch.tailor_id = ? AND cp.status = 'returned'
         `).get(tid)
         const earned = db.prepare(
-          'SELECT COALESCE(SUM(total_cost), 0) AS total FROM distribution_batches WHERE tailor_id = ?'
+          'SELECT COALESCE(SUM(COALESCE(sewing_cost, total_cost)), 0) AS total FROM distribution_batches WHERE tailor_id = ?'
         ).get(tid)
         const paid = db.prepare(
           'SELECT COALESCE(SUM(amount), 0) AS total FROM tailor_payments WHERE tailor_id = ?'
@@ -2551,7 +2608,7 @@ function registerIpcHandlers() {
         return {
           id: b.id, modelName: b.model_name, sizeLabel: b.size_label ?? null, color: b.color ?? null,
           quantity: b.quantity, expectedPiecesCount: b.expected_pieces_count ?? 0,
-          remainingQuantity: b.quantity - retTotal.total,
+          remainingQuantity: (b.expected_pieces_count || b.quantity) - retTotal.total,
           sewingPricePerPiece: b.sewing_price_per_piece, totalCost: b.total_cost,
           distributionDate: b.distribution_date,
           parts: batchParts.map(p => ({ partName: p.part_name, quantity: p.quantity })),
@@ -2622,11 +2679,128 @@ function registerIpcHandlers() {
     } catch (err) { return { success: false, error: err.message ?? 'حدث خطأ' } }
   })
 
+  // 020: Cascading filter handlers for distribution modal (uses cutting_parts aggregate)
+  ipcMain.handle('distribution:getModelsWithPieces', () => {
+    try {
+      const rows = db.prepare(`
+        SELECT DISTINCT avail.model_name FROM (
+          SELECT cp.model_name,
+            (cp.count - COALESCE(SUM(
+              CAST(dbp.quantity AS REAL)
+              * (1.0 - COALESCE(
+                  (SELECT CAST(SUM(rr.quantity_returned) AS REAL) / db2.quantity
+                   FROM return_records rr WHERE rr.batch_id = db2.id), 0.0
+                ))
+            ), 0)) AS available
+          FROM cutting_parts cp
+          LEFT JOIN distribution_batch_parts dbp ON dbp.part_name = cp.part_name
+          LEFT JOIN distribution_batches db2 ON db2.id = dbp.batch_id
+            AND db2.model_name = cp.model_name AND db2.size_label = cp.size_label AND db2.color = cp.color
+          GROUP BY cp.model_name, cp.size_label, cp.color, cp.part_name
+        ) avail
+        WHERE avail.available > 0
+        ORDER BY avail.model_name
+      `).all()
+      return { success: true, data: rows.map(r => r.model_name) }
+    } catch (err) { return { success: false, error: err.message ?? 'حدث خطأ' } }
+  })
+
+  ipcMain.handle('distribution:getSizesForModel', (_event, { modelName }) => {
+    try {
+      const rows = db.prepare(`
+        SELECT DISTINCT avail.size_label FROM (
+          SELECT cp.size_label,
+            (cp.count - COALESCE(SUM(
+              CAST(dbp.quantity AS REAL)
+              * (1.0 - COALESCE(
+                  (SELECT CAST(SUM(rr.quantity_returned) AS REAL) / db2.quantity
+                   FROM return_records rr WHERE rr.batch_id = db2.id), 0.0
+                ))
+            ), 0)) AS available
+          FROM cutting_parts cp
+          LEFT JOIN distribution_batch_parts dbp ON dbp.part_name = cp.part_name
+          LEFT JOIN distribution_batches db2 ON db2.id = dbp.batch_id
+            AND db2.model_name = cp.model_name AND db2.size_label = cp.size_label AND db2.color = cp.color
+          WHERE cp.model_name = ?
+          GROUP BY cp.size_label, cp.color, cp.part_name
+        ) avail
+        WHERE avail.available > 0
+        ORDER BY avail.size_label
+      `).all(modelName)
+      return { success: true, data: rows.map(r => r.size_label) }
+    } catch (err) { return { success: false, error: err.message ?? 'حدث خطأ' } }
+  })
+
+  ipcMain.handle('distribution:getColorsForModelSize', (_event, { modelName, sizeLabel }) => {
+    try {
+      const rows = db.prepare(`
+        SELECT DISTINCT avail.color FROM (
+          SELECT cp.color,
+            (cp.count - COALESCE(SUM(
+              CAST(dbp.quantity AS REAL)
+              * (1.0 - COALESCE(
+                  (SELECT CAST(SUM(rr.quantity_returned) AS REAL) / db2.quantity
+                   FROM return_records rr WHERE rr.batch_id = db2.id), 0.0
+                ))
+            ), 0)) AS available
+          FROM cutting_parts cp
+          LEFT JOIN distribution_batch_parts dbp ON dbp.part_name = cp.part_name
+          LEFT JOIN distribution_batches db2 ON db2.id = dbp.batch_id
+            AND db2.model_name = cp.model_name AND db2.size_label = cp.size_label AND db2.color = cp.color
+          WHERE cp.model_name = ? AND cp.size_label = ?
+          GROUP BY cp.color, cp.part_name
+        ) avail
+        WHERE avail.available > 0
+        ORDER BY avail.color
+      `).all(modelName, sizeLabel)
+      return { success: true, data: rows.map(r => r.color) }
+    } catch (err) { return { success: false, error: err.message ?? 'حدث خطأ' } }
+  })
+
+  ipcMain.handle('distribution:getPartsWithCostForModelSizeColor', (_event, { modelName, sizeLabel, color }) => {
+    try {
+      const rows = db.prepare(`
+        SELECT
+          avail.part_name,
+          avail.available AS available_count,
+          COALESCE((
+            SELECT AVG(COALESCE(csp.unit_cost, 0))
+            FROM cutting_session_parts csp
+            JOIN cutting_sessions cs ON cs.id = csp.session_id
+            WHERE cs.model_name = ? AND cs.fabric_color = ? AND csp.size_label = ? AND csp.part_name = avail.part_name
+          ), 0) AS avg_unit_cost
+        FROM (
+          SELECT cp.part_name,
+            (cp.count - COALESCE(SUM(
+              CAST(dbp.quantity AS REAL)
+              * (1.0 - COALESCE(
+                  (SELECT CAST(SUM(rr.quantity_returned) AS REAL) / db2.quantity
+                   FROM return_records rr WHERE rr.batch_id = db2.id), 0.0
+                ))
+            ), 0)) AS available
+          FROM cutting_parts cp
+          LEFT JOIN distribution_batch_parts dbp ON dbp.part_name = cp.part_name
+          LEFT JOIN distribution_batches db2 ON db2.id = dbp.batch_id
+            AND db2.model_name = cp.model_name AND db2.size_label = cp.size_label AND db2.color = cp.color
+          WHERE cp.model_name = ? AND cp.size_label = ? AND cp.color = ?
+          GROUP BY cp.part_name
+        ) avail
+        WHERE avail.available > 0
+        ORDER BY avail.part_name
+      `).all(modelName, color, sizeLabel, modelName, sizeLabel, color)
+      return { success: true, data: rows.map(r => ({
+        partName: r.part_name,
+        availableCount: Math.round(r.available_count),
+        avgUnitCost: Math.round(r.avg_unit_cost * 100) / 100,
+      })) }
+    } catch (err) { return { success: false, error: err.message ?? 'حدث خطأ' } }
+  })
+
   ipcMain.handle('distribution:getBatchesForTailor', (_event, { tailorId }) => {
     try {
       const batches = db.prepare(`
         SELECT db.*,
-          db.quantity - COALESCE((SELECT SUM(rr.quantity_returned) FROM return_records rr WHERE rr.batch_id = db.id), 0) AS remaining
+          COALESCE(db.expected_pieces_count, db.quantity) - COALESCE((SELECT SUM(rr.quantity_returned) FROM return_records rr WHERE rr.batch_id = db.id), 0) AS remaining
         FROM distribution_batches db
         WHERE db.tailor_id = ?
         ORDER BY db.distribution_date DESC
@@ -2651,72 +2825,88 @@ function registerIpcHandlers() {
         const tailor = db.prepare(`SELECT id FROM tailors WHERE id = ? AND status = 'active'`).get(p.tailorId)
         if (!tailor) throw new Error('الخياط غير موجود أو غير نشط')
         if (!p.parts || p.parts.length === 0) throw new Error('يجب تحديد الأجزاء')
-        if (!p.expectedPiecesCount || p.expectedPiecesCount < 1) throw new Error('عدد القطع المتوقعة يجب أن يكون أكبر من صفر')
+        const expectedQty = p.expectedFinalQuantity ?? p.expectedPiecesCount ?? 0
+        if (expectedQty < 1) throw new Error('عدد القطع المتوقعة يجب أن يكون أكبر من صفر')
 
         const sizeLabel = p.sizeLabel ?? ''
         const color = p.color ?? ''
 
-        // Validate each part against available inventory
+        // Validate each part against cutting_parts availability
+        const availStmt = db.prepare(`
+          SELECT (cp.count - COALESCE(SUM(
+            CAST(dbp.quantity AS REAL)
+            * (1.0 - COALESCE(
+                (SELECT CAST(SUM(rr.quantity_returned) AS REAL) / db2.quantity
+                 FROM return_records rr WHERE rr.batch_id = db2.id), 0.0
+              ))
+          ), 0)) AS available
+          FROM cutting_parts cp
+          LEFT JOIN distribution_batch_parts dbp ON dbp.part_name = cp.part_name
+          LEFT JOIN distribution_batches db2 ON db2.id = dbp.batch_id
+            AND db2.model_name = cp.model_name AND db2.size_label = cp.size_label AND db2.color = cp.color
+          WHERE cp.model_name = ? AND cp.size_label = ? AND cp.color = ? AND cp.part_name = ?
+          GROUP BY cp.part_name
+        `)
         for (const part of p.parts) {
-          const availRow = db.prepare(`
-            SELECT
-              cp.count - COALESCE(SUM(
-                CAST(dbp2.quantity AS REAL)
-                * (1.0 - COALESCE(
-                    (SELECT CAST(SUM(rr.quantity_returned) AS REAL) / db3.quantity
-                     FROM return_records rr WHERE rr.batch_id = db3.id),
-                    0.0
-                  ))
-              ), 0) AS available
-            FROM cutting_parts cp
-            LEFT JOIN distribution_batch_parts dbp2 ON dbp2.part_name = cp.part_name
-            LEFT JOIN distribution_batches db3 ON db3.id = dbp2.batch_id
-              AND db3.model_name = cp.model_name
-              AND db3.size_label = cp.size_label
-              AND db3.color = cp.color
-            WHERE cp.model_name = ? AND cp.size_label = ? AND cp.color = ? AND cp.part_name = ?
-            GROUP BY cp.id
-          `).get(p.modelName, sizeLabel, color, part.partName)
-          const available = Math.round(availRow?.available ?? 0)
-          if (part.quantity > available) {
-            throw new Error(`الكمية المطلوبة من "${part.partName}" (${part.quantity}) أكبر من المتاح (${available})`)
+          const row = availStmt.get(p.modelName, sizeLabel, color, part.partName)
+          const available = row ? Math.round(row.available) : 0
+          if (available < part.quantity) {
+            throw new Error(`الكمية المتاحة من "${part.partName}" غير كافية (متاح: ${available}، مطلوب: ${part.quantity})`)
           }
         }
 
         const totalQuantity = p.parts.reduce((s, r) => s + r.quantity, 0)
-        const totalCost = p.expectedPiecesCount * p.sewingPricePerPiece
+        const piecesCost = Math.round((p.piecesCost ?? 0) * 100) / 100
+        const sewingCost = Math.round((p.sewingCost ?? expectedQty * p.sewingPricePerPiece) * 100) / 100
+        const materialsCost = Math.round((p.materialsCost ?? 0) * 100) / 100
+        const totalCost = Math.round((p.totalCost ?? piecesCost + sewingCost + materialsCost) * 100) / 100
+        const costPerFinalItem = expectedQty > 0 ? Math.round((totalCost / expectedQty) * 100) / 100 : 0
         const batchId = crypto.randomUUID()
 
         db.prepare(`
-          INSERT INTO distribution_batches (id, tailor_id, model_name, size_label, color, part_name, quantity, expected_pieces_count, sewing_price_per_piece, total_cost, distribution_date, created_at, updated_at)
-          VALUES (?, ?, ?, ?, ?, NULL, ?, ?, ?, ?, ?, ?, ?)
-        `).run(batchId, p.tailorId, p.modelName, sizeLabel || null, color || null, totalQuantity, p.expectedPiecesCount, p.sewingPricePerPiece, totalCost, p.distributionDate, now, now)
+          INSERT INTO distribution_batches
+            (id, tailor_id, model_name, size_label, color, part_name, quantity, expected_pieces_count,
+             sewing_price_per_piece, total_cost, pieces_cost, sewing_cost, materials_cost, cost_per_final_item,
+             distribution_date, created_at, updated_at)
+          VALUES (?, ?, ?, ?, ?, NULL, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        `).run(batchId, p.tailorId, p.modelName, sizeLabel || null, color || null,
+               totalQuantity, expectedQty, p.sewingPricePerPiece, totalCost,
+               piecesCost, sewingCost, materialsCost, costPerFinalItem,
+               p.distributionDate, now, now)
 
-        const insertBatchPart = db.prepare(`INSERT INTO distribution_batch_parts (id, batch_id, part_name, quantity, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?)`)
+        const insertBatchPart = db.prepare(`
+          INSERT INTO distribution_batch_parts (id, batch_id, part_name, quantity, avg_unit_cost, created_at, updated_at)
+          VALUES (?, ?, ?, ?, ?, ?, ?)
+        `)
+
         for (const part of p.parts) {
-          insertBatchPart.run(crypto.randomUUID(), batchId, part.partName, part.quantity, now, now)
+          insertBatchPart.run(crypto.randomUUID(), batchId, part.partName, part.quantity, part.avgUnitCost ?? 0, now, now)
         }
 
-        // Validate and insert consumed materials
+        // Insert consumed materials
         for (const row of (p.consumptionRows || [])) {
-          const avail = row.color
-            ? db.prepare(`SELECT COALESCE(SUM(CASE WHEN type='inbound' THEN quantity ELSE -quantity END), 0) AS available FROM stock_transactions WHERE stock_item_id = ? AND color = ?`).get(row.stockItemId, row.color)
-            : db.prepare(`SELECT COALESCE(SUM(CASE WHEN type='inbound' THEN quantity ELSE -quantity END), 0) AS available FROM stock_transactions WHERE stock_item_id = ? AND color IS NULL`).get(row.stockItemId)
-          if (!avail || avail.available < row.quantity) {
-            const item = db.prepare('SELECT name FROM stock_items WHERE id = ?').get(row.stockItemId)
-            throw new Error(`الكمية المتاحة من "${item?.name ?? row.stockItemId}" غير كافية`)
+          if (row.stockTransactionId) {
+            // New batch-level format
+            const txn = db.prepare('SELECT stock_item_id, color FROM stock_transactions WHERE id = ?').get(row.stockTransactionId)
+            if (txn) {
+              db.prepare(`INSERT INTO distribution_consumption_entries (id, batch_id, stock_item_id, color, quantity, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?)`)
+                .run(crypto.randomUUID(), batchId, txn.stock_item_id, txn.color, row.quantity, now, now)
+              db.prepare(`INSERT INTO stock_transactions (id, stock_item_id, type, quantity, color, transaction_date, source_module, source_reference_id, model_name, created_at, updated_at) VALUES (?, ?, 'consumed', ?, ?, ?, 'distribution', ?, ?, ?, ?)`)
+                .run(crypto.randomUUID(), txn.stock_item_id, row.quantity, txn.color, p.distributionDate, batchId, p.modelName ?? null, now, now)
+            }
+          } else if (row.stockItemId) {
+            // Legacy format (from old modal)
+            db.prepare(`INSERT INTO distribution_consumption_entries (id, batch_id, stock_item_id, color, quantity, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?)`)
+              .run(crypto.randomUUID(), batchId, row.stockItemId, row.color ?? null, row.quantity, now, now)
+            db.prepare(`INSERT INTO stock_transactions (id, stock_item_id, type, quantity, color, transaction_date, source_module, source_reference_id, model_name, created_at, updated_at) VALUES (?, ?, 'consumed', ?, ?, ?, 'distribution', ?, ?, ?, ?)`)
+              .run(crypto.randomUUID(), row.stockItemId, row.quantity, row.color ?? null, p.distributionDate, batchId, p.modelName ?? null, now, now)
           }
-          db.prepare(`INSERT INTO distribution_consumption_entries (id, batch_id, stock_item_id, color, quantity, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?)`
-          ).run(crypto.randomUUID(), batchId, row.stockItemId, row.color ?? null, row.quantity, now, now)
-          db.prepare(`INSERT INTO stock_transactions (id, stock_item_id, type, quantity, color, transaction_date, source_module, source_reference_id, model_name, created_at, updated_at) VALUES (?, ?, 'consumed', ?, ?, ?, 'distribution', ?, ?, ?, ?)`
-          ).run(crypto.randomUUID(), row.stockItemId, row.quantity, row.color ?? null, p.distributionDate, batchId, p.modelName ?? null, now, now)
         }
 
-        const agg = db.prepare(`SELECT COALESCE(SUM(total_cost), 0) AS total_earned FROM distribution_batches WHERE tailor_id = ?`).get(p.tailorId)
+        const agg = db.prepare(`SELECT COALESCE(SUM(COALESCE(sewing_cost, total_cost)), 0) AS total_earned FROM distribution_batches WHERE tailor_id = ?`).get(p.tailorId)
         const paid = db.prepare(`SELECT COALESCE(SUM(amount), 0) AS total FROM tailor_payments WHERE tailor_id = ?`).get(p.tailorId)
         const tailorRow = db.prepare('SELECT name FROM tailors WHERE id = ?').get(p.tailorId)
         return {
-          
           tailorId: p.tailorId, tailorName: tailorRow.name,
           piecesInDistribution: 0, piecesReturned: 0, piecesNotYetReturned: 0,
           totalEarned: agg.total_earned, settledAmount: paid.total, remainingBalance: agg.total_earned - paid.total,
@@ -2735,7 +2925,7 @@ function registerIpcHandlers() {
         const retSoFar = db.prepare(
           'SELECT COALESCE(SUM(quantity_returned), 0) AS total FROM return_records WHERE batch_id = ?'
         ).get(p.batchId)
-        const remaining = batch.quantity - retSoFar.total
+        const remaining = (batch.expected_pieces_count || batch.quantity) - retSoFar.total
         if (p.quantityReturned < 1) throw new Error('يجب إرجاع قطعة واحدة على الأقل')
         if (p.quantityReturned > remaining) throw new Error(`الكمية المرتجعة (${p.quantityReturned}) تتجاوز المتبقي (${remaining})`)
         for (const row of (p.consumptionRows || [])) {
@@ -2782,7 +2972,7 @@ function registerIpcHandlers() {
           JOIN distribution_batches dbatch ON dbatch.id = dpl.batch_id
           WHERE dbatch.tailor_id = ? AND cp.status = 'returned'
         `).get(tailorId)
-        const agg = db.prepare(`SELECT COALESCE(SUM(total_cost), 0) AS total_earned FROM distribution_batches WHERE tailor_id = ?`).get(tailorId)
+        const agg = db.prepare(`SELECT COALESCE(SUM(COALESCE(sewing_cost, total_cost)), 0) AS total_earned FROM distribution_batches WHERE tailor_id = ?`).get(tailorId)
         const paid = db.prepare(`SELECT COALESCE(SUM(amount), 0) AS total FROM tailor_payments WHERE tailor_id = ?`).get(tailorId)
         const tailorRow = db.prepare('SELECT name FROM tailors WHERE id = ?').get(tailorId)
         return {
