@@ -92,6 +92,12 @@ function createQcRecord(db, payload) {
     for (const entry of consumptionEntries) {
       insertConsumption.run(randomUUID(), id, entry.stockItemId, entry.color ?? null, entry.quantity, now, now)
     }
+    if (employeeId && pricePerPiece > 0) {
+      db.prepare(`
+        INSERT INTO employee_operations (id, employee_id, operation_type, source_module, source_reference_id, operation_date, quantity, price_per_unit, total_amount, notes, created_at, updated_at)
+        VALUES (?, ?, 'qc', 'qc', ?, ?, ?, ?, ?, NULL, ?, ?)
+      `).run(randomUUID(), employeeId, id, reviewDate, quantityReviewed, pricePerPiece, totalCost, now, now)
+    }
   })()
 
   return { id }

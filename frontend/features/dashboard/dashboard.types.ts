@@ -55,14 +55,24 @@ export interface MonthlyProductionPoint {
   pieces: number;
 }
 
-export interface TopTailorPoint {
-  name: string;
-  returned: number;
+export interface QcRejectionPoint {
+  modelName: string;
+  totalChecked: number;
+  totalRejected: number;
+  rejectionRate: number;
 }
 
-export interface TopModelPoint {
+export interface TailorCompletionPoint {
+  name: string;
+  totalExpected: number;
+  totalReturned: number;
+  completionRate: number;
+}
+
+export interface AvgCostPoint {
   modelName: string;
-  pieces: number;
+  avgCost: number;
+  totalPieces: number;
 }
 
 export interface FabricConsumptionRawPoint {
@@ -89,8 +99,9 @@ export interface MonthlyDistributedPoint {
 export interface DashboardChartData {
   monthlyProduction: MonthlyProductionPoint[];
   monthlyDistributed: MonthlyDistributedPoint[];
-  topTailors: TopTailorPoint[];
-  topModels: TopModelPoint[];
+  qcRejectionRates: QcRejectionPoint[];
+  tailorCompletionRates: TailorCompletionPoint[];
+  avgCostPerModel: AvgCostPoint[];
   fabricConsumption: FabricConsumptionRawPoint[];
   employeeDebt: EmployeeDebtPoint[];
 }

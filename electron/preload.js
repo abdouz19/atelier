@@ -80,6 +80,7 @@ contextBridge.exposeInMainWorld('ipcBridge', {
     getPartsWithCostForModelSizeColor: (payload) => ipcRenderer.invoke('distribution:getPartsWithCostForModelSizeColor', payload),
     distribute: (payload) => ipcRenderer.invoke('distribution:distribute', payload),
     return: (payload) => ipcRenderer.invoke('distribution:return', payload),
+    getAllBatches: () => ipcRenderer.invoke('distribution:getAllBatches'),
   },
   pieces: {
     getAvailability: (payload) => ipcRenderer.invoke('pieces:getAvailability', payload),
@@ -134,6 +135,15 @@ contextBridge.exposeInMainWorld('ipcBridge', {
     getSnapshotData: () => ipcRenderer.invoke('dashboard:getSnapshotData'),
     getPeriodKpis: (payload) => ipcRenderer.invoke('dashboard:getPeriodKpis', payload),
     getChartData: (payload) => ipcRenderer.invoke('dashboard:getChartData', payload),
+  },
+  settings: {
+    getAppearance: () => ipcRenderer.invoke('settings:getAppearance'),
+    setAppearance: (payload) => ipcRenderer.invoke('settings:setAppearance', payload),
+    getLogo: () => ipcRenderer.invoke('settings:getLogo'),
+    setLogo: (payload) => ipcRenderer.invoke('settings:setLogo', payload),
+    removeLogo: () => ipcRenderer.invoke('settings:removeLogo'),
+    resetToDefaults: () => ipcRenderer.invoke('settings:resetToDefaults'),
+    getAppearanceSync: () => ipcRenderer.sendSync('settings:getAppearanceSync'),
   },
   on: (channel, callback) => {
     ipcRenderer.on(channel, (_event, ...args) => callback(...args))

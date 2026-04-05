@@ -20,8 +20,21 @@ export function SupplierTableRow({ supplier, onClick, onEdit, onDelete }: Suppli
       <td className="px-4 py-3 text-sm text-text-muted">{supplier.phone ?? '—'}</td>
       <td className="px-4 py-3 text-sm text-text-muted">{supplier.address ?? '—'}</td>
       <td className="px-4 py-3 text-sm text-text-muted">{supplier.productsSold ?? '—'}</td>
-      <td className="max-w-xs px-4 py-3 text-sm text-text-muted">
-        <span className="line-clamp-1">{supplier.notes ?? '—'}</span>
+      <td className="px-4 py-3 text-sm tabular-nums">
+        {supplier.purchaseCount > 0 ? (
+          <span className="rounded-full px-2 py-0.5 text-xs font-semibold" style={{ background: 'rgba(96,165,250,0.1)', color: '#60a5fa' }}>
+            {supplier.purchaseCount}
+          </span>
+        ) : (
+          <span className="text-text-muted">—</span>
+        )}
+      </td>
+      <td className="px-4 py-3 text-sm font-semibold tabular-nums">
+        {supplier.totalSpent > 0 ? (
+          <span style={{ color: '#34d399' }}>{supplier.totalSpent.toLocaleString('en-US', { maximumFractionDigits: 2 })} <span className="text-xs font-normal" style={{ color: 'var(--cell-faint)' }}>دج</span></span>
+        ) : (
+          <span className="text-text-muted text-xs">لا توجد مشتريات</span>
+        )}
       </td>
       <td className="px-4 py-3">
         <div className="flex items-center gap-1" onClick={(e) => e.stopPropagation()}>

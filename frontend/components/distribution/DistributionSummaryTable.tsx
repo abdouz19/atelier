@@ -85,6 +85,27 @@ export function DistributionSummaryTable({ summary, loading, error, onRowClick }
                 <DistributionSummaryRow key={s.tailorId} summary={s} onClick={() => onRowClick(s.tailorId)} />
               ))}
             </tbody>
+            {filtered.length > 1 && (() => {
+              const totals = filtered.reduce((acc, s) => ({
+                piecesInDistribution: acc.piecesInDistribution + s.piecesInDistribution,
+                piecesReturned: acc.piecesReturned + s.piecesReturned,
+                piecesNotYetReturned: acc.piecesNotYetReturned + s.piecesNotYetReturned,
+                totalEarned: acc.totalEarned + s.totalEarned,
+                remainingBalance: acc.remainingBalance + s.remainingBalance,
+              }), { piecesInDistribution: 0, piecesReturned: 0, piecesNotYetReturned: 0, totalEarned: 0, remainingBalance: 0 });
+              return (
+                <tfoot>
+                  <tr style={{ borderTop: '2px solid var(--divider)', background: 'rgba(255,255,255,0.02)' }}>
+                    <td className="px-4 py-3 text-xs font-semibold" style={{ color: '#475569' }}>الإجمالي ({filtered.length})</td>
+                    <td className="px-4 py-3 text-xs font-semibold tabular-nums" style={{ color: '#60a5fa' }}>{totals.piecesInDistribution}</td>
+                    <td className="px-4 py-3 text-xs tabular-nums" style={{ color: 'var(--cell-muted)' }}>{totals.piecesReturned}</td>
+                    <td className="px-4 py-3 text-xs font-semibold tabular-nums" style={{ color: '#fb923c' }}>{totals.piecesNotYetReturned}</td>
+                    <td className="px-4 py-3 text-xs font-semibold tabular-nums" style={{ color: '#34d399' }}>{totals.totalEarned.toFixed(2)} <span style={{ color: 'var(--cell-faint)' }}>دج</span></td>
+                    <td className="px-4 py-3 text-xs font-semibold tabular-nums" style={{ color: totals.remainingBalance > 0 ? '#f87171' : '#475569' }}>{totals.remainingBalance.toFixed(2)} <span style={{ color: 'var(--cell-faint)' }}>دج</span></td>
+                  </tr>
+                </tfoot>
+              );
+            })()}
           </table>
         </div>
       )}

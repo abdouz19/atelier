@@ -1510,14 +1510,23 @@ function registerIpcHandlers() {
 
   ipcMain.handle('suppliers:getAll', () => {
     try {
-      const rows = db.prepare(
-        'SELECT id, name, phone, address, products_sold, notes, is_deleted FROM suppliers WHERE is_deleted = 0 ORDER BY name'
-      ).all()
+      const rows = db.prepare(`
+        SELECT
+          s.id, s.name, s.phone, s.address, s.products_sold, s.notes,
+          COALESCE(SUM(st.total_price_paid), 0) AS total_spent,
+          COUNT(st.id) AS purchase_count
+        FROM suppliers s
+        LEFT JOIN stock_transactions st ON st.supplier_id = s.id AND st.type = 'inbound'
+        WHERE s.is_deleted = 0
+        GROUP BY s.id
+        ORDER BY s.name
+      `).all()
       return {
         success: true,
         data: rows.map(s => ({
           id: s.id, name: s.name, phone: s.phone, address: s.address,
           productsSold: s.products_sold, notes: s.notes, isDeleted: false,
+          totalSpent: s.total_spent, purchaseCount: s.purchase_count,
         })),
       }
     } catch (err) { return { success: false, error: err.message ?? 'حدث خطأ' } }
@@ -2572,36 +2581,33 @@ function registerIpcHandlers() {
 
   ipcMain.handle('distribution:getSummary', () => {
     try {
-      const tailorIds = db.prepare(
-        'SELECT DISTINCT tailor_id FROM distribution_batches'
-      ).all().map(r => r.tailor_id)
+      const tailorIds = db.prepare('SELECT DISTINCT tailor_id FROM distribution_batches').all().map(r => r.tailor_id)
       const result = tailorIds.map(tid => {
         const tailor = db.prepare('SELECT id, name FROM tailors WHERE id = ?').get(tid)
-        const inDist = db.prepare(`
-          SELECT COUNT(*) AS cnt FROM cutting_pieces cp
-          JOIN distribution_piece_links dpl ON dpl.piece_id = cp.id
-          JOIN distribution_batches dbatch ON dbatch.id = dpl.batch_id
-          WHERE dbatch.tailor_id = ? AND cp.status = 'distributed'
+        const stats = db.prepare(`
+          SELECT
+            COALESCE(SUM(COALESCE(db.expected_pieces_count, db.quantity)), 0) AS total_expected,
+            COALESCE(SUM(COALESCE(db.sewing_cost, db.total_cost)), 0) AS total_earned
+          FROM distribution_batches db WHERE db.tailor_id = ?
         `).get(tid)
-        const returned = db.prepare(`
-          SELECT COUNT(*) AS cnt FROM cutting_pieces cp
-          JOIN distribution_piece_links dpl ON dpl.piece_id = cp.id
-          JOIN distribution_batches dbatch ON dbatch.id = dpl.batch_id
-          WHERE dbatch.tailor_id = ? AND cp.status = 'returned'
+        const retRow = db.prepare(`
+          SELECT COALESCE(SUM(rr.quantity_returned), 0) AS total_returned
+          FROM return_records rr
+          JOIN distribution_batches db2 ON db2.id = rr.batch_id
+          WHERE db2.tailor_id = ?
         `).get(tid)
-        const earned = db.prepare(
-          'SELECT COALESCE(SUM(COALESCE(sewing_cost, total_cost)), 0) AS total FROM distribution_batches WHERE tailor_id = ?'
-        ).get(tid)
-        const paid = db.prepare(
-          'SELECT COALESCE(SUM(amount), 0) AS total FROM tailor_payments WHERE tailor_id = ?'
-        ).get(tid)
+        const paid = db.prepare('SELECT COALESCE(SUM(amount), 0) AS total FROM tailor_payments WHERE tailor_id = ?').get(tid)
+        const piecesReturned = retRow.total_returned
+        const piecesNotYetReturned = Math.max(0, stats.total_expected - piecesReturned)
         return {
           tailorId: tid, tailorName: tailor?.name ?? '',
-          piecesInDistribution: inDist.cnt, piecesReturned: returned.cnt, piecesNotYetReturned: inDist.cnt,
-          totalEarned: earned.total, settledAmount: paid.total, remainingBalance: earned.total - paid.total,
+          piecesInDistribution: stats.total_expected,
+          piecesReturned, piecesNotYetReturned,
+          totalEarned: stats.total_earned, settledAmount: paid.total,
+          remainingBalance: stats.total_earned - paid.total,
         }
       })
-      result.sort((a, b) => b.piecesInDistribution - a.piecesInDistribution)
+      result.sort((a, b) => b.piecesNotYetReturned - a.piecesNotYetReturned)
       return { success: true, data: result }
     } catch (err) { return { success: false, error: err.message ?? 'حدث خطأ' } }
   })
@@ -2632,18 +2638,78 @@ function registerIpcHandlers() {
             consumptionEntries: consumption.map(c => ({ stockItemName: c.item_name, color: c.color ?? null, quantity: c.quantity })),
           }
         })
-        const batchParts = db.prepare(`SELECT part_name, quantity FROM distribution_batch_parts WHERE batch_id = ? ORDER BY part_name`).all(b.id)
+        const batchParts = db.prepare(`SELECT part_name, quantity, avg_unit_cost FROM distribution_batch_parts WHERE batch_id = ? ORDER BY part_name`).all(b.id)
+        const consumedMaterials = db.prepare(`
+          SELECT dce.color, dce.quantity, si.name AS item_name
+          FROM distribution_consumption_entries dce
+          JOIN stock_items si ON si.id = dce.stock_item_id
+          WHERE dce.batch_id = ?
+        `).all(b.id)
         return {
           id: b.id, modelName: b.model_name, sizeLabel: b.size_label ?? null, color: b.color ?? null,
           quantity: b.quantity, expectedPiecesCount: b.expected_pieces_count ?? 0,
           remainingQuantity: (b.expected_pieces_count || b.quantity) - retTotal.total,
-          sewingPricePerPiece: b.sewing_price_per_piece, totalCost: b.total_cost,
+          sewingPricePerPiece: b.sewing_price_per_piece,
+          piecesCost: b.pieces_cost ?? null,
+          sewingCost: b.sewing_cost ?? null,
+          materialsCost: b.materials_cost ?? null,
+          totalCost: b.total_cost,
+          costPerFinalItem: b.cost_per_final_item ?? null,
           distributionDate: b.distribution_date,
-          parts: batchParts.map(p => ({ partName: p.part_name, quantity: p.quantity })),
+          parts: batchParts.map(p => ({ partName: p.part_name, quantity: p.quantity, avgUnitCost: p.avg_unit_cost ?? null })),
+          consumedMaterials: consumedMaterials.map(c => ({ itemName: c.item_name, color: c.color ?? null, quantity: c.quantity })),
           returns: returnRows,
         }
       })
-      return { success: true, data: { tailorId: tailor.id, tailorName: tailor.name, batches: result } }
+      // Financial summary for this tailor
+      const totalEarned = result.reduce((s, b) => s + (b.sewingCost ?? b.totalCost), 0)
+      const paid = db.prepare('SELECT COALESCE(SUM(amount), 0) AS total FROM tailor_payments WHERE tailor_id = ?').get(tailorId)
+      return { success: true, data: {
+        tailorId: tailor.id, tailorName: tailor.name, batches: result,
+        totalEarned, settledAmount: paid.total, remainingBalance: totalEarned - paid.total,
+      } }
+    } catch (err) { return { success: false, error: err.message ?? 'حدث خطأ' } }
+  })
+
+  ipcMain.handle('distribution:getAllBatches', () => {
+    try {
+      const batches = db.prepare(`
+        SELECT db.*, t.name AS tailor_name
+        FROM distribution_batches db
+        JOIN tailors t ON t.id = db.tailor_id
+        ORDER BY db.distribution_date DESC
+      `).all()
+      const result = batches.map(b => {
+        const retTotal = db.prepare(
+          'SELECT COALESCE(SUM(quantity_returned), 0) AS total FROM return_records WHERE batch_id = ?'
+        ).get(b.id)
+        const batchParts = db.prepare(`SELECT part_name, quantity, avg_unit_cost FROM distribution_batch_parts WHERE batch_id = ? ORDER BY part_name`).all(b.id)
+        const consumed = db.prepare(`
+          SELECT dce.color, dce.quantity, si.name AS item_name
+          FROM distribution_consumption_entries dce
+          JOIN stock_items si ON si.id = dce.stock_item_id
+          WHERE dce.batch_id = ?
+        `).all(b.id)
+        const expected = b.expected_pieces_count || b.quantity
+        const returned = retTotal.total
+        const remaining = Math.max(0, expected - returned)
+        const status = remaining === 0 ? 'fully_returned' : returned > 0 ? 'partial_return' : 'in_distribution'
+        return {
+          id: b.id,
+          tailorId: b.tailor_id, tailorName: b.tailor_name,
+          modelName: b.model_name, sizeLabel: b.size_label ?? null, color: b.color ?? null,
+          quantity: b.quantity, expectedPiecesCount: expected,
+          quantityReturned: returned, remainingQuantity: remaining,
+          sewingPricePerPiece: b.sewing_price_per_piece,
+          piecesCost: b.pieces_cost ?? null, sewingCost: b.sewing_cost ?? null,
+          materialsCost: b.materials_cost ?? null, totalCost: b.total_cost,
+          costPerFinalItem: b.cost_per_final_item ?? null,
+          distributionDate: b.distribution_date, status,
+          parts: batchParts.map(p => ({ partName: p.part_name, quantity: p.quantity, avgUnitCost: p.avg_unit_cost ?? null })),
+          consumedMaterials: consumed.map(c => ({ itemName: c.item_name, color: c.color ?? null, quantity: c.quantity })),
+        }
+      })
+      return { success: true, data: result }
     } catch (err) { return { success: false, error: err.message ?? 'حدث خطأ' } }
   })
 

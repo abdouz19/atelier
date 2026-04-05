@@ -73,6 +73,12 @@ function createFinitionRecord(db, payload) {
     for (const entry of consumptionEntries) {
       insertConsumption.run(randomUUID(), id, entry.stockItemId, entry.color ?? null, entry.quantity, now, now)
     }
+    if (employeeId && pricePerPiece > 0) {
+      db.prepare(`
+        INSERT INTO employee_operations (id, employee_id, operation_type, source_module, source_reference_id, operation_date, quantity, price_per_unit, total_amount, notes, created_at, updated_at)
+        VALUES (?, ?, 'finition', 'finition', ?, ?, ?, ?, ?, NULL, ?, ?)
+      `).run(randomUUID(), employeeId, id, finitionDate, quantity, pricePerPiece, totalCost, now, now)
+    }
   })()
 
   return { id }
@@ -144,6 +150,12 @@ function createFinitionStep(db, payload) {
     insertStep.run(id, finitionId, stepOrder, stepName, employeeId ?? null, quantity, pricePerPiece ?? null, totalCost, materialsCost, materialsCostPerPiece, costAfterStep, stepDate, now, now)
     for (const entry of consumptionEntries) {
       insertConsumption.run(randomUUID(), id, entry.stockItemId, entry.color ?? null, entry.quantity, now, now)
+    }
+    if (employeeId && pricePerPiece != null && pricePerPiece > 0 && totalCost != null) {
+      db.prepare(`
+        INSERT INTO employee_operations (id, employee_id, operation_type, source_module, source_reference_id, operation_date, quantity, price_per_unit, total_amount, notes, created_at, updated_at)
+        VALUES (?, ?, 'finition_step', 'finition', ?, ?, ?, ?, ?, NULL, ?, ?)
+      `).run(randomUUID(), employeeId, id, stepDate, quantity, pricePerPiece, totalCost, now, now)
     }
   })()
 

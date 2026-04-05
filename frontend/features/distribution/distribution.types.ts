@@ -33,6 +33,13 @@ export interface DistributionReturnRow {
 export interface DistributionBatchPart {
   partName: string;
   quantity: number;
+  avgUnitCost?: number | null;
+}
+
+export interface BatchConsumedMaterial {
+  itemName: string;
+  color: string | null;
+  quantity: number;
 }
 
 export interface DistributionBatchRow {
@@ -44,9 +51,14 @@ export interface DistributionBatchRow {
   expectedPiecesCount: number;
   remainingQuantity: number;
   sewingPricePerPiece: number;
+  piecesCost: number | null;
+  sewingCost: number | null;
+  materialsCost: number | null;
   totalCost: number;
+  costPerFinalItem: number | null;
   distributionDate: number;
   parts: DistributionBatchPart[];
+  consumedMaterials: BatchConsumedMaterial[];
   returns: DistributionReturnRow[];
 }
 
@@ -54,6 +66,32 @@ export interface DistributionTailorDetail {
   tailorId: string;
   tailorName: string;
   batches: DistributionBatchRow[];
+  totalEarned: number;
+  settledAmount: number;
+  remainingBalance: number;
+}
+
+export interface DistributionBatchLogRow {
+  id: string;
+  tailorId: string;
+  tailorName: string;
+  modelName: string;
+  sizeLabel: string | null;
+  color: string | null;
+  quantity: number;
+  expectedPiecesCount: number;
+  quantityReturned: number;
+  remainingQuantity: number;
+  sewingPricePerPiece: number;
+  piecesCost: number | null;
+  sewingCost: number | null;
+  materialsCost: number | null;
+  totalCost: number;
+  costPerFinalItem: number | null;
+  distributionDate: number;
+  status: 'in_distribution' | 'partial_return' | 'fully_returned';
+  parts: DistributionBatchPart[];
+  consumedMaterials: BatchConsumedMaterial[];
 }
 
 export interface DistributionBatchOption {
@@ -132,7 +170,7 @@ export interface DistributePayload {
   sewingPricePerPiece: number;
   distributionDate: number;
   parts: DistributePartRow[];
-  consumptionRows: ReturnConsumptionRowPayload[];
+  consumptionRows: DistributionConsumptionRow[];
   piecesCost: number;
   sewingCost: number;
   materialsCost: number;

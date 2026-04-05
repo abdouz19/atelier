@@ -6,6 +6,8 @@ export interface SupplierSummary {
   productsSold: string | null;
   notes: string | null;
   isDeleted: boolean;
+  totalSpent: number;
+  purchaseCount: number;
 }
 
 export interface PurchaseRecord {
@@ -21,7 +23,6 @@ export interface PurchaseRecord {
 }
 
 export interface SupplierDetail extends SupplierSummary {
-  totalSpent: number;
   purchases: PurchaseRecord[];
 }
 

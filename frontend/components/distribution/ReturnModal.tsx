@@ -8,9 +8,10 @@ import type { DistributionBatchOption, DistributionTailorSummary } from '@/featu
 interface ReturnModalProps {
   onClose: () => void;
   onSuccess: (summary: DistributionTailorSummary) => void;
+  defaultBatchId?: string;
 }
 
-export function ReturnModal({ onClose, onSuccess }: ReturnModalProps) {
+export function ReturnModal({ onClose, onSuccess, defaultBatchId }: ReturnModalProps) {
   const [activeTailors, setActiveTailors] = useState<Array<{ id: string; name: string }>>([]);
   const [tailorId, setTailorId] = useState('');
   const [batches, setBatches] = useState<DistributionBatchOption[]>([]);
@@ -27,9 +28,26 @@ export function ReturnModal({ onClose, onSuccess }: ReturnModalProps) {
   useEffect(() => {
     if (!tailorId) { setBatches([]); setSelectedBatch(null); return; }
     ipcClient.distribution.getBatchesForTailor({ tailorId }).then(res => {
-      if (res.success) setBatches(res.data);
+      if (res.success) {
+        setBatches(res.data);
+        if (defaultBatchId) {
+          const match = res.data.find(b => b.id === defaultBatchId);
+          if (match) { setSelectedBatch(match); setQuantityReturned(String(match.remainingQuantity)); }
+        }
+      }
     });
-  }, [tailorId]);
+  }, [tailorId, defaultBatchId]);
+
+  // If defaultBatchId provided, fetch all batches across all tailors to find the right tailor
+  useEffect(() => {
+    if (!defaultBatchId) return;
+    ipcClient.distribution.getAllBatches().then(res => {
+      if (res.success) {
+        const match = res.data.find(b => b.id === defaultBatchId);
+        if (match) setTailorId(match.tailorId);
+      }
+    });
+  }, [defaultBatchId]);
 
   function selectBatch(b: DistributionBatchOption) {
     setSelectedBatch(b);

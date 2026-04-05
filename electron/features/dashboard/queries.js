@@ -108,11 +108,9 @@ function getSnapshotKpis(db) {
  */
 function getPipelineStages(db, kpis) {
   return [
-    { label: 'غير موزعة', count: kpis.piecesNotDistributed, href: '/cutting' },
     { label: 'في التوزيع', count: kpis.piecesInDistribution, href: '/distribution' },
-    { label: 'مُعادة — بانتظار مراقبة', count: kpis.piecesAwaitingQc, href: '/distribution' },
+    { label: 'بانتظار المراقبة', count: kpis.piecesAwaitingQc, href: '/distribution' },
     { label: 'جاهزة للتشطيب', count: kpis.piecesAwaitingFinition, href: '/qc' },
-    { label: 'في التشطيب', count: kpis.piecesInFinition, href: '/qc' },
     { label: 'المخزون النهائي', count: kpis.piecesInFinalStock, href: '/final-stock' },
   ]
 }
@@ -225,36 +223,77 @@ function getChartData(db, { startDate, endDate, modelName }) {
     pieces: r.pieces,
   }))
 
-  // Top 5 tailors by returns
-  const tailorRows = db.prepare(`
-    SELECT t.name, SUM(rr.quantity_returned) AS returned
-    FROM return_records rr
-      JOIN distribution_batches db ON db.id = rr.batch_id
-      JOIN tailors t ON t.id = db.tailor_id
-    WHERE rr.return_date >= ? AND rr.return_date <= ?
-      AND (? IS NULL OR db.model_name = ?)
-    GROUP BY t.id, t.name
-    ORDER BY returned DESC
-    LIMIT 5
+  // QC rejection rate by model (period-filtered)
+  const qcRejectionRows = db.prepare(`
+    SELECT
+      db2.model_name,
+      SUM(qr.quantity_reviewed) AS total_checked,
+      SUM(COALESCE(qr.qty_damaged, 0)) AS total_rejected
+    FROM qc_records qr
+    JOIN return_records rr ON rr.id = qr.return_id
+    JOIN distribution_batches db2 ON db2.id = rr.batch_id
+    WHERE qr.review_date >= ? AND qr.review_date <= ?
+      AND (? IS NULL OR db2.model_name = ?)
+    GROUP BY db2.model_name
+    HAVING total_checked > 0
+    ORDER BY (CAST(total_rejected AS REAL) / total_checked) DESC
+    LIMIT 7
   `).all(startDate, endDate, model, model)
 
-  const topTailors = tailorRows.map(r => ({
-    name: r.name,
-    returned: r.returned,
+  const qcRejectionRates = qcRejectionRows.map(r => ({
+    modelName: r.model_name,
+    totalChecked: r.total_checked,
+    totalRejected: r.total_rejected,
+    rejectionRate: r.total_checked > 0 ? Math.round((r.total_rejected / r.total_checked) * 100 * 10) / 10 : 0,
   }))
 
-  // Top 5 models by final stock (not date/model filtered)
-  const modelRows = db.prepare(`
-    SELECT model_name, SUM(quantity) AS pieces
-    FROM final_stock_entries
-    GROUP BY model_name
-    ORDER BY pieces DESC
-    LIMIT 5
-  `).all()
+  // Tailor completion rate (returned / expected %) — all time per tailor
+  const tailorCompletionRows = db.prepare(`
+    SELECT
+      t.name,
+      COALESCE(SUM(db.expected_pieces_count), 0) AS total_expected,
+      COALESCE(SUM(rr_total.returned), 0) AS total_returned
+    FROM tailors t
+    JOIN distribution_batches db ON db.tailor_id = t.id
+    LEFT JOIN (
+      SELECT batch_id, SUM(quantity_returned) AS returned
+      FROM return_records
+      GROUP BY batch_id
+    ) rr_total ON rr_total.batch_id = db.id
+    WHERE db.distribution_date >= ? AND db.distribution_date <= ?
+    GROUP BY t.id, t.name
+    HAVING total_expected > 0
+    ORDER BY t.name
+    LIMIT 7
+  `).all(startDate, endDate)
 
-  const topModels = modelRows.map(r => ({
+  const tailorCompletionRates = tailorCompletionRows.map(r => ({
+    name: r.name,
+    totalExpected: r.total_expected,
+    totalReturned: r.total_returned,
+    completionRate: r.total_expected > 0 ? Math.round((r.total_returned / r.total_expected) * 100 * 10) / 10 : 0,
+  }))
+
+  // Avg final cost per piece by model (from final_stock_entries with cost data)
+  const avgCostRows = db.prepare(`
+    SELECT
+      fse.model_name,
+      ROUND(AVG(fse.final_cost_per_piece), 2) AS avg_cost,
+      SUM(fse.quantity) AS total_pieces
+    FROM final_stock_entries fse
+    WHERE fse.final_cost_per_piece IS NOT NULL AND fse.final_cost_per_piece > 0
+      AND fse.entry_date >= ? AND fse.entry_date <= ?
+      AND (? IS NULL OR fse.model_name = ?)
+    GROUP BY fse.model_name
+    HAVING total_pieces > 0
+    ORDER BY avg_cost DESC
+    LIMIT 7
+  `).all(startDate, endDate, model, model)
+
+  const avgCostPerModel = avgCostRows.map(r => ({
     modelName: r.model_name,
-    pieces: r.pieces,
+    avgCost: r.avg_cost,
+    totalPieces: r.total_pieces,
   }))
 
   // Fabric consumption (6 months) — raw rows, client pivots
@@ -316,8 +355,9 @@ function getChartData(db, { startDate, endDate, modelName }) {
   return {
     monthlyProduction,
     monthlyDistributed,
-    topTailors,
-    topModels,
+    qcRejectionRates,
+    tailorCompletionRates,
+    avgCostPerModel,
     fabricConsumption,
     employeeDebt,
   }

@@ -62,7 +62,7 @@ export function SupplierTable({ suppliers, onRowClick, onEdit, onDelete }: Suppl
         <table className="w-full text-right text-sm">
           <thead className="sticky top-0 z-10 text-xs font-semibold" style={{ background: 'var(--table-head-bg)' }}>
             <tr>
-              {['الاسم', 'الهاتف', 'العنوان', 'المنتجات', 'ملاحظات', ''].map((h, i) => (
+              {['الاسم', 'الهاتف', 'العنوان', 'المنتجات', 'عدد المشتريات', 'إجمالي المشتريات', ''].map((h, i) => (
                 <th key={i} className="px-4 py-3 text-right" style={{ color: 'var(--cell-faint)', borderBottom: '1px solid var(--table-head-border)' }}>
                   {h}
                 </th>

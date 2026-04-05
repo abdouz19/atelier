@@ -176,10 +176,10 @@ function DashboardPageContent() {
             <section className="space-y-3">
               <SectionHeading>التحليلات والإحصاءات</SectionHeading>
               <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-3">
-                <MonthlyProductionChart data={chartData.monthlyProduction}     distributedData={chartData.monthlyDistributed} />
-                <PipelineDonutChart     stages={pipeline} />
-                <TopTailorsChart        data={chartData.topTailors} />
-                <TopModelsChart         data={chartData.topModels} />
+                <MonthlyProductionChart data={chartData.monthlyProduction}          distributedData={chartData.monthlyDistributed} />
+                <TopModelsChart         data={chartData.qcRejectionRates} />
+                <TopTailorsChart        data={chartData.tailorCompletionRates} />
+                <PipelineDonutChart     data={chartData.avgCostPerModel} />
                 <FabricConsumptionChart data={chartData.fabricConsumption} />
                 <EmployeeDebtChart      data={chartData.employeeDebt} />
               </div>

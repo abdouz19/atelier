@@ -125,8 +125,13 @@ declare global {
         getAvailabilityForModel: (payload: { modelName: string }) => Promise<unknown>;
         getModelSuggestions: () => Promise<unknown>;
         getBatchesForTailor: (payload: { tailorId: string }) => Promise<unknown>;
+        getModelsWithPieces: () => Promise<unknown>;
+        getSizesForModel: (payload: { modelName: string }) => Promise<unknown>;
+        getColorsForModelSize: (payload: { modelName: string; sizeLabel: string }) => Promise<unknown>;
+        getPartsWithCostForModelSizeColor: (payload: { modelName: string; sizeLabel: string; color: string }) => Promise<unknown>;
         distribute: (payload: unknown) => Promise<unknown>;
         return: (payload: unknown) => Promise<unknown>;
+        getAllBatches: () => Promise<unknown>;
       };
       pieces: {
         getAvailability: (payload: unknown) => Promise<unknown>;

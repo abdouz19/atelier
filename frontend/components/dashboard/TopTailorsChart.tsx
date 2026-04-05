@@ -1,19 +1,20 @@
-import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid, Cell } from 'recharts';
-import type { TopTailorPoint } from '@/features/dashboard/dashboard.types';
+import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid, Cell, ReferenceLine } from 'recharts';
+import type { TailorCompletionPoint } from '@/features/dashboard/dashboard.types';
 
-interface Props { data: TopTailorPoint[] }
+interface Props { data: TailorCompletionPoint[] }
 
-const BAR_COLORS = ['#ef4444', '#f97316', '#f59e0b', '#fb923c', '#fca5a5'];
-
-type TEntry = { value?: number };
-function CustomTooltip({ active, payload, label }: { active?: boolean; payload?: TEntry[]; label?: string }) {
+function CustomTooltip({ active, payload, label }: { active?: boolean; payload?: unknown[]; label?: string }) {
   if (!active || !payload?.[0]) return null;
+  const d = (payload[0] as { payload?: TailorCompletionPoint }).payload;
   return (
     <div className="rounded-xl px-3 py-2.5 text-right" dir="rtl"
       style={{ background: '#131b2e', border: '1px solid rgba(255,255,255,0.1)', boxShadow: '0 8px 32px rgba(0,0,0,0.6)' }}>
       <p className="text-xs font-semibold" style={{ color: '#e2e8f0' }}>{label}</p>
       <p className="text-xs mt-0.5" style={{ color: '#64748b' }}>
-        <span className="font-bold" style={{ color: '#f87171' }}>{Number(payload[0].value).toLocaleString('ar-DZ')}</span> قطعة مُعادة
+        الإنجاز: <span className="font-bold" style={{ color: d && d.completionRate >= 80 ? '#34d399' : '#f97316' }}>{d?.completionRate ?? 0}%</span>
+      </p>
+      <p className="text-xs" style={{ color: '#475569' }}>
+        {d?.totalReturned ?? 0} مُرجَّع / {d?.totalExpected ?? 0} موزَّع
       </p>
     </div>
   );
@@ -23,32 +24,29 @@ export function TopTailorsChart({ data }: Props) {
   return (
     <div className="rounded-2xl border p-5" style={{ background: '#0d1422', borderColor: 'rgba(255,255,255,0.07)', boxShadow: '0 1px 3px rgba(0,0,0,0.4)' }}>
       <div className="mb-4 flex items-center justify-between">
-        <h2 className="text-sm font-semibold" style={{ color: '#e2e8f0' }}>أكثر 5 خياطين إعادةً</h2>
-        <span className="rounded-full px-2 py-0.5 text-[10px] font-semibold" style={{ background: 'rgba(239,68,68,0.12)', color: '#f87171' }}>
-          تنبيه جودة
+        <h2 className="text-sm font-semibold" style={{ color: '#e2e8f0' }}>معدل إنجاز الخياطين</h2>
+        <span className="rounded-full px-2 py-0.5 text-[10px] font-semibold" style={{ background: 'rgba(16,185,129,0.12)', color: '#34d399' }}>
+          مرتجع / موزَّع
         </span>
       </div>
       {data.length === 0 ? (
         <div className="flex h-44 items-center justify-center">
-          <p className="text-sm" style={{ color: '#334155' }}>لا توجد إعادات في هذه الفترة</p>
+          <p className="text-sm" style={{ color: '#334155' }}>لا توجد توزيعات في هذه الفترة</p>
         </div>
       ) : (
         <ResponsiveContainer width="100%" height={180}>
           <BarChart data={data} layout="vertical" margin={{ top: 0, right: 16, left: 0, bottom: 0 }}>
-            <defs>
-              {data.map((_, i) => (
-                <linearGradient key={i} id={`rt${i}`} x1="0" y1="0" x2="1" y2="0">
-                  <stop offset="0%" stopColor={BAR_COLORS[i] ?? '#ef4444'} stopOpacity={1} />
-                  <stop offset="100%" stopColor={BAR_COLORS[i] ?? '#ef4444'} stopOpacity={0.3} />
-                </linearGradient>
-              ))}
-            </defs>
             <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.04)" horizontal={false} />
-            <XAxis type="number" tick={{ fontSize: 9, fill: '#334155' }} allowDecimals={false} axisLine={false} tickLine={false} />
+            <XAxis type="number" domain={[0, 100]} tickFormatter={v => `${v}%`} tick={{ fontSize: 9, fill: '#334155' }} axisLine={false} tickLine={false} />
             <YAxis type="category" dataKey="name" tick={{ fontSize: 10, fill: '#475569' }} width={72} axisLine={false} tickLine={false} />
+            <ReferenceLine x={80} stroke="rgba(99,102,241,0.3)" strokeDasharray="4 2" />
             <Tooltip content={<CustomTooltip />} cursor={{ fill: 'rgba(255,255,255,0.02)' }} />
-            <Bar dataKey="returned" radius={[0, 4, 4, 0]} maxBarSize={18}>
-              {data.map((_, i) => <Cell key={i} fill={`url(#rt${i})`} />)}
+            <Bar dataKey="completionRate" radius={[0, 4, 4, 0]} maxBarSize={18}>
+              {data.map((d, i) => (
+                <Cell key={i}
+                  fill={d.completionRate >= 100 ? '#10b981' : d.completionRate >= 80 ? '#34d399' : d.completionRate >= 50 ? '#f97316' : '#ef4444'}
+                  fillOpacity={0.85} />
+              ))}
             </Bar>
           </BarChart>
         </ResponsiveContainer>

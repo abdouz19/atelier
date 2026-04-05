@@ -38,6 +38,7 @@ import type {
   DistributionTailorSummary,
   DistributionTailorDetail,
   DistributionBatchOption,
+  DistributionBatchLogRow,
   DistributePayload,
   ReturnPayload,
   AvailablePartForModel,
@@ -196,6 +197,7 @@ export const ipcClient = {
     getPartsWithCostForModelSizeColor: (payload: { modelName: string; sizeLabel: string; color: string }) => getBridge().distribution.getPartsWithCostForModelSizeColor(payload) as Promise<{ success: true; data: AvailablePartWithCost[] } | { success: false; error: string }>,
     distribute: (payload: DistributePayload) => getBridge().distribution.distribute(payload) as Promise<{ success: true; data: DistributionTailorSummary } | { success: false; error: string }>,
     return: (payload: ReturnPayload) => getBridge().distribution.return(payload) as Promise<{ success: true; data: DistributionTailorSummary } | { success: false; error: string }>,
+    getAllBatches: () => getBridge().distribution.getAllBatches() as Promise<{ success: true; data: DistributionBatchLogRow[] } | { success: false; error: string }>,
   },
   pieces: {
     getAvailability: (filters?: { modelName?: string; partName?: string; sizeLabel?: string; color?: string }) =>
