@@ -65,9 +65,9 @@ function QcPageContent() {
     setPendingStep(info);
   }
 
-  function handleStepNotReady(newMaxQuantity: number) {
+  function handleStepNotReady(newMaxQuantity: number, costAfterStep: number) {
     if (pendingStep) {
-      setPendingStep({ ...pendingStep, quantity: newMaxQuantity });
+      setPendingStep({ ...pendingStep, quantity: newMaxQuantity, finalCostPerPiece: costAfterStep });
     }
   }
 

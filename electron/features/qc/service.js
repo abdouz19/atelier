@@ -29,6 +29,7 @@ function createQcRecord(db, payload) {
     reviewDate,
     consumptionEntries = [],
     materialBatchConsumptions = [],
+    transportationCost = 0,
   } = payload
 
   const gradeSum = qtyDamaged + qtyAcceptable + qtyGood + qtyVeryGood
@@ -69,8 +70,13 @@ function createQcRecord(db, payload) {
     ? Math.round((materialsCost / quantityReviewed) * 100) / 100
     : 0
 
+  const transportationCostRounded = Math.round((transportationCost ?? 0) * 100) / 100
+  const transportationCostPerPiece = quantityReviewed > 0
+    ? Math.round((transportationCostRounded / quantityReviewed) * 100) / 100
+    : 0
+
   const costPerPieceAfterQc = Math.round(
-    ((costPerFinalItem ?? 0) + pricePerPiece + materialsCostPerPiece) * 100
+    ((costPerFinalItem ?? 0) + pricePerPiece + materialsCostPerPiece + transportationCostPerPiece) * 100
   ) / 100
 
   const now = Date.now()
@@ -78,8 +84,8 @@ function createQcRecord(db, payload) {
   const totalCost = quantityReviewed * pricePerPiece
 
   const insertQc = db.prepare(`
-    INSERT INTO qc_records (id, return_id, employee_id, quantity_reviewed, qty_damaged, qty_acceptable, qty_good, qty_very_good, price_per_piece, total_cost, materials_cost, materials_cost_per_piece, cost_per_piece_after_qc, review_date, created_at, updated_at)
-    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+    INSERT INTO qc_records (id, return_id, employee_id, quantity_reviewed, qty_damaged, qty_acceptable, qty_good, qty_very_good, price_per_piece, total_cost, materials_cost, materials_cost_per_piece, transportation_cost, transportation_cost_per_piece, cost_per_piece_after_qc, review_date, created_at, updated_at)
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
   `)
 
   const insertConsumption = db.prepare(`
@@ -88,7 +94,7 @@ function createQcRecord(db, payload) {
   `)
 
   db.transaction(() => {
-    insertQc.run(id, returnId, employeeId, quantityReviewed, qtyDamaged, qtyAcceptable, qtyGood, qtyVeryGood, pricePerPiece, totalCost, materialsCost, materialsCostPerPiece, costPerPieceAfterQc, reviewDate, now, now)
+    insertQc.run(id, returnId, employeeId, quantityReviewed, qtyDamaged, qtyAcceptable, qtyGood, qtyVeryGood, pricePerPiece, totalCost, materialsCost, materialsCostPerPiece, transportationCostRounded, transportationCostPerPiece, costPerPieceAfterQc, reviewDate, now, now)
     for (const entry of consumptionEntries) {
       insertConsumption.run(randomUUID(), id, entry.stockItemId, entry.color ?? null, entry.quantity, now, now)
     }

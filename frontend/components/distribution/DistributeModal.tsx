@@ -64,6 +64,7 @@ export function DistributeModal({ onClose, onSuccess }: DistributeModalProps) {
         piecesCost: step1Data.piecesCost,
         sewingCost: step1Data.sewingCost,
         materialsCost: step1Data.consumedMaterialsCost,
+        transportationCost: step1Data.transportationCost,
         totalCost: step1Data.totalCost,
         costPerFinalItem: step1Data.costPerFinalItem,
       });

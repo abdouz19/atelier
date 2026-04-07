@@ -30,6 +30,7 @@ export function AddQcRecordModal({ onClose, onSuccess }: AddQcRecordModalProps) 
   const [reviewDate, setReviewDate] = useState(new Date().toISOString().split('T')[0]);
   const [consumptionRows, setConsumptionRows] = useState<ConsumptionRow[]>([]);
   const [materialBatchConsumptions, setMaterialBatchConsumptions] = useState<MaterialBatchConsumption[]>([]);
+  const [transportationCostStr, setTransportationCostStr] = useState('');
   const [error, setError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
 
@@ -54,7 +55,9 @@ export function AddQcRecordModal({ onClose, onSuccess }: AddQcRecordModalProps) 
   const materialsCost = materialBatchConsumptions.reduce((sum, mc) =>
     sum + mc.batches.reduce((s, b) => s + b.quantity * b.pricePerUnit, 0), 0);
   const materialsCostPerPiece = reviewed > 0 ? materialsCost / reviewed : 0;
-  const costPerPieceAfterQc = (selectedBatch?.costPerFinalItem ?? 0) + (Number(pricePerPiece) || 0) + materialsCostPerPiece;
+  const transportationCost = Math.max(0, Number(transportationCostStr) || 0);
+  const transportationCostPerPiece = reviewed > 0 ? transportationCost / reviewed : 0;
+  const costPerPieceAfterQc = (selectedBatch?.costPerFinalItem ?? 0) + (Number(pricePerPiece) || 0) + materialsCostPerPiece + transportationCostPerPiece;
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -85,6 +88,7 @@ export function AddQcRecordModal({ onClose, onSuccess }: AddQcRecordModalProps) 
         reviewDate: new Date(reviewDate).getTime(),
         consumptionEntries: consumptionRows.map(r => ({ stockItemId: r.stockItemId, color: r.color ?? undefined, quantity: r.quantity })),
         materialBatchConsumptions,
+        transportationCost,
       });
       if (res.success) { onSuccess(); }
       else { setError(res.error); }
@@ -194,6 +198,14 @@ export function AddQcRecordModal({ onClose, onSuccess }: AddQcRecordModalProps) 
               disabled={submitting}
             />
 
+            <div>
+              <label className="mb-1 block text-sm font-medium text-text-base">رسوم النقل (دج) — اختياري</label>
+              <input type="number" min={0} step="any" value={transportationCostStr}
+                onChange={e => setTransportationCostStr(e.target.value)}
+                placeholder="0"
+                className="w-full rounded-lg border border-border px-3 py-2 text-sm outline-none input-transition focus:border-primary-500 focus:ring-2 focus:ring-primary-500/20" />
+            </div>
+
             {reviewed > 0 && (
               <div className="rounded-lg border px-3 py-2.5 text-sm space-y-1" style={{ borderColor: 'rgba(251,191,36,0.25)', background: 'rgba(251,191,36,0.06)' }}>
                 <div className="flex justify-between text-xs" style={{ color: 'var(--cell-muted)' }}>
@@ -208,6 +220,12 @@ export function AddQcRecordModal({ onClose, onSuccess }: AddQcRecordModalProps) 
                   <span>تكلفة المواد للقطعة</span>
                   <span>{materialsCostPerPiece.toFixed(2)} دج</span>
                 </div>
+                {transportationCostPerPiece > 0 && (
+                  <div className="flex justify-between text-xs" style={{ color: 'var(--cell-muted)' }}>
+                    <span>رسوم النقل للقطعة</span>
+                    <span>{transportationCostPerPiece.toFixed(2)} دج</span>
+                  </div>
+                )}
                 <div className="flex justify-between border-t pt-1 font-semibold" style={{ borderColor: 'rgba(251,191,36,0.2)', color: '#fbbf24' }}>
                   <span>تكلفة القطعة بعد المراقبة</span>
                   <span>{costPerPieceAfterQc.toFixed(2)} دج</span>

@@ -19,13 +19,13 @@ interface AddStepModalProps {
   maxQuantity: number;
   onClose: () => void;
   onSuccess: () => void;
-  onNotReady?: (newMaxQuantity: number) => void;
+  onNotReady?: (newMaxQuantity: number, costAfterStep: number) => void;
 }
 
 type Step =
   | { type: 'form' }
-  | { type: 'ready_prompt'; stepId: string; quantity: number; stepDate: number }
-  | { type: 'add_to_stock'; stepId: string; quantity: number; stepDate: number };
+  | { type: 'ready_prompt'; stepId: string; quantity: number; stepDate: number; costAfterStep: number }
+  | { type: 'add_to_stock'; stepId: string; quantity: number; stepDate: number; costAfterStep: number };
 
 export function AddStepModal({ finitionId, modelName, sizeLabel, color, maxQuantity, incomingCostPerPiece, onClose, onSuccess, onNotReady }: AddStepModalProps) {
   const [employees, setEmployees] = useState<ActiveEmployee[]>([]);
@@ -35,6 +35,7 @@ export function AddStepModal({ finitionId, modelName, sizeLabel, color, maxQuant
   const [quantity, setQuantity] = useState(String(maxQuantity));
   const [employeeId, setEmployeeId] = useState('');
   const [pricePerPiece, setPricePerPiece] = useState('');
+  const [transportationCostStr, setTransportationCostStr] = useState('');
   const [stepDate, setStepDate] = useState(new Date().toISOString().split('T')[0]);
   const [consumptionRows, setConsumptionRows] = useState<ConsumptionRow[]>([]);
   const [materialBatchConsumptions, setMaterialBatchConsumptions] = useState<MaterialBatchConsumption[]>([]);
@@ -61,7 +62,9 @@ export function AddStepModal({ finitionId, modelName, sizeLabel, color, maxQuant
   const materialsCost = materialBatchConsumptions.reduce((sum, mc) =>
     sum + mc.batches.reduce((s, b) => s + b.quantity * b.pricePerUnit, 0), 0);
   const materialsCostPerPiece = qty > 0 ? materialsCost / qty : 0;
-  const costAfterStep = (incomingCostPerPiece ?? 0) + (Number(pricePerPiece) || 0) + materialsCostPerPiece;
+  const transportationCost = Math.max(0, Number(transportationCostStr) || 0);
+  const transportationCostPerPiece = qty > 0 ? transportationCost / qty : 0;
+  const costAfterStep = (incomingCostPerPiece ?? 0) + (Number(pricePerPiece) || 0) + materialsCostPerPiece + transportationCostPerPiece;
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -80,9 +83,10 @@ export function AddStepModal({ finitionId, modelName, sizeLabel, color, maxQuant
         stepDate: new Date(stepDate).getTime(),
         consumptionEntries: consumptionRows.filter(r => r.stockItemId && r.quantity > 0).map(r => ({ stockItemId: r.stockItemId, color: r.color ?? undefined, quantity: r.quantity })),
         materialBatchConsumptions,
+        transportationCost,
       });
       if (res.success) {
-        setStep({ type: 'ready_prompt', stepId: res.data.id, quantity: qty, stepDate: new Date(stepDate).getTime() });
+        setStep({ type: 'ready_prompt', stepId: res.data.id, quantity: qty, stepDate: new Date(stepDate).getTime(), costAfterStep });
       } else { setError(res.error); }
     } finally { setSubmitting(false); }
   }
@@ -98,17 +102,17 @@ export function AddStepModal({ finitionId, modelName, sizeLabel, color, maxQuant
       <AppModal
         open
         onClose={onClose}
-        title="إضافة خطوة تشطيب"
+        title="إضافة خطوة إضافية"
         size="sm"
       >
         <div className="text-center py-4">
           <p className="text-base font-semibold text-text-base mb-6">هل المنتج جاهز للمخزون النهائي؟</p>
           <div className="flex gap-3 justify-center">
-            <button onClick={() => setStep({ type: 'add_to_stock', stepId: step.stepId, quantity: step.quantity, stepDate: step.stepDate })}
+            <button onClick={() => setStep({ type: 'add_to_stock', stepId: step.stepId, quantity: step.quantity, stepDate: step.stepDate, costAfterStep: step.costAfterStep })}
               className="rounded-lg bg-green-600 px-5 py-2 text-sm font-medium text-white hover:bg-green-700">
               نعم
             </button>
-            <button onClick={() => { if (onNotReady) { onNotReady(step.quantity); } else { onSuccess(); } }}
+            <button onClick={() => { if (onNotReady) { onNotReady(step.quantity, step.costAfterStep); } else { onSuccess(); } }}
               className="rounded-lg border border-border px-5 py-2 text-sm text-text-base hover:bg-base">
               لا (خطوة أخرى)
             </button>
@@ -129,7 +133,7 @@ export function AddStepModal({ finitionId, modelName, sizeLabel, color, maxQuant
         quantity={step.quantity}
         entryDate={step.stepDate}
         onConfirm={handleAddToStock}
-        onCancel={() => setStep({ type: 'ready_prompt', stepId: step.stepId, quantity: step.quantity, stepDate: step.stepDate })}
+        onCancel={() => setStep({ type: 'ready_prompt', stepId: step.stepId, quantity: step.quantity, stepDate: step.stepDate, costAfterStep: step.costAfterStep })}
       />
     );
   }
@@ -138,7 +142,7 @@ export function AddStepModal({ finitionId, modelName, sizeLabel, color, maxQuant
     <AppModal
       open
       onClose={onClose}
-      title="إضافة خطوة تشطيب"
+      title="إضافة خطوة إضافية"
       size="lg"
       footer={
         <>
@@ -196,6 +200,14 @@ export function AddStepModal({ finitionId, modelName, sizeLabel, color, maxQuant
           disabled={submitting}
         />
 
+        <div>
+          <label className="mb-1 block text-sm font-medium text-text-base">رسوم النقل (دج) — اختياري</label>
+          <input type="number" min={0} step="any" value={transportationCostStr}
+            onChange={e => setTransportationCostStr(e.target.value)}
+            placeholder="0"
+            className="w-full rounded-lg border border-border px-3 py-2 text-sm outline-none input-transition focus:border-primary-500 focus:ring-2 focus:ring-primary-500/20" />
+        </div>
+
         {qty > 0 && (
           <div className="rounded-lg border px-3 py-2.5 text-sm space-y-1" style={{ borderColor: 'rgba(251,191,36,0.25)', background: 'rgba(251,191,36,0.06)' }}>
             <div className="flex justify-between text-xs" style={{ color: 'var(--cell-muted)' }}>
@@ -210,6 +222,12 @@ export function AddStepModal({ finitionId, modelName, sizeLabel, color, maxQuant
               <span>تكلفة المواد للقطعة</span>
               <span>{materialsCostPerPiece.toFixed(2)} دج</span>
             </div>
+            {transportationCostPerPiece > 0 && (
+              <div className="flex justify-between text-xs" style={{ color: 'var(--cell-muted)' }}>
+                <span>رسوم النقل للقطعة</span>
+                <span>{transportationCostPerPiece.toFixed(2)} دج</span>
+              </div>
+            )}
             <div className="flex justify-between border-t pt-1 font-semibold" style={{ borderColor: 'rgba(251,191,36,0.2)', color: '#fbbf24' }}>
               <span>التكلفة بعد هذه الخطوة</span>
               <span>{costAfterStep.toFixed(2)} دج</span>

@@ -111,6 +111,7 @@ export function DistributeStep1Form({ nonFabricItems, onNext }: DistributeStep1F
   const [partRows, setPartRows] = useState<PartGivenRow[]>([{ partName: '', quantity: 1, avgUnitCost: 0, availableCount: 0 }]);
   const [consumptionRows, setConsumptionRows] = useState<ConsumptionRow[]>([]);
   const [materialBatchConsumptions, setMaterialBatchConsumptions] = useState<MaterialBatchConsumption[]>([]);
+  const [transportationCostStr, setTransportationCostStr] = useState('');
   const [partRowError, setPartRowError] = useState<string | null>(null);
 
   const [tailors, setTailors] = useState<Array<{ id: string; name: string }>>([]);
@@ -166,8 +167,9 @@ export function DistributeStep1Form({ nonFabricItems, onNext }: DistributeStep1F
     [partRows],
   );
 
+  const transportationCost = Math.max(0, Number(transportationCostStr) || 0);
   const sewingCost = round2(expectedQty * sewingPrice);
-  const totalCost = round2(piecesCost + sewingCost + consumedMaterialsCost);
+  const totalCost = round2(piecesCost + sewingCost + consumedMaterialsCost + transportationCost);
   const costPerFinalItem = expectedQty > 0 ? round2(totalCost / expectedQty) : 0;
 
   const hasValidPartRow = partRows.some(r => r.partName && r.quantity >= 1 && r.quantity <= r.availableCount);
@@ -187,6 +189,7 @@ export function DistributeStep1Form({ nonFabricItems, onNext }: DistributeStep1F
       distributionDate,
       partRows: partRows.filter(r => r.partName && r.quantity >= 1),
       consumedMaterialsCost,
+      transportationCost,
       materialBatchConsumptions,
       piecesCost, sewingCost, totalCost, costPerFinalItem,
     });
@@ -248,10 +251,21 @@ export function DistributeStep1Form({ nonFabricItems, onNext }: DistributeStep1F
         onBatchChange={setMaterialBatchConsumptions}
       />
 
+      <div>
+        <label className="mb-1 block text-sm font-medium">رسوم النقل (دج) — اختياري</label>
+        <input
+          type="number" min={0} step="any" value={transportationCostStr}
+          onChange={e => setTransportationCostStr(e.target.value)}
+          placeholder="0"
+          className="w-full rounded-lg border border-border px-3 py-2 text-sm outline-none input-transition focus:border-primary-500 focus:ring-2 focus:ring-primary-500/20"
+        />
+      </div>
+
       <DistributionCostCard
         piecesCost={piecesCost}
         sewingCost={sewingCost}
         materialsCost={consumedMaterialsCost}
+        transportationCost={transportationCost}
         totalCost={totalCost}
         costPerFinalItem={costPerFinalItem}
         expectedFinalQuantity={expectedQty}

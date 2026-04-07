@@ -154,6 +154,7 @@ export interface Step1Values {
   distributionDate: string;
   partRows: PartGivenRow[];
   consumedMaterialsCost: number;
+  transportationCost: number;
   materialBatchConsumptions: import('@/features/cutting/cutting.types').MaterialBatchConsumption[];
   piecesCost: number;
   sewingCost: number;
@@ -174,6 +175,7 @@ export interface DistributePayload {
   piecesCost: number;
   sewingCost: number;
   materialsCost: number;
+  transportationCost: number;
   totalCost: number;
   costPerFinalItem: number;
 }

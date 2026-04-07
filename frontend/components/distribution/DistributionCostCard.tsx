@@ -4,6 +4,7 @@ interface DistributionCostCardProps {
   piecesCost: number;
   sewingCost: number;
   materialsCost: number;
+  transportationCost: number;
   totalCost: number;
   costPerFinalItem: number;
   expectedFinalQuantity: number;
@@ -14,6 +15,7 @@ export function DistributionCostCard({
   piecesCost,
   sewingCost,
   materialsCost,
+  transportationCost,
   totalCost,
   costPerFinalItem,
   expectedFinalQuantity,
@@ -36,6 +38,12 @@ export function DistributionCostCard({
         <span>تكلفة المواد المستهلكة</span>
         <span>{materialsCost.toFixed(2)} دج</span>
       </div>
+      {transportationCost > 0 && (
+        <div className="flex justify-between text-text-muted">
+          <span>رسوم النقل</span>
+          <span>{transportationCost.toFixed(2)} دج</span>
+        </div>
+      )}
       <div className="flex justify-between font-semibold border-t border-border pt-1 mt-1">
         <span>التكلفة الإجمالية للتوزيع</span>
         <span className={frozen ? 'text-text-base' : 'text-amber-600'}>{totalCost.toFixed(2)} دج</span>

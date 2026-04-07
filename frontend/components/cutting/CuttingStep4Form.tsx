@@ -15,6 +15,7 @@ interface CuttingStep4FormProps {
   fabricCost: number;
   employeeCost: number;
   consumedMaterialsCost: number;
+  transportationCost: number;
   totalSessionCost: number;
   parts: PartRow[];
   isSubmitting: boolean;
@@ -31,6 +32,7 @@ export function CuttingStep4Form({
   fabricCost,
   employeeCost,
   consumedMaterialsCost,
+  transportationCost,
   totalSessionCost,
   parts,
   isSubmitting,
@@ -44,7 +46,10 @@ export function CuttingStep4Form({
   const [notes, setNotes] = useState('');
   const [dateError, setDateError] = useState<string | null>(null);
 
-  const validParts = parts.filter(r => r.partName.trim() && r.sizeLabel.trim() && r.count >= 1);
+  const validParts = useMemo(
+    () => parts.filter(r => r.partName.trim() && r.sizeLabel.trim() && r.count >= 1),
+    [parts],
+  );
 
   const grandTotal = useMemo(
     () => round2(costDistributionRows.reduce((s, r) => s + round2(r.unitCost * r.count), 0)),
@@ -74,6 +79,7 @@ export function CuttingStep4Form({
         fabricCost={fabricCost}
         employeeCost={employeeCost}
         consumedMaterialsCost={consumedMaterialsCost}
+        transportationCost={transportationCost}
         totalSessionCost={totalSessionCost}
         frozen
       />

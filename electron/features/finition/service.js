@@ -27,7 +27,7 @@ function computeMaterialsCost(materialBatchConsumptions) {
  * }} payload
  */
 function createFinitionRecord(db, payload) {
-  const { qcId, employeeId, quantity, pricePerPiece, finitionDate, consumptionEntries = [], materialBatchConsumptions = [] } = payload
+  const { qcId, employeeId, quantity, pricePerPiece, finitionDate, consumptionEntries = [], materialBatchConsumptions = [], transportationCost = 0 } = payload
 
   const availableRow = db.prepare(`
     SELECT (qr.quantity_reviewed - qr.qty_damaged) -
@@ -50,8 +50,12 @@ function createFinitionRecord(db, payload) {
   const materialsCostPerPiece = quantity > 0
     ? Math.round((materialsCost / quantity) * 100) / 100
     : 0
+  const transportationCostRounded = Math.round((transportationCost ?? 0) * 100) / 100
+  const transportationCostPerPiece = quantity > 0
+    ? Math.round((transportationCostRounded / quantity) * 100) / 100
+    : 0
   const finalCostPerPiece = Math.round(
-    ((costPerPieceAfterQc ?? 0) + pricePerPiece + materialsCostPerPiece) * 100
+    ((costPerPieceAfterQc ?? 0) + pricePerPiece + materialsCostPerPiece + transportationCostPerPiece) * 100
   ) / 100
 
   const now = Date.now()
@@ -59,8 +63,8 @@ function createFinitionRecord(db, payload) {
   const totalCost = quantity * pricePerPiece
 
   const insertFinition = db.prepare(`
-    INSERT INTO finition_records (id, qc_id, employee_id, quantity, price_per_piece, total_cost, materials_cost, materials_cost_per_piece, final_cost_per_piece, finition_date, is_ready, created_at, updated_at)
-    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 0, ?, ?)
+    INSERT INTO finition_records (id, qc_id, employee_id, quantity, price_per_piece, total_cost, materials_cost, materials_cost_per_piece, transportation_cost, transportation_cost_per_piece, final_cost_per_piece, finition_date, is_ready, created_at, updated_at)
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 0, ?, ?)
   `)
 
   const insertConsumption = db.prepare(`
@@ -69,7 +73,7 @@ function createFinitionRecord(db, payload) {
   `)
 
   db.transaction(() => {
-    insertFinition.run(id, qcId, employeeId, quantity, pricePerPiece, totalCost, materialsCost, materialsCostPerPiece, finalCostPerPiece, finitionDate, now, now)
+    insertFinition.run(id, qcId, employeeId, quantity, pricePerPiece, totalCost, materialsCost, materialsCostPerPiece, transportationCostRounded, transportationCostPerPiece, finalCostPerPiece, finitionDate, now, now)
     for (const entry of consumptionEntries) {
       insertConsumption.run(randomUUID(), id, entry.stockItemId, entry.color ?? null, entry.quantity, now, now)
     }
@@ -98,7 +102,7 @@ function createFinitionRecord(db, payload) {
  * }} payload
  */
 function createFinitionStep(db, payload) {
-  const { finitionId, stepName, quantity, employeeId, pricePerPiece, stepDate, consumptionEntries = [], materialBatchConsumptions = [] } = payload
+  const { finitionId, stepName, quantity, employeeId, pricePerPiece, stepDate, consumptionEntries = [], materialBatchConsumptions = [], transportationCost = 0 } = payload
 
   const finitionRow = db.prepare('SELECT quantity, final_cost_per_piece FROM finition_records WHERE id = ?').get(finitionId)
   if (!finitionRow) throw new Error('سجل التشطيب غير موجود')
@@ -127,9 +131,13 @@ function createFinitionStep(db, payload) {
   const materialsCostPerPiece = quantity > 0
     ? Math.round((materialsCost / quantity) * 100) / 100
     : 0
+  const transportationCostRounded = Math.round((transportationCost ?? 0) * 100) / 100
+  const transportationCostPerPiece = quantity > 0
+    ? Math.round((transportationCostRounded / quantity) * 100) / 100
+    : 0
   const stepPricePerPiece = pricePerPiece ?? 0
   const costAfterStep = Math.round(
-    (incomingCost + stepPricePerPiece + materialsCostPerPiece) * 100
+    (incomingCost + stepPricePerPiece + materialsCostPerPiece + transportationCostPerPiece) * 100
   ) / 100
 
   const now = Date.now()
@@ -137,8 +145,8 @@ function createFinitionStep(db, payload) {
   const totalCost = pricePerPiece != null ? quantity * pricePerPiece : null
 
   const insertStep = db.prepare(`
-    INSERT INTO finition_steps (id, finition_id, step_order, step_name, employee_id, quantity, price_per_piece, total_cost, materials_cost, materials_cost_per_piece, cost_after_step, step_date, is_ready, created_at, updated_at)
-    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 0, ?, ?)
+    INSERT INTO finition_steps (id, finition_id, step_order, step_name, employee_id, quantity, price_per_piece, total_cost, materials_cost, materials_cost_per_piece, transportation_cost, transportation_cost_per_piece, cost_after_step, step_date, is_ready, created_at, updated_at)
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 0, ?, ?)
   `)
 
   const insertConsumption = db.prepare(`
@@ -147,7 +155,7 @@ function createFinitionStep(db, payload) {
   `)
 
   db.transaction(() => {
-    insertStep.run(id, finitionId, stepOrder, stepName, employeeId ?? null, quantity, pricePerPiece ?? null, totalCost, materialsCost, materialsCostPerPiece, costAfterStep, stepDate, now, now)
+    insertStep.run(id, finitionId, stepOrder, stepName, employeeId ?? null, quantity, pricePerPiece ?? null, totalCost, materialsCost, materialsCostPerPiece, transportationCostRounded, transportationCostPerPiece, costAfterStep, stepDate, now, now)
     for (const entry of consumptionEntries) {
       insertConsumption.run(randomUUID(), id, entry.stockItemId, entry.color ?? null, entry.quantity, now, now)
     }

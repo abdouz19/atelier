@@ -37,7 +37,8 @@ export function NewCuttingSessionModal({ onClose, onSuccess }: NewCuttingSession
   const totalSessionCost =
     (step1Data?.fabricCost ?? 0) +
     (step2Data?.employeeCost ?? 0) +
-    (step3Data?.consumedMaterialsCost ?? 0);
+    (step3Data?.consumedMaterialsCost ?? 0) +
+    (step3Data?.transportationCost ?? 0);
 
   function handleNext1(values: Step1Values) {
     setStep1Data(values);
@@ -78,6 +79,7 @@ export function NewCuttingSessionModal({ onClose, onSuccess }: NewCuttingSession
       consumptionRows,
       materialBatchConsumptions: step3Data.materialBatchConsumptions,
       consumedMaterialsCost: step3Data.consumedMaterialsCost,
+      transportationCost: step3Data.transportationCost,
       partCosts: step4Values.partCosts,
       sessionDate: new Date(step4Values.sessionDate).getTime(),
       notes: step4Values.notes,
@@ -129,6 +131,7 @@ export function NewCuttingSessionModal({ onClose, onSuccess }: NewCuttingSession
           fabricCost={step1Data?.fabricCost ?? 0}
           employeeCost={step2Data?.employeeCost ?? 0}
           consumedMaterialsCost={step3Data?.consumedMaterialsCost ?? 0}
+          transportationCost={step3Data?.transportationCost ?? 0}
           totalSessionCost={totalSessionCost}
           parts={step3Data?.parts ?? []}
           isSubmitting={isSubmitting}
