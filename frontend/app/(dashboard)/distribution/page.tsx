@@ -121,7 +121,10 @@ function DistributionPageContent() {
 
       {activeTab === 'distribution' && (
         <>
-          <DistributionKpiCards kpis={kpis} loading={loading} />
+          <DistributionKpiCards kpis={kpis} loading={loading} onCardClick={(key) => {
+            if (key === 'returned') switchTab('log');
+            else if (key === 'notReturned' || key === 'tailors' || key === 'sewingCost' || key === 'unsettled') switchTab('distribution');
+          }} />
           <DistributionSummaryTable
             summary={summary}
             loading={loading}

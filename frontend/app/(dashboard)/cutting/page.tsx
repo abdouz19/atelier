@@ -9,16 +9,19 @@ import { CuttingKpiCards } from '@/components/cutting/CuttingKpiCards';
 import { PartsInventoryPanel } from '@/components/cutting/PartsInventoryPanel';
 import { CuttingSessionTable } from '@/components/cutting/CuttingSessionTable';
 import { CuttingSessionDetail } from '@/components/cutting/CuttingSessionDetail';
+import { AvailablePartsDetailView } from '@/components/cutting/AvailablePartsDetailView';
 import { NewCuttingSessionModal } from '@/components/cutting/NewCuttingSessionModal';
 import { ErrorAlert } from '@/components/shared/ErrorAlert';
 import { Toast } from '@/components/shared/Toast';
 import { PageHeader } from '@/components/shared/PageHeader';
-import { AppCard } from '@/components/shared/AppCard';
+
+type CuttingView = 'available' | 'produced' | null;
 
 function CuttingPageContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const selectedId = searchParams.get('id') ?? '';
+  const activeView = (searchParams.get('view') ?? null) as CuttingView;
   const { kpis, sessions, loading, error, refetch } = useCuttingList();
   const partsInventory = useCuttingPartsInventory();
   const [showCreate, setShowCreate] = useState(false);
@@ -30,6 +33,17 @@ function CuttingPageContent() {
     router.replace(`/cutting?${params.toString()}`);
   }
 
+  function setView(view: string) {
+    router.replace(`/cutting?view=${view}`);
+  }
+
+  function handleCardClick(key: 'sessions' | 'produced' | 'available' | 'meters' | 'cost') {
+    if (key === 'available') setView('available');
+    else if (key === 'produced') setView('produced');
+    // sessions, meters, cost stay on main page (scroll to relevant panel)
+  }
+
+  // Session detail view
   if (selectedId) {
     return (
       <>
@@ -37,6 +51,16 @@ function CuttingPageContent() {
         {toast && <Toast message={toast.message} type={toast.type} onClose={() => setToast(null)} />}
       </>
     );
+  }
+
+  // Available parts detail view
+  if (activeView === 'available') {
+    return <AvailablePartsDetailView onBack={() => router.replace('/cutting')} initialFilter="available" />;
+  }
+
+  // Produced parts detail view (reuse AvailablePartsDetailView with all=true)
+  if (activeView === 'produced') {
+    return <AvailablePartsDetailView onBack={() => router.replace('/cutting')} initialFilter="all" />;
   }
 
   return (
@@ -59,7 +83,7 @@ function CuttingPageContent() {
         </div>
       ) : (
         <div className="space-y-6">
-          {kpis && <CuttingKpiCards kpis={kpis} />}
+          {kpis && <CuttingKpiCards kpis={kpis} onCardClick={handleCardClick} />}
           <PartsInventoryPanel
             rows={partsInventory.rows}
             isLoading={partsInventory.isLoading}

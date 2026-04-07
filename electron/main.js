@@ -2266,6 +2266,91 @@ function registerIpcHandlers() {
     } catch (err) { return { success: false, error: err.message ?? 'حدث خطأ' }; }
   })
 
+  // cutting:getSessionsWithParts — enriched data: sessions × parts with cost, fabric, employees, availability
+  ipcMain.handle('cutting:getSessionsWithParts', () => {
+    try {
+      const sessionParts = db.prepare(`
+        SELECT
+          cs.model_name,
+          COALESCE(csp.size_label, '') AS size_label,
+          COALESCE(cs.fabric_color, '') AS color,
+          csp.part_name,
+          csp.count              AS session_count,
+          csp.unit_cost,
+          cs.id                  AS session_id,
+          cs.session_date,
+          si.name                AS fabric_name
+        FROM cutting_session_parts csp
+        JOIN cutting_sessions cs ON cs.id = csp.session_id
+        JOIN stock_items si      ON si.id = cs.fabric_item_id
+        ORDER BY cs.session_date DESC
+      `).all();
+
+      const empRows = db.prepare(`
+        SELECT eo.source_reference_id AS session_id, e.name
+        FROM employee_operations eo
+        JOIN employees e ON e.id = eo.employee_id
+        WHERE eo.source_module = 'cutting'
+      `).all();
+      const empMap = new Map();
+      for (const row of empRows) {
+        if (!empMap.has(row.session_id)) empMap.set(row.session_id, []);
+        empMap.get(row.session_id).push(row.name);
+      }
+
+      const availRows = db.prepare(`
+        SELECT
+          cp.model_name,
+          COALESCE(cp.size_label, '') AS size_label,
+          COALESCE(cp.color, '')      AS color,
+          cp.part_name,
+          cp.count - COALESCE(dist.net_distributed, 0) AS available_count
+        FROM cutting_parts cp
+        LEFT JOIN (
+          SELECT
+            dbp.part_name,
+            db2.model_name,
+            COALESCE(db2.size_label, '') AS size_label,
+            COALESCE(db2.color, '')      AS color,
+            SUM(
+              CAST(dbp.quantity AS REAL)
+              * (1.0 - COALESCE(
+                  (SELECT CAST(SUM(rr.quantity_returned) AS REAL) / db2.quantity
+                   FROM return_records rr WHERE rr.batch_id = db2.id),
+                  0.0
+                ))
+            ) AS net_distributed
+          FROM distribution_batch_parts dbp
+          JOIN distribution_batches db2 ON db2.id = dbp.batch_id
+          GROUP BY dbp.part_name, db2.model_name, db2.size_label, db2.color
+        ) dist ON dist.part_name = cp.part_name
+              AND dist.model_name = cp.model_name
+              AND dist.size_label = COALESCE(cp.size_label, '')
+              AND dist.color      = COALESCE(cp.color, '')
+      `).all();
+      const availMap = new Map(availRows.map(r => [
+        `${r.model_name}__${r.size_label}__${r.color}__${r.part_name}`,
+        Math.round(r.available_count)
+      ]));
+
+      const data = sessionParts.map(r => ({
+        modelName:      r.model_name,
+        sizeLabel:      r.size_label,
+        color:          r.color,
+        partName:       r.part_name,
+        availableCount: availMap.get(`${r.model_name}__${r.size_label}__${r.color}__${r.part_name}`) ?? 0,
+        sessionId:      r.session_id,
+        sessionDate:    r.session_date,
+        fabricName:     r.fabric_name,
+        sessionCount:   r.session_count,
+        unitCost:       r.unit_cost ?? null,
+        employeeNames:  empMap.get(r.session_id) ?? [],
+      }));
+
+      return { success: true, data };
+    } catch (err) { return { success: false, error: err.message ?? 'حدث خطأ' }; }
+  })
+
   // cutting:getAvailableSizesForModel
   ipcMain.handle('cutting:getAvailableSizesForModel', (_event, { modelName }) => {
     try {

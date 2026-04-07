@@ -14,16 +14,17 @@ const COLORS: Record<string, C> = {
   red:     { value: '#f87171', iconText: '#f87171', iconBg: 'rgba(239,68,68,0.12)',   glow: 'rgba(239,68,68,0.18)',   accent: '#ef4444' },
 };
 
-interface Card { label: string; value: string | number; icon: React.ElementType; color: keyof typeof COLORS }
+interface Card { label: string; value: string | number; icon: React.ElementType; color: keyof typeof COLORS; onClick?: () => void }
 
-function StatCard({ label, value, icon: Icon, color }: Card) {
+function StatCard({ label, value, icon: Icon, color, onClick }: Card) {
   const c = COLORS[color];
   const display = typeof value === 'number' && !Number.isInteger(value) ? value.toFixed(2) : String(value);
   return (
     <motion.div
       whileHover={{ y: -2, scale: 1.015 }}
       className="group relative overflow-hidden rounded-2xl border p-5 transition-all duration-200"
-      style={{ background: '#0d1422', borderColor: 'rgba(255,255,255,0.07)', boxShadow: '0 1px 3px rgba(0,0,0,0.4), 0 0 0 1px rgba(255,255,255,0.03)' }}
+      style={{ background: '#0d1422', borderColor: 'rgba(255,255,255,0.07)', boxShadow: '0 1px 3px rgba(0,0,0,0.4), 0 0 0 1px rgba(255,255,255,0.03)', cursor: onClick ? 'pointer' : 'default' }}
+      onClick={onClick}
       onMouseEnter={e => { (e.currentTarget as HTMLElement).style.borderColor = `${c.accent}30`; }}
       onMouseLeave={e => { (e.currentTarget as HTMLElement).style.borderColor = 'rgba(255,255,255,0.07)'; }}
     >
@@ -37,13 +38,22 @@ function StatCard({ label, value, icon: Icon, color }: Card) {
         </div>
       </div>
       <p className="text-[26px] font-bold tabular-nums leading-none tracking-tight" style={{ color: c.value }}>{display}</p>
+      {onClick && (
+        <p className="mt-2 text-[10px] font-medium opacity-0 transition-opacity duration-200 group-hover:opacity-60" style={{ color: c.accent }}>
+          عرض التفاصيل ←
+        </p>
+      )}
     </motion.div>
   );
 }
 
-interface DistributionKpiCardsProps { kpis: DistributionKpis | null; loading: boolean }
+interface DistributionKpiCardsProps {
+  kpis: DistributionKpis | null;
+  loading: boolean;
+  onCardClick?: (key: 'notReturned' | 'returned' | 'tailors' | 'sewingCost' | 'unsettled') => void;
+}
 
-export function DistributionKpiCards({ kpis, loading }: DistributionKpiCardsProps) {
+export function DistributionKpiCards({ kpis, loading, onCardClick }: DistributionKpiCardsProps) {
   if (loading || !kpis) {
     return (
       <div className="grid grid-cols-5 gap-4" dir="rtl">
@@ -55,11 +65,11 @@ export function DistributionKpiCards({ kpis, loading }: DistributionKpiCardsProp
   }
 
   const cards: Card[] = [
-    { label: 'القطع غير المرتجعة',      value: kpis.piecesNotYetReturned,    icon: Clock,       color: 'amber'   },
-    { label: 'القطع المرتجعة',          value: kpis.piecesReturned,          icon: RotateCcw,   color: 'blue'    },
-    { label: 'خياطون نشطون',            value: kpis.tailorsWithActiveDist,   icon: Users,       color: 'violet'  },
-    { label: 'إجمالي تكلفة الخياطة',   value: kpis.totalSewingCost,         icon: CreditCard,  color: 'emerald' },
-    { label: 'التكلفة غير المسددة',     value: kpis.totalUnsettledCost,      icon: AlertCircle, color: 'red'     },
+    { label: 'القطع غير المرتجعة',    value: kpis.piecesNotYetReturned,  icon: Clock,       color: 'amber',   onClick: onCardClick ? () => onCardClick('notReturned') : undefined },
+    { label: 'القطع المرتجعة',        value: kpis.piecesReturned,        icon: RotateCcw,   color: 'blue',    onClick: onCardClick ? () => onCardClick('returned')    : undefined },
+    { label: 'خياطون نشطون',          value: kpis.tailorsWithActiveDist, icon: Users,       color: 'violet',  onClick: onCardClick ? () => onCardClick('tailors')     : undefined },
+    { label: 'إجمالي تكلفة الخياطة', value: kpis.totalSewingCost,       icon: CreditCard,  color: 'emerald', onClick: onCardClick ? () => onCardClick('sewingCost')  : undefined },
+    { label: 'التكلفة غير المسددة',   value: kpis.totalUnsettledCost,    icon: AlertCircle, color: 'red',     onClick: onCardClick ? () => onCardClick('unsettled')   : undefined },
   ];
 
   return (

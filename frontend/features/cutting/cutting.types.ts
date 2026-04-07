@@ -135,6 +135,22 @@ export interface PartCost {
   unitCost: number;
 }
 
+// ─── Enriched parts inventory (drill-down view) ───────────────────────────────
+
+export interface SessionWithPartsRow {
+  modelName: string;
+  sizeLabel: string;
+  color: string;
+  partName: string;
+  availableCount: number;
+  sessionId: string;
+  sessionDate: number;
+  fabricName: string;
+  sessionCount: number;
+  unitCost: number | null;
+  employeeNames: string[];
+}
+
 export type CostDistributionLockState = 'auto' | 'locked';
 
 export interface CostDistributionRow {

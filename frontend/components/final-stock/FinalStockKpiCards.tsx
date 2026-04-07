@@ -11,15 +11,16 @@ const COLORS: Record<string, C> = {
   violet:  { value: '#a78bfa', iconText: '#a78bfa', iconBg: 'rgba(139,92,246,0.12)', glow: 'rgba(139,92,246,0.15)', accent: '#8b5cf6' },
 };
 
-interface Card { label: string; value: string; icon: React.ElementType; color: keyof typeof COLORS }
+interface Card { label: string; value: string; icon: React.ElementType; color: keyof typeof COLORS; onClick?: () => void }
 
-function StatCard({ label, value, icon: Icon, color }: Card) {
+function StatCard({ label, value, icon: Icon, color, onClick }: Card) {
   const c = COLORS[color];
   return (
     <motion.div
       whileHover={{ y: -2, scale: 1.015 }}
       className="group relative overflow-hidden rounded-2xl border p-5 transition-all duration-200"
-      style={{ background: '#0d1422', borderColor: 'rgba(255,255,255,0.07)', boxShadow: '0 1px 3px rgba(0,0,0,0.4), 0 0 0 1px rgba(255,255,255,0.03)' }}
+      style={{ background: '#0d1422', borderColor: 'rgba(255,255,255,0.07)', boxShadow: '0 1px 3px rgba(0,0,0,0.4), 0 0 0 1px rgba(255,255,255,0.03)', cursor: onClick ? 'pointer' : 'default' }}
+      onClick={onClick}
       onMouseEnter={e => { (e.currentTarget as HTMLElement).style.borderColor = `${c.accent}30`; }}
       onMouseLeave={e => { (e.currentTarget as HTMLElement).style.borderColor = 'rgba(255,255,255,0.07)'; }}
     >
@@ -33,17 +34,25 @@ function StatCard({ label, value, icon: Icon, color }: Card) {
         </div>
       </div>
       <p className="text-[28px] font-bold tabular-nums leading-none tracking-tight" style={{ color: c.value }}>{value}</p>
+      {onClick && (
+        <p className="mt-2 text-[10px] font-medium opacity-0 transition-opacity duration-200 group-hover:opacity-60" style={{ color: c.accent }}>
+          عرض التفاصيل ←
+        </p>
+      )}
     </motion.div>
   );
 }
 
-interface FinalStockKpiCardsProps { kpis: FinalStockKpis }
+interface FinalStockKpiCardsProps {
+  kpis: FinalStockKpis;
+  onCardClick?: (key: 'pieces' | 'models' | 'combos') => void;
+}
 
-export function FinalStockKpiCards({ kpis }: FinalStockKpiCardsProps) {
+export function FinalStockKpiCards({ kpis, onCardClick }: FinalStockKpiCardsProps) {
   const cards: Card[] = [
-    { label: 'إجمالي القطع في المخزون', value: kpis.totalPieces.toLocaleString('ar-DZ'),             icon: Archive,  color: 'emerald' },
-    { label: 'عدد الموديلات المختلفة',  value: kpis.totalDistinctModels.toLocaleString('ar-DZ'),      icon: Layers,   color: 'blue'    },
-    { label: 'تركيبات المقاس/اللون',    value: kpis.totalDistinctSizeColorCombos.toLocaleString('ar-DZ'), icon: Grid3X3, color: 'violet'  },
+    { label: 'إجمالي القطع في المخزون', value: kpis.totalPieces.toLocaleString('ar-DZ'),                  icon: Archive, color: 'emerald', onClick: onCardClick ? () => onCardClick('pieces') : undefined },
+    { label: 'عدد الموديلات المختلفة',  value: kpis.totalDistinctModels.toLocaleString('ar-DZ'),           icon: Layers,  color: 'blue',    onClick: onCardClick ? () => onCardClick('models') : undefined },
+    { label: 'تركيبات المقاس/اللون',    value: kpis.totalDistinctSizeColorCombos.toLocaleString('ar-DZ'),  icon: Grid3X3, color: 'violet',  onClick: onCardClick ? () => onCardClick('combos') : undefined },
   ];
 
   return (

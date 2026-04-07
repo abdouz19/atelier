@@ -22,9 +22,10 @@ interface Card {
   value: string;
   icon: React.ElementType;
   color: keyof typeof COLORS;
+  onClick?: () => void;
 }
 
-function StatCard({ label, value, icon: Icon, color }: Card) {
+function StatCard({ label, value, icon: Icon, color, onClick }: Card) {
   const c = COLORS[color];
   return (
     <motion.div
@@ -34,7 +35,9 @@ function StatCard({ label, value, icon: Icon, color }: Card) {
         background: '#0d1422',
         borderColor: 'rgba(255,255,255,0.07)',
         boxShadow: '0 1px 3px rgba(0,0,0,0.4), 0 0 0 1px rgba(255,255,255,0.03)',
+        cursor: onClick ? 'pointer' : 'default',
       }}
+      onClick={onClick}
       onMouseEnter={e => { (e.currentTarget as HTMLElement).style.borderColor = `${c.accent}30`; }}
       onMouseLeave={e => { (e.currentTarget as HTMLElement).style.borderColor = 'rgba(255,255,255,0.07)'; }}
     >
@@ -48,19 +51,27 @@ function StatCard({ label, value, icon: Icon, color }: Card) {
         </div>
       </div>
       <p className="text-[26px] font-bold tabular-nums leading-none tracking-tight" style={{ color: c.value }}>{value}</p>
+      {onClick && (
+        <p className="mt-2 text-[10px] font-medium opacity-0 transition-opacity duration-200 group-hover:opacity-60" style={{ color: c.accent }}>
+          عرض التفاصيل ←
+        </p>
+      )}
     </motion.div>
   );
 }
 
-interface CuttingKpiCardsProps { kpis: CuttingKpis }
+interface CuttingKpiCardsProps {
+  kpis: CuttingKpis;
+  onCardClick?: (key: 'sessions' | 'produced' | 'available' | 'meters' | 'cost') => void;
+}
 
-export function CuttingKpiCards({ kpis }: CuttingKpiCardsProps) {
+export function CuttingKpiCards({ kpis, onCardClick }: CuttingKpiCardsProps) {
   const cards: Card[] = [
-    { label: 'إجمالي الجلسات',   value: kpis.totalSessions.toString(),              icon: Layers,             color: 'blue'    },
-    { label: 'الأجزاء المنتجة',  value: kpis.totalPartsProduced.toString(),          icon: Package,            color: 'emerald' },
-    { label: 'الأجزاء المتاحة',  value: kpis.totalPartsAvailable.toString(),         icon: Boxes,              color: 'violet'  },
-    { label: 'الأمتار المستهلكة', value: `${fmt(kpis.totalMetersConsumed)} م`,        icon: Ruler,              color: 'orange'  },
-    { label: 'التكلفة الإجمالية', value: `${fmt(kpis.totalCostPaid)} دج`,             icon: CircleDollarSign,   color: 'amber'   },
+    { label: 'إجمالي الجلسات',   value: kpis.totalSessions.toString(),       icon: Layers,           color: 'blue',    onClick: onCardClick ? () => onCardClick('sessions')  : undefined },
+    { label: 'الأجزاء المنتجة',  value: kpis.totalPartsProduced.toString(),   icon: Package,          color: 'emerald', onClick: onCardClick ? () => onCardClick('produced')  : undefined },
+    { label: 'الأجزاء المتاحة',  value: kpis.totalPartsAvailable.toString(),  icon: Boxes,            color: 'violet',  onClick: onCardClick ? () => onCardClick('available') : undefined },
+    { label: 'الأمتار المستهلكة', value: `${fmt(kpis.totalMetersConsumed)} م`, icon: Ruler,            color: 'orange',  onClick: onCardClick ? () => onCardClick('meters')   : undefined },
+    { label: 'التكلفة الإجمالية', value: `${fmt(kpis.totalCostPaid)} دج`,      icon: CircleDollarSign, color: 'amber',   onClick: onCardClick ? () => onCardClick('cost')     : undefined },
   ];
 
   return (

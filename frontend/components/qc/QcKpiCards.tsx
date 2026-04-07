@@ -18,15 +18,16 @@ const COLORS: Record<string, C> = {
   orange:  { value: '#fb923c', iconText: '#fb923c', iconBg: 'rgba(249,115,22,0.12)',  glow: 'rgba(249,115,22,0.15)',  accent: '#f97316' },
 };
 
-interface Card { label: string; value: string; icon: React.ElementType; color: keyof typeof COLORS }
+interface Card { label: string; value: string; icon: React.ElementType; color: keyof typeof COLORS; onClick?: () => void }
 
-function StatCard({ label, value, icon: Icon, color }: Card) {
+function StatCard({ label, value, icon: Icon, color, onClick }: Card) {
   const c = COLORS[color];
   return (
     <motion.div
       whileHover={{ y: -2, scale: 1.015 }}
       className="group relative overflow-hidden rounded-2xl border p-4 transition-all duration-200"
-      style={{ background: '#0d1422', borderColor: 'rgba(255,255,255,0.07)', boxShadow: '0 1px 3px rgba(0,0,0,0.4), 0 0 0 1px rgba(255,255,255,0.03)' }}
+      style={{ background: '#0d1422', borderColor: 'rgba(255,255,255,0.07)', boxShadow: '0 1px 3px rgba(0,0,0,0.4), 0 0 0 1px rgba(255,255,255,0.03)', cursor: onClick ? 'pointer' : 'default' }}
+      onClick={onClick}
       onMouseEnter={e => { (e.currentTarget as HTMLElement).style.borderColor = `${c.accent}30`; }}
       onMouseLeave={e => { (e.currentTarget as HTMLElement).style.borderColor = 'rgba(255,255,255,0.07)'; }}
     >
@@ -40,22 +41,32 @@ function StatCard({ label, value, icon: Icon, color }: Card) {
         </div>
       </div>
       <p className="text-2xl font-bold tabular-nums leading-none tracking-tight" style={{ color: c.value }}>{value}</p>
+      {onClick && (
+        <p className="mt-1.5 text-[9px] font-medium opacity-0 transition-opacity duration-200 group-hover:opacity-60" style={{ color: c.accent }}>
+          عرض التفاصيل ←
+        </p>
+      )}
     </motion.div>
   );
 }
 
-interface QcKpiCardsProps { kpis: QcKpis }
+type QcCardKey = 'pending' | 'reviewed' | 'damaged' | 'acceptable' | 'good' | 'veryGood' | 'finitionPending' | 'readyForStock';
 
-export function QcKpiCards({ kpis }: QcKpiCardsProps) {
+interface QcKpiCardsProps {
+  kpis: QcKpis;
+  onCardClick?: (key: QcCardKey) => void;
+}
+
+export function QcKpiCards({ kpis, onCardClick }: QcKpiCardsProps) {
   const cards: Card[] = [
-    { label: 'في انتظار المراجعة', value: fmt(kpis.pendingQc),         icon: Clock,         color: 'orange'  },
-    { label: 'تمت مراجعته',        value: fmt(kpis.totalReviewed),     icon: CheckCircle2,  color: 'blue'    },
-    { label: 'تالف',               value: fmt(kpis.totalDamaged),      icon: XCircle,       color: 'red'     },
-    { label: 'مقبول',              value: fmt(kpis.totalAcceptable),   icon: ThumbsUp,      color: 'amber'   },
-    { label: 'جيد',                value: fmt(kpis.totalGood),         icon: Star,          color: 'emerald' },
-    { label: 'جيد جداً',           value: fmt(kpis.totalVeryGood),     icon: Sparkles,      color: 'violet'  },
-    { label: 'في انتظار التشطيب',  value: fmt(kpis.finitionPending),   icon: Wrench,        color: 'orange'  },
-    { label: 'جاهز للمخزون',       value: fmt(kpis.readyForStock),     icon: Archive,       color: 'emerald' },
+    { label: 'في انتظار المراجعة', value: fmt(kpis.pendingQc),       icon: Clock,        color: 'orange',  onClick: onCardClick ? () => onCardClick('pending')        : undefined },
+    { label: 'تمت مراجعته',        value: fmt(kpis.totalReviewed),   icon: CheckCircle2, color: 'blue',    onClick: onCardClick ? () => onCardClick('reviewed')       : undefined },
+    { label: 'تالف',               value: fmt(kpis.totalDamaged),    icon: XCircle,      color: 'red',     onClick: onCardClick ? () => onCardClick('damaged')        : undefined },
+    { label: 'مقبول',              value: fmt(kpis.totalAcceptable), icon: ThumbsUp,     color: 'amber',   onClick: onCardClick ? () => onCardClick('acceptable')     : undefined },
+    { label: 'جيد',                value: fmt(kpis.totalGood),       icon: Star,         color: 'emerald', onClick: onCardClick ? () => onCardClick('good')           : undefined },
+    { label: 'جيد جداً',           value: fmt(kpis.totalVeryGood),   icon: Sparkles,     color: 'violet',  onClick: onCardClick ? () => onCardClick('veryGood')       : undefined },
+    { label: 'في انتظار التشطيب',  value: fmt(kpis.finitionPending), icon: Wrench,       color: 'orange',  onClick: onCardClick ? () => onCardClick('finitionPending'): undefined },
+    { label: 'جاهز للمخزون',       value: fmt(kpis.readyForStock),   icon: Archive,      color: 'emerald', onClick: onCardClick ? () => onCardClick('readyForStock')  : undefined },
   ];
 
   return (

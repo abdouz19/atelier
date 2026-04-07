@@ -100,6 +100,7 @@ declare global {
         getModelSuggestions: () => Promise<unknown>;
         getPartSuggestions: (payload: { modelName: string }) => Promise<unknown>;
         getPartsInventory: () => Promise<unknown>;
+        getSessionsWithParts: () => Promise<unknown>;
         getAvailableSizesForModel: (payload: { modelName: string }) => Promise<unknown>;
         getAvailableColorsForModelSize: (payload: { modelName: string; sizeLabel: string }) => Promise<unknown>;
         create: (payload: unknown) => Promise<unknown>;

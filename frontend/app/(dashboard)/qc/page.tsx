@@ -1,6 +1,7 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, Suspense } from 'react';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { ShieldCheck } from 'lucide-react';
 import { useQcData } from '@/hooks/useQcData';
 import { useFinitionData } from '@/hooks/useFinitionData';
@@ -12,18 +13,38 @@ import { AddFinitionRecordModal, type FinitionNotReadyInfo } from '@/components/
 import { AddStepModal } from '@/components/finition/AddStepModal';
 import { Toast } from '@/components/shared/Toast';
 import { PageHeader } from '@/components/shared/PageHeader';
-import { AppCard } from '@/components/shared/AppCard';
 
 type Tab = 'qc' | 'finition';
+type QcResultFilter = 'damaged' | 'acceptable' | 'good' | 'veryGood' | null;
 
-export default function QcPage() {
+function QcPageContent() {
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  const paramTab = (searchParams.get('tab') ?? 'qc') as Tab;
+  const paramFilter = (searchParams.get('filter') ?? null) as QcResultFilter;
+
   const { kpis, records: qcRecords, loading: qcLoading, error: qcError, refetch: refetchQc } = useQcData();
   const { records: finitionRecords, loading: finitionLoading, error: finitionError, refetch: refetchFinition } = useFinitionData();
-  const [activeTab, setActiveTab] = useState<Tab>('qc');
+  const [activeTab, setActiveTab] = useState<Tab>(paramTab);
   const [showAddQc, setShowAddQc] = useState(false);
   const [showAddFinition, setShowAddFinition] = useState(false);
   const [pendingStep, setPendingStep] = useState<FinitionNotReadyInfo | null>(null);
   const [toast, setToast] = useState<{ message: string; type: 'success' | 'error' } | null>(null);
+
+  function switchTab(tab: Tab) {
+    setActiveTab(tab);
+    router.replace(`/qc?tab=${tab}`);
+  }
+
+  function handleKpiCardClick(key: 'pending' | 'reviewed' | 'damaged' | 'acceptable' | 'good' | 'veryGood' | 'finitionPending' | 'readyForStock') {
+    if (key === 'finitionPending') { switchTab('finition'); return; }
+    if (key === 'readyForStock') { router.push('/final-stock'); return; }
+    const filterMap: Record<string, string> = { damaged: 'damaged', acceptable: 'acceptable', good: 'good', veryGood: 'veryGood' };
+    const filter = filterMap[key];
+    setActiveTab('qc');
+    if (filter) router.replace(`/qc?tab=qc&filter=${filter}`);
+    else router.replace('/qc?tab=qc');
+  }
 
   function handleQcSuccess() {
     setShowAddQc(false);
@@ -72,7 +93,7 @@ export default function QcPage() {
         }
       />
 
-      {kpis && !qcLoading && <QcKpiCards kpis={kpis} />}
+      {kpis && !qcLoading && <QcKpiCards kpis={kpis} onCardClick={handleKpiCardClick} />}
 
       {/* Tabs */}
       <div style={{ borderBottom: '1px solid rgba(255,255,255,0.07)' }}>
@@ -80,7 +101,7 @@ export default function QcPage() {
           {([['qc', 'مراقبة الجودة'], ['finition', 'التشطيب']] as [Tab, string][]).map(([tab, label]) => (
             <button
               key={tab}
-              onClick={() => setActiveTab(tab)}
+              onClick={() => switchTab(tab as Tab)}
               className="pb-3 text-sm font-medium border-b-2 transition-colors"
               style={activeTab === tab
                 ? { borderColor: 'var(--primary-500)', color: 'var(--primary-500)' }
@@ -96,7 +117,7 @@ export default function QcPage() {
         <>
           {qcLoading && <p className="text-sm" style={{ color: '#475569' }}>جاري التحميل...</p>}
           {qcError && <p className="text-sm text-red-500">{qcError}</p>}
-          {!qcLoading && <QcTable records={qcRecords} />}
+          {!qcLoading && <QcTable records={qcRecords} resultFilter={paramFilter} />}
         </>
       )}
 
@@ -131,5 +152,13 @@ export default function QcPage() {
       )}
       {toast && <Toast message={toast.message} type={toast.type} onClose={() => setToast(null)} />}
     </div>
+  );
+}
+
+export default function QcPage() {
+  return (
+    <Suspense fallback={<div className="p-6" style={{ color: '#475569' }}>جاري التحميل...</div>}>
+      <QcPageContent />
+    </Suspense>
   );
 }

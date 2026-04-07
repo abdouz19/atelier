@@ -21,18 +21,33 @@ function GradePill({ value, color, bg }: { value: string; color: string; bg: str
   );
 }
 
+type QcResultFilter = 'damaged' | 'acceptable' | 'good' | 'veryGood' | null;
+
 interface QcTableProps {
   records: QcRecordSummary[];
+  resultFilter?: QcResultFilter;
 }
 
-export function QcTable({ records }: QcTableProps) {
+export function QcTable({ records, resultFilter }: QcTableProps) {
   const [search, setSearch] = useState('');
-  const filtered = records.filter(
-    (r) =>
-      r.tailorName.toLowerCase().includes(search.toLowerCase()) ||
-      r.modelName.toLowerCase().includes(search.toLowerCase()) ||
-      r.employeeName.toLowerCase().includes(search.toLowerCase()),
-  );
+
+  const RESULT_FILTER_LABELS: Record<string, string> = {
+    damaged: 'تالف',
+    acceptable: 'مقبول',
+    good: 'جيد',
+    veryGood: 'جيد جداً',
+  };
+
+  const filtered = records.filter((r) => {
+    if (search && !r.tailorName.toLowerCase().includes(search.toLowerCase()) &&
+        !r.modelName.toLowerCase().includes(search.toLowerCase()) &&
+        !r.employeeName.toLowerCase().includes(search.toLowerCase())) return false;
+    if (resultFilter === 'damaged'    && r.qtyDamaged === 0)    return false;
+    if (resultFilter === 'acceptable' && r.qtyAcceptable === 0) return false;
+    if (resultFilter === 'good'       && r.qtyGood === 0)       return false;
+    if (resultFilter === 'veryGood'   && r.qtyVeryGood === 0)   return false;
+    return true;
+  });
 
   return (
     <div
@@ -48,6 +63,11 @@ export function QcTable({ records }: QcTableProps) {
 
       {/* search */}
       <div className="flex items-center justify-between gap-3 border-b px-4 py-3" style={{ borderColor: 'var(--divider)' }}>
+        {resultFilter && (
+          <span className="rounded-full px-3 py-0.5 text-xs font-semibold" style={{ background: 'rgba(139,92,246,0.12)', color: '#a78bfa' }}>
+            فلتر: {RESULT_FILTER_LABELS[resultFilter]}
+          </span>
+        )}
         <div className="relative flex-1 max-w-xs">
           <Search size={14} className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none" style={{ color: 'var(--cell-dim)' }} />
           <input

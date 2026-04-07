@@ -79,6 +79,7 @@ import type {
   NonFabricItem,
   CreateCuttingSessionPayload,
   PartsInventoryRow,
+  SessionWithPartsRow,
   FabricBatch,
   MaterialBatch,
 } from '@/features/cutting/cutting.types';
@@ -166,6 +167,7 @@ export const ipcClient = {
     getModelSuggestions: () => getBridge().cutting.getModelSuggestions() as Promise<{ success: true; data: string[] } | { success: false; error: string }>,
     getPartSuggestions: (payload: { modelName: string }) => getBridge().cutting.getPartSuggestions(payload) as Promise<{ success: true; data: string[] } | { success: false; error: string }>,
     getPartsInventory: () => getBridge().cutting.getPartsInventory() as Promise<{ success: true; data: PartsInventoryRow[] } | { success: false; error: string }>,
+    getSessionsWithParts: () => getBridge().cutting.getSessionsWithParts() as Promise<{ success: true; data: SessionWithPartsRow[] } | { success: false; error: string }>,
     getAvailableSizesForModel: (payload: { modelName: string }) => getBridge().cutting.getAvailableSizesForModel(payload) as Promise<{ success: true; data: string[] } | { success: false; error: string }>,
     getAvailableColorsForModelSize: (payload: { modelName: string; sizeLabel: string }) => getBridge().cutting.getAvailableColorsForModelSize(payload) as Promise<{ success: true; data: string[] } | { success: false; error: string }>,
     create: (payload: CreateCuttingSessionPayload) => getBridge().cutting.create(payload) as Promise<{ success: true; data: CuttingSessionSummary } | { success: false; error: string }>,

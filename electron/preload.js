@@ -49,6 +49,7 @@ contextBridge.exposeInMainWorld('ipcBridge', {
     getModelSuggestions: () => ipcRenderer.invoke('cutting:getModelSuggestions'),
     getPartSuggestions: (payload) => ipcRenderer.invoke('cutting:getPartSuggestions', payload),
     getPartsInventory: () => ipcRenderer.invoke('cutting:getPartsInventory'),
+    getSessionsWithParts: () => ipcRenderer.invoke('cutting:getSessionsWithParts'),
     getAvailableSizesForModel: (payload) => ipcRenderer.invoke('cutting:getAvailableSizesForModel', payload),
     getAvailableColorsForModelSize: (payload) => ipcRenderer.invoke('cutting:getAvailableColorsForModelSize', payload),
     create: (payload) => ipcRenderer.invoke('cutting:create', payload),
