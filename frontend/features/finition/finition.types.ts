@@ -47,6 +47,7 @@ export interface CreateFinitionPayload {
   finitionDate: number;
   consumptionEntries?: ConsumptionEntryInput[];
   materialBatchConsumptions?: import('@/features/cutting/cutting.types').MaterialBatchConsumption[];
+  transportationCost?: number;
 }
 
 export interface CreateStepPayload {
@@ -58,6 +59,7 @@ export interface CreateStepPayload {
   stepDate: number;
   consumptionEntries?: ConsumptionEntryInput[];
   materialBatchConsumptions?: import('@/features/cutting/cutting.types').MaterialBatchConsumption[];
+  transportationCost?: number;
 }
 
 export interface AddToFinalStockPayload {

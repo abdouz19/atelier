@@ -184,6 +184,7 @@ export interface CreateCuttingSessionPayload {
   materialBatchConsumptions: MaterialBatchConsumption[];
   fabricCost: number;
   consumedMaterialsCost: number;
+  transportationCost: number;
   totalSessionCost: number;
   partCosts: PartCost[];
 }

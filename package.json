@@ -5,7 +5,7 @@
   "main": "electron/main.js",
   "scripts": {
     "dev:next": "cd frontend && npm run dev",
-    "dev:electron": "concurrently \"npm run dev:next\" \"wait-on http://localhost:3000 && cross-env NODE_ENV=development electron .\"",
+    "dev:electron": "lsof -ti:3000 | xargs kill -9 2>/dev/null; concurrently \"npm run dev:next\" \"wait-on http://localhost:3000 && cross-env NODE_ENV=development electron .\"",
     "build": "cd frontend && npm run build",
     "build:electron": "npm run build && electron-builder",
     "dist:mac": "npm run build && electron-builder --mac",

@@ -60,4 +60,5 @@ export interface CreateQcPayload {
   reviewDate: number;
   consumptionEntries?: ConsumptionEntryInput[];
   materialBatchConsumptions?: import('@/features/cutting/cutting.types').MaterialBatchConsumption[];
+  transportationCost?: number;
 }

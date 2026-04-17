@@ -29,7 +29,17 @@
       "Bash(sed -n '484,545p' /Users/macbook/Documents/development/atelier/electron/main.js)",
       "Bash(sed -n '618,648p' /Users/macbook/Documents/development/atelier/electron/main.js)",
       "Bash(sed -n '2830,2845p' /Users/macbook/Documents/development/atelier/electron/main.js)",
-      "Bash(sed -n '2900,2915p' /Users/macbook/Documents/development/atelier/electron/main.js)"
+      "Bash(sed -n '2900,2915p' /Users/macbook/Documents/development/atelier/electron/main.js)",
+      "Bash(find /Users/macbook/Documents/development/atelier/frontend -name *stock* -name *.tsx)",
+      "Bash(git add:*)",
+      "Bash(git commit:*)",
+      "Bash(npx --yes typescript/bin/tsc --noEmit)",
+      "Bash(cat \"/Users/macbook/Documents/development/atelier/frontend/app/\\(dashboard\\)/qc/page.tsx\")",
+      "Bash(grep -n \"cost\" /Users/macbook/Documents/development/atelier/electron/db/schema/*.ts)",
+      "Bash(fuser -k 3000/tcp)",
+      "Bash(echo \"exit: $?\")",
+      "Bash(lsof -ti:3000)",
+      "Bash(xargs kill:*)"
     ]
   }
 }
